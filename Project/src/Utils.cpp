@@ -11,7 +11,8 @@ using namespace Eigen;
 
 namespace Geometry {
 
-unsigned int readFractures(const string& fileName, vector<Fracture>& vec, const double& tol){
+unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol){
+
     ifstream ifstr(fileName);
     if(ifstr.fail()){
         cerr << "errore nell'apertura del file" << endl;
@@ -30,7 +31,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& vec, const 
     istringstream convert(line);
     unsigned int numFractures;
     convert >> numFractures;
-    vec.reserve(numFractures);
+    fractures.reserve(numFractures);
 
     while(getline(ifstr,line)){
         Fracture frac;
@@ -66,10 +67,33 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& vec, const 
 
         // Eseguo un controllo sulle tracce per verificare che non abbiano lati null
         if (frac.checkFractureEdges(tol))
-            vec.push_back(frac);
+            fractures.push_back(frac);
     }
     return numFractures;
 }
+
+void findTraces(const vector<Fracture> fractures, vector<Trace>& traces) {
+
+    for (int i = 0; i < fractures.size(); ++i) {
+        for (int j = i + 1; j < fractures.size(); ++j) {
+
+            // Calcolo i vettori che generano la normale per la prima frattura:
+            Vector3d u1 = fractures[i].vertices[2] - fractures[i].vertices[0];
+            Vector3d v1 = fractures[i].vertices[1] - fractures[i].vertices[0];
+            Vector3d norm1 = (u1.cross(v1)).normalized();
+
+            // Calcolo i vettori che generano la normale per la seconda frattura:
+            Vector3d u2 = fractures[j].vertices[2] - fractures[i].vertices[0];
+            Vector3d v2 = fractures[j].vertices[1] - fractures[i].vertices[0];
+            Vector3d norm2 = (u2.cross(v2)).normalized();
+
+            // Calcolo la direzione della retta di intersezione:
+            Vector3d tangent = norm1.cross(norm2);
+        }
+    }
+}
+
+
 }
 
 

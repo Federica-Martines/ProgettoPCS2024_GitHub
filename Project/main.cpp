@@ -18,21 +18,21 @@ int main(int argc, char **argv)
         tol=max(tol, tolInput);
     }
 
-    vector<Fracture> vec = {};
+    vector<Fracture> fractures = {};
     string path = "./DFN/FR3_data.txt";
-    unsigned int numFractures = readFractures(path, vec, tol);
+    unsigned int numFractures = readFractures(path, fractures, tol);
 
     cout << "Numero previsto di fratture: " << numFractures << endl;
-    cout << "Numero di fratture: " << vec.size() << endl << endl;
+    cout << "Numero di fratture: " << fractures.size() << endl << endl;
 
     for (unsigned int j = 0; j < numFractures; j++){
-        Fracture frac = vec[j];
+        Fracture fracture = fractures[j];
 
-        cout << "Frattura: " << frac.idFrac << endl;
-        cout << "Numero vertici: " << frac.numVertices << endl;
+        cout << "Frattura: " << fracture.idFrac << endl;
+        cout << "Numero vertici: " << fracture.numVertices << endl;
 
-        for (unsigned int i=0; i<frac.numVertices; i++){
-            cout << "Vertice " << i << ": " << frac.vertices[i][0] << " " << frac.vertices[i][1] << " " << frac.vertices[i][2] << endl;
+        for (unsigned int i=0; i<fracture.numVertices; i++){
+            cout << "Vertice " << i << ": " << fracture.vertices[i][0] << " " << fracture.vertices[i][1] << " " << fracture.vertices[i][2] << endl;
         }
 
         cout << endl;
