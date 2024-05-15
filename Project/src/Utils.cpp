@@ -8,9 +8,9 @@
 
 using namespace std;
 using namespace Eigen;
+using namespace Geometry;
 
-namespace Geometry {
-
+namespace Utils {
 unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol){
 
     ifstream ifstr(fileName);
@@ -72,6 +72,44 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     return numFractures;
 }
 
+void printFractures(vector<Fracture> fractures, unsigned int expectedNumFractures) {
+    cout << "Numero previsto di fratture: " << expectedNumFractures << endl;
+    cout << "Numero di fratture: " << fractures.size() << endl << endl;
+
+    for (unsigned int j = 0; j < fractures.size(); j++){
+        Fracture fracture = fractures[j];
+
+        cout << "Frattura: " << fracture.idFrac << endl;
+        cout << "Numero vertici: " << fracture.numVertices << endl;
+
+        for (unsigned int i=0; i<fracture.numVertices; i++){
+            cout << "Vertice " << i << ": (" << fracture.vertices[i][0] << ", " << fracture.vertices[i][1] << ", " << fracture.vertices[i][2] << ")" << endl;
+        }
+
+        cout << endl;
+    }
+}
+
+void printTraces(vector<Trace> traces) {
+    cout << "Numero di fratture: " << traces.size() << endl << endl;
+
+    for (unsigned int j = 0; j < traces.size(); j++){
+        Trace trace = traces[j];
+
+        cout << "Traccia: " << trace.idTrace << endl;
+        cout << "Tracce generatrici:" << endl << trace.idGenerator1 << " " << trace.idGenerator2 << endl;
+
+        for (unsigned int i=0; i<trace.extremes.size(); i++){
+            cout << "Estremo " << i+1 << ": ("
+                                           "" << trace.extremes[i][0] << ", " << trace.extremes[i][1] << ", " << trace.extremes[i][2] << ")" << endl;
+        }
+
+        cout << endl;
+    }
+}
+}
+
+namespace Geometry {
 // given 3 points not aligned returns the normal to the plane passing in the 3 points
 Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3) {
 
@@ -81,16 +119,16 @@ Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3) {
     return u1.cross(v1).normalized();
 }
 
-bool checkSegmentIntersection(const Vector3d planeNormal, Vector3d planePoint, Vector3d s1, Vector3d s2) {
+bool checkSegmentIntersection(const Vector3d planeNormal, Vector3d planePoint, Vector3d s1, Vector3d s2, double tol) {
 
     double value1 = planeNormal.dot(s1-planePoint);
     double value2 = planeNormal.dot(s2-planePoint);
 
-    if (value1*value2 > 0) {
+    if (value1*value2 > tol) {
         // il segmento è completamente sopra o sotto il piano e non c'è intersezione
         return false;
     }
-    else if (value1*value2 < 0){
+    else if (value1*value2 < tol){
         // il segmento attraversa il piano
         return true;
     }
@@ -100,17 +138,18 @@ bool checkSegmentIntersection(const Vector3d planeNormal, Vector3d planePoint, V
     }
 }
 
-bool addLineIntersection(vector<Vector3d>& intersections, Vector3d planePoint, Vector3d planeNormal, Vector3d p1, Vector3d p2) {
+bool addLineIntersection(vector<Vector3d>& intersections, Vector3d planeNormal, Vector3d planePoint, Vector3d p1, Vector3d p2, double tol) {
     Vector3d direction = (p2 - p1).normalized();
 
-    if (planeNormal.dot(direction) == 0) {
+    // se la traccia è parallela al piano controllo se uno dei due punti tocca il piano
+    if (abs(planeNormal.dot(direction)) < tol) {
         double value1 = planeNormal.dot(p1-planePoint);
         double value2 = planeNormal.dot(p2-planePoint);
-        if (value1 == 0){
+        if (abs(value1) < tol){
             intersections.push_back(p1);
             return true;
         }
-        if (value2 == 0){
+        if (abs(value2) < tol){
             intersections.push_back(p2);
             return true;
         }
@@ -125,72 +164,8 @@ bool addLineIntersection(vector<Vector3d>& intersections, Vector3d planePoint, V
     return true;
 }
 
-// Function to project a 3D point onto the XY plane
-Vector2d projectOntoXY(const Vector3d& point)
-{
-    return Vector2d(point.x(), point.y());
-}
 
-// Function to project a 3D point onto the XZ plane
-Vector2d projectOntoXZ(const Vector3d& point)
-{
-    return Vector2d(point.x(), point.z());
-}
-
-
-
-bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon)
-{
-    bool isInside = false; // Initialize the flag to false
-
-    // Loop through each edge of the polygon
-    for (size_t i = 0, j = polygon.size() - 1; i < polygon.size(); j = i++)
-    {
-        // Get the current vertex and the previous vertex
-        Vector2d currentVertex = polygon[i];
-        Vector2d previousVertex = polygon[j];
-
-        // Check if the point is within the edge's y-bounds
-        bool isWithinYBounds = (currentVertex.y() > point.y()) != (previousVertex.y() > point.y());
-
-        // Calculate the x-coordinate of the point where the horizontal line through the point intersects the edge
-        double intersectionX = (previousVertex.x() - currentVertex.x()) * (point.y() - currentVertex.y()) / (previousVertex.y() - currentVertex.y()) + currentVertex.x();
-
-        // If the point is within the y-bounds and to the left of the intersection, flip the flag
-        if (isWithinYBounds && point.x() < intersectionX)
-        {
-            isInside = !isInside;
-        }
-    }
-
-    // Return the final result
-    return isInside;
-}
-
-void projectPoints( vector<Vector2d>& projIntersections, vector<Vector2d>& projVertices, Fracture F1, Vector3d n1, Vector3d intersection ) {
-
-    Vector3d eZ = {0,0,1};
-
-    // controlliamo se il piano contenente F1 è ortogonale al piano XY
-    if (n1.dot(eZ) == 0) {
-
-        projIntersections.push_back(projectOntoXZ(intersection));
-        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
-            projVertices.push_back(projectOntoXZ(F1.vertices[ver]));
-        }
-    }
-    else {
-        projIntersections.push_back(projectOntoXY(intersection));
-        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
-            projVertices.push_back(projectOntoXY(F1.vertices[ver]));
-        }
-    }
-
-}
-
-
-
-unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, const double& tol) {
+unsigned int findTraces(vector<Trace>& traces, vector<Fracture> fractures, const double& tol) {
     Trace trace;
 
     for (unsigned int i = 0; i < fractures.size(); i++) {
@@ -203,7 +178,7 @@ unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, cons
             Vector3d n1 = findNormal(F1.vertices[0], F1.vertices[1], F1.vertices[2]);
             Vector3d n2 = findNormal(F2.vertices[0], F2.vertices[1], F2.vertices[2]);
 
-            if (n1.cross(n2).norm() == 0  && n1.dot(F1.vertices[0] - F2.vertices[0]) == 0) {
+            if (abs(n1.cross(n2).norm()) < tol && abs(n1.dot(F1.vertices[0] - F2.vertices[0])) < tol) {
                 // le due fratture sono complanari
             }
             else {
@@ -213,37 +188,40 @@ unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, cons
                 vector<Vector3d> intersections;
                 intersections.reserve(F1.vertices.size());
 
-                for (unsigned int v = 0; v < F1.vertices.size(); v++ ) {
-
-                    if(checkSegmentIntersection(n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1])) {
+                for (unsigned int v = 0; v < F1.vertices.size()-1; v++ ) {
+                    if(checkSegmentIntersection(n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1], tol)) {
                         Vector3d intersection;
 
-                        addLineIntersection(intersections, n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1]);
+                        addLineIntersection(intersections, n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1], tol);
                     }
                 }
+                if(checkSegmentIntersection(n2, F2.vertices[0], F1.vertices[0], F1.vertices[F1.vertices.size()-1], tol)) {
+                    Vector3d intersection;
 
-                vector<Vector2d> projIntersections;
-                vector<Vector2d> projVertices;
-                projIntersections.reserve(intersections.size());
-                projVertices.reserve(F1.vertices.size());
+                    addLineIntersection(intersections, n2, F2.vertices[0],  F1.vertices[0], F1.vertices[F1.vertices.size()-1], tol);
+                }
+
 
                 // per ogni intersezione controlliamo che sia interna alla frattura, proiettando su un piano e usando il ray casting algorithn
                 for (unsigned int v = 0; v < intersections.size(); v++ ) {
-                    projectPoints(projIntersections, projVertices, F1, n1, intersections[v]);
+                    Vector2d projIntersection;
+                    vector<Vector2d> projVertices;
+                    projVertices.reserve(F1.vertices.size());
 
-                    if (isPointIn2DPolygon(projIntersections[v], projVertices)) {
+                    projectIntVer(projIntersection, projVertices, F1, n1, intersections[v], tol);
+
+                    if (isPointIn2DPolygon(projIntersection, projVertices)) {
                         trace.extremes.push_back(intersections[v]);
                     }
                 }
 
                 if (trace.extremes.size() > 1)
                 {
-                    trace.idFracture1 = F1.idFrac;
-                    trace.idFracture2 = F2.idFrac;
+                    trace.idGenerator1 = F1.idFrac;
+                    trace.idGenerator2 = F2.idFrac;
                     traces.push_back(trace);
                 }
             }
-
         }
     }
 

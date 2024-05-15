@@ -8,6 +8,7 @@
 
 using namespace std;
 using namespace Geometry;
+using namespace Utils;
 
 int main(int argc, char **argv)
 {
@@ -20,24 +21,16 @@ int main(int argc, char **argv)
 
     vector<Fracture> fractures = {};
     string path = "./DFN/FR3_data.txt";
-    unsigned int numFractures = readFractures(path, fractures, tol);
 
-    cout << "Numero previsto di fratture: " << numFractures << endl;
-    cout << "Numero di fratture: " << fractures.size() << endl << endl;
+    unsigned int expectedNumFractures = readFractures(path, fractures, tol);
+    printFractures(fractures, expectedNumFractures);
 
-    for (unsigned int j = 0; j < numFractures; j++){
-        Fracture fracture = fractures[j];
+    vector<Trace> traces = {};
+    findTraces(traces, fractures, tol);
+    printTraces(traces);
 
-        cout << "Frattura: " << fracture.idFrac << endl;
-        cout << "Numero vertici: " << fracture.numVertices << endl;
 
-        for (unsigned int i=0; i<fracture.numVertices; i++){
-            cout << "Vertice " << i << ": " << fracture.vertices[i][0] << " " << fracture.vertices[i][1] << " " << fracture.vertices[i][2] << endl;
-        }
 
-        cout << endl;
-        cout << "ciao";
-    }
 
     return 0;
 }
