@@ -18,5 +18,14 @@ struct Fracture{
 
     bool checkFractureEdges(double tol);
 };
+
+struct Trace{
+    unsigned int idTrace;
+    unsigned int idFracture1;
+    unsigned int idFracture2;
+    vector <Vector3d> vertices={}; //coordinate dei vertici della frattura
+
+    Trace()=default;
+};
 }
 

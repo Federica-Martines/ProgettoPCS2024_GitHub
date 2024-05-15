@@ -7,6 +7,8 @@
 using namespace std;
 
 namespace Geometry {
-unsigned int readFractures(const string& fileName, vector<Fracture>& vec, const double& tol);
+unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol);
+
+unsigned int findTraces(vector<Fracture>& fractures, const double& tol);
 }
 
