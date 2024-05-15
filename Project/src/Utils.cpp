@@ -114,6 +114,7 @@ bool addLineIntersection(vector<Vector3d>& intersections, Vector3d planePoint, V
             intersections.push_back(p2);
             return true;
         }
+
         return false;
     }
 
@@ -166,13 +167,35 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon)
     return isInside;
 }
 
+void projectPoints( vector<Vector2d>& projIntersections, vector<Vector2d>& projVertices, Fracture F1, Vector3d n1, Vector3d intersection ) {
+
+    Vector3d eZ = {0,0,1};
+
+    // controlliamo se il piano contenente F1 è ortogonale al piano XY
+    if (n1.dot(eZ) == 0) {
+
+        projIntersections.push_back(projectOntoXZ(intersection));
+        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
+            projVertices.push_back(projectOntoXZ(F1.vertices[ver]));
+        }
+    }
+    else {
+        projIntersections.push_back(projectOntoXY(intersection));
+        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
+            projVertices.push_back(projectOntoXY(F1.vertices[ver]));
+        }
+    }
+
+}
+
 
 
 unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, const double& tol) {
     Trace trace;
 
     for (unsigned int i = 0; i < fractures.size(); i++) {
-        for (unsigned int j = 0; j < fractures.size(); j++) {
+        // j < i perche prendiamo solo la parte triangolare inferiore della matrice essendo che 2 fratture hanno la stessa traccia
+        for (unsigned int j = 0; j < i; j++) {
 
             Fracture F1 = fractures[i];
             Fracture F2 = fractures[j];
@@ -196,43 +219,24 @@ unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, cons
                         Vector3d intersection;
 
                         addLineIntersection(intersections, n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1]);
-
-
                     }
                 }
 
                 vector<Vector2d> projIntersections;
+                vector<Vector2d> projVertices;
                 projIntersections.reserve(intersections.size());
-                // controlliamo se le intersezioni sono interne alle fratture e se si creiamo la traccia
+                projVertices.reserve(F1.vertices.size());
+
+                // per ogni intersezione controlliamo che sia interna alla frattura, proiettando su un piano e usando il ray casting algorithn
                 for (unsigned int v = 0; v < intersections.size(); v++ ) {
-
-                    Vector3d eZ = {0,0,1};
-
-                    vector<Vector2d> projVertices;
-                    projVertices.reserve(F1.vertices.size());
-
-                    // controlliamo se il piano contenente F1 è ortogonale al piano XY
-                    if (n1.dot(eZ) == 0) {
-
-                        projIntersections[v] = projectOntoXZ(intersections[v]);
-                        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
-                            projVertices.push_back(projectOntoXZ(F1.vertices[ver]));
-                        }
-                    }
-                    else {
-                        projIntersections[v] = projectOntoXY(intersections[v]);
-                        for (unsigned int ver = 0; ver < F1.vertices.size(); ver++) {
-                            projVertices.push_back(projectOntoXY(F1.vertices[ver]));
-                        }
-                    }
+                    projectPoints(projIntersections, projVertices, F1, n1, intersections[v]);
 
                     if (isPointIn2DPolygon(projIntersections[v], projVertices)) {
-                        trace.vertices.push_back(intersections[v]);
+                        trace.extremes.push_back(intersections[v]);
                     }
-
                 }
 
-                if (trace.vertices.size() > 0)
+                if (trace.extremes.size() > 1)
                 {
                     trace.idFracture1 = F1.idFrac;
                     trace.idFracture2 = F2.idFrac;
