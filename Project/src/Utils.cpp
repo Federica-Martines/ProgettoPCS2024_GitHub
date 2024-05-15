@@ -81,10 +81,10 @@ Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3) {
     return u1.cross(v1).normalized();
 }
 
-bool checkSegmentIntersection(const Vector3d n, Vector3d P, Vector3d s1, Vector3d s2) {
+bool checkSegmentIntersection(const Vector3d planeNormal, Vector3d planePoint, Vector3d s1, Vector3d s2) {
 
-    double value1 = n.dot(s1-P);
-    double value2 = n.dot(s2-P);
+    double value1 = planeNormal.dot(s1-planePoint);
+    double value2 = planeNormal.dot(s2-planePoint);
 
     if (value1*value2 > 0) {
         // il segmento è completamente sopra o sotto il piano e non c'è intersezione
@@ -100,16 +100,27 @@ bool checkSegmentIntersection(const Vector3d n, Vector3d P, Vector3d s1, Vector3
     }
 }
 
-bool lineIntersection(Vector3d& intersection, Vector3d planePoint, Vector3d planeNormal, Vector3d p1, Vector3d p2) {
+bool addLineIntersection(vector<Vector3d>& intersections, Vector3d planePoint, Vector3d planeNormal, Vector3d p1, Vector3d p2) {
     Vector3d direction = (p2 - p1).normalized();
 
     if (planeNormal.dot(direction) == 0) {
+        double value1 = planeNormal.dot(p1-planePoint);
+        double value2 = planeNormal.dot(p2-planePoint);
+        if (value1 == 0){
+            intersections.push_back(p1);
+            return true;
+        }
+        if (value2 == 0){
+            intersections.push_back(p2);
+            return true;
+        }
         return false;
     }
 
     double t = planeNormal.dot(planePoint - p1) / planeNormal.dot(direction);
-    intersection =  p1 + direction * t;
+    Vector3d intersection =  p1 + direction * t;
 
+    intersections.push_back(intersection);
     return true;
 }
 
@@ -184,9 +195,9 @@ unsigned int findTraces(vector<Fracture>& fractures, vector<Trace>& traces, cons
                     if(checkSegmentIntersection(n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1])) {
                         Vector3d intersection;
 
-                        lineIntersection(intersection, n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1]);
+                        addLineIntersection(intersections, n2, F2.vertices[0], F1.vertices[v], F1.vertices[v+1]);
 
-                        intersections.push_back(intersection);
+
                     }
                 }
 
