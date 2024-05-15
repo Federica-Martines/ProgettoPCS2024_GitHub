@@ -36,6 +36,7 @@ int main(int argc, char **argv)
         }
 
         cout << endl;
+        cout << "ciao";
     }
 
     return 0;
