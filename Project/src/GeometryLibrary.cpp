@@ -77,11 +77,6 @@ Vector2d projectOntoYZ(const Vector3d& point)
 
 void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d intersection) {
 
-    Vector3d eX = {1,0,0};
-    Vector3d eY = {0,1,0};
-    Vector3d eZ = {0,0,1};
-
-    // controlliamo se il piano contenente F1 è ortogonale al piano XY
     switch (F.lyingPlane) {
     case 0:
     case 1:
@@ -100,10 +95,6 @@ void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d inters
 }
 
 void projectVertices(vector<Vector2d>& projVertices, Fracture F) {
-
-    Vector3d eX = {1,0,0};
-    Vector3d eY = {0,1,0};
-    Vector3d eZ = {0,0,1};
 
     switch (F.lyingPlane) {
     case 0:

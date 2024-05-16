@@ -51,16 +51,22 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
     // per ogni intersezione controlliamo che sia interna alla frattura, proiettando su un piano e usando il ray casting algorithm
 
     vector<Vector2d> projVertices;
-    projVertices.reserve(F1.vertices.size());
-    projectVertices(projVertices, F1);
+    projVertices.reserve(F2.vertices.size());
+    projectVertices(projVertices, F2);
 
     for (unsigned int v = 0; v < intersections.size(); v++ ) {
         Vector2d projIntersection;
+        projectIntersection(projIntersection, F2, intersections[v]);
 
-        projectIntersection(projIntersection, F1, intersections[v]);
+        // Check if intersections[v] is already in trace.extremes
+        if (find(trace.extremes.begin(), trace.extremes.end(), intersections[v]) == trace.extremes.end())
+        {
+            // If not present, check if projIntersection is inside projVertices
+            if (isPointIn2DPolygon(projIntersection, projVertices, tol)) {
 
-        if (isPointIn2DPolygon(projIntersection, projVertices, tol)) {
-            trace.extremes.push_back(intersections[v]);
+                // If so, push intersections[v] into trace.extremes
+                trace.extremes.push_back(intersections[v]);
+            }
         }
     }
 }
@@ -87,8 +93,9 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture> fractures, const
             else {
                 // le due fratture giaciono su piani diversi
 
-                // insersechiamo ogni lato della frattura i con la frattura j
+                // insersechiamo ogni lato della frattura 1 con la frattura 2 e viceversa
                 findIntersections(trace, F1, F2, tol);
+                findIntersections(trace, F2, F1, tol);
 
                 if (trace.extremes.size() > 1)
                 {
