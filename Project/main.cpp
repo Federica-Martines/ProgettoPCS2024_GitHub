@@ -1,4 +1,5 @@
 #include "src/Utils.hpp"
+#include "src/input-output.hpp"
 #include "src/GeometryLibrary.hpp"
 #include <iostream>
 #include <string>
@@ -8,7 +9,6 @@
 
 using namespace std;
 using namespace Geometry;
-using namespace Utils;
 
 int main(int argc, char **argv)
 {

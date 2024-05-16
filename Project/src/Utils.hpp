@@ -7,16 +7,10 @@
 using namespace std;
 using namespace Geometry;
 
-namespace Geometry {
 unsigned int findTraces(vector<Trace>& traces, vector<Fracture> fractures, const double& tol);
-}
 
-namespace Utils {
-unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol);
+bool checkSegmentIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol);
 
-void printFractures(vector<Fracture> fractures, unsigned int expectedNumFractures);
+void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol);
 
-
-void printTraces(vector<Trace> traces);
-}
 
