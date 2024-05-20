@@ -144,14 +144,11 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
 
             Trace trace;
 
-
             Fracture& F1 = fractures[i];
             Fracture& F2 = fractures[j];
 
             Vector3d n1 = F1.normal;
             Vector3d n2 = F2.normal;
-
-
 
             if (n1.cross(n2).norm() < tol && abs(n1.dot(F1.vertices[0] - F2.vertices[0])) < tol) {
                 // le due fratture sono complanari
