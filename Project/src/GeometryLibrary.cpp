@@ -29,6 +29,30 @@ bool Fracture::checkFractureEdges(double tol){
     return true;
 };
 
+BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
+    Vector3d centroid = Vector3d::Zero();
+    for (const auto& vertex : vertices) {
+        centroid += vertex;
+    }
+    centroid /= vertices.size();
+
+    double maxRadius = 0.0;
+    for (const auto& vertex : vertices) {
+        double distance = (vertex - centroid).norm();
+        if (distance > maxRadius) {
+            maxRadius = distance;
+        }
+    }
+
+    return {centroid, maxRadius};
+}
+
+bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2) {
+    double distance = (sphere1.center - sphere2.center).norm();
+    double radiusSum = sphere1.radius + sphere2.radius;
+    return distance <= radiusSum;
+}
+
 // given 3 points not aligned returns the normal to the plane passing in the 3 points
 Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3) {
 

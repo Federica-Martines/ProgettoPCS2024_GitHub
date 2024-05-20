@@ -151,10 +151,18 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
             Vector3d n1 = F1.normal;
             Vector3d n2 = F2.normal;
 
+
+
             if (n1.cross(n2).norm() < tol && abs(n1.dot(F1.vertices[0] - F2.vertices[0])) < tol) {
                 // le due fratture sono complanari
             }
             else {
+                BoundingSphere sphere1 = computeBoundingSphere(F1.vertices);
+                BoundingSphere sphere2 = computeBoundingSphere(F2.vertices);
+                // Se le sfere non si intersecano skippa alle prossime fratture per ottimizzare
+                if (!spheresIntersect(sphere1, sphere2))
+                    continue;
+
                 // le due fratture giaciono su piani diversi
 
                 // insersechiamo ogni lato della frattura 1 con la frattura 2 e viceversa

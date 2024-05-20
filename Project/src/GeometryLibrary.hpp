@@ -8,6 +8,11 @@ using namespace Eigen;
 
 namespace Geometry {
 
+struct BoundingSphere {
+    Vector3d center;
+    double radius;
+};
+
 struct Trace{
     unsigned int idTrace;
     unsigned int idGenerator1;
@@ -32,6 +37,10 @@ struct Fracture{
 
     bool checkFractureEdges(double tol);
 };
+
+BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices);
+
+bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2);
 
 
 // given 3 points not aligned returns the normal to the plane passing in the 3 points

@@ -146,8 +146,6 @@ void printTracesToFile(const vector<Trace>& traces, const string& filename) {
                     << end.y() << "; "
                     << end.z() << endl;
         }
-
-
     }
 
     outFile.close();

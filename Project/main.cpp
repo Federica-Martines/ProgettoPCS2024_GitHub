@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     }
 
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR10_data.txt";
+    string path = "./DFN/FR200_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
     unsigned int expectedNumFractures = readFractures(path, fractures, tol);
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
     sortTraces(fractures);
 
-    printFractures(fractures, expectedNumFractures);
+    // printFractures(fractures, expectedNumFractures);
     // printTraces(traces);
 
     string outputPathTraces = "./traces.txt";
