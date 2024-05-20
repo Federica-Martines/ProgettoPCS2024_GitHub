@@ -7,28 +7,32 @@ using namespace std;
 using namespace Eigen;
 
 namespace Geometry {
+
+struct Trace{
+    unsigned int idTrace;
+    unsigned int idGenerator1;
+    unsigned int idGenerator2;
+    double length;
+    bool tips;
+    vector <Vector3d> extremes={}; //coordinate dei vertici della frattura
+
+    Trace()=default;
+};
+
 struct Fracture{
     unsigned int idFrac;
     unsigned int numVertices;
     Vector3d normal;
     unsigned int lyingPlane;
     vector <Vector3d> vertices={}; //coordinate dei vertici della frattura
-    vector <unsigned int> passingTraces={}; //vettore con gli id delle tracce passanti per la frattura corrente
-    vector <unsigned int> notPassingTraces={};
+    vector <Trace> passingTraces={}; //vettore con gli id delle tracce passanti per la frattura corrente
+    vector <Trace> notPassingTraces={};
 
     Fracture()=default;
 
     bool checkFractureEdges(double tol);
 };
 
-struct Trace{
-    unsigned int idTrace;
-    unsigned int idGenerator1;
-    unsigned int idGenerator2;
-    vector <Vector3d> extremes={}; //coordinate dei vertici della frattura
-
-    Trace()=default;
-};
 
 // given 3 points not aligned returns the normal to the plane passing in the 3 points
 Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3);
@@ -45,6 +49,9 @@ Vector2d projectOntoXZ(const Vector3d& point);
 // Function to project a 3D point onto the YZ plane
 Vector2d projectOntoYZ(const Vector3d& point);
 
+bool isPointOn2DSegment(const Vector2d& point, const Vector2d& s1, const Vector2d& s2, double tol);
+
+bool isPointOn3DSegment(const Vector3d& point, const Vector3d& s1, const Vector3d& s2, double tol);
 
 void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d intersection);
 
@@ -54,4 +61,27 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -119,11 +119,28 @@ void projectVertices(vector<Vector2d>& projVertices, Fracture F) {
 }
 
 
-bool isPointOnSegment(const Vector2d& point, const Vector2d& p1, const Vector2d& p2, double tol) {
-    Vector2d v1 = point - p1;
-    Vector2d v2 = p2 - p1;
+bool isPointOn2DSegment(const Vector2d& point, const Vector2d& s1, const Vector2d& s2, double tol) {
+    Vector2d v1 = point - s1;
+    Vector2d v2 = s2 - s1;
     double crossProduct = v1.x() * v2.y() - v1.y() * v2.x();
     if (fabs(crossProduct) > tol) return false; // Point is not collinear with the segment
+
+    double dotProduct = v1.dot(v2);
+    if (dotProduct < -tol || dotProduct > v2.squaredNorm() + tol) return false; // Point is not within the segment bounds
+
+    return true;
+}
+
+bool isPointOn3DSegment(const Vector3d& point, const Vector3d& s1, const Vector3d& s2, double tol) {
+    Vector3d v1 = point - s1;
+    Vector3d v2 = s2 - s1;
+
+    // Calculate cross product
+    Vector3d crossProduct = v1.cross(v2);
+    double crossProductNorm = crossProduct.norm();
+
+    // Check if the cross product magnitude is greater than tolerance
+    if (crossProductNorm > tol) return false; // Point is not collinear with the segment
 
     double dotProduct = v1.dot(v2);
     if (dotProduct < -tol || dotProduct > v2.squaredNorm() + tol) return false; // Point is not within the segment bounds
@@ -138,7 +155,7 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
         const Vector2d& p1 = polygon[i];
         const Vector2d& p2 = polygon[(i + 1) % n];
 
-        if (isPointOnSegment(point, p1, p2, tol))
+        if (isPointOn2DSegment(point, p1, p2, tol))
             return true; // Point lies on an edge
 
         if (fabs(p1.y() - p2.y()) < tol) // If the segment is horizontal, skip

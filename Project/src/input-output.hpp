@@ -14,4 +14,8 @@ void printFractures(vector<Fracture> fractures, unsigned int expectedNumFracture
 
 void printTraces(vector<Trace> traces);
 
+void printTracesToFile(const vector<Trace>& traces, const string& filename);
+
+void printFracturesToFile(const vector<Fracture>& fractures, const string& filename);
+
 
