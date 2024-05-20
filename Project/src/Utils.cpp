@@ -73,13 +73,13 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
 
 
 unsigned int findTraces(vector<Trace>& traces, vector<Fracture> fractures, const double& tol) {
-
+    unsigned int c = 0;
     for (unsigned int i = 0; i < fractures.size(); i++) {
         // j < i perche prendiamo solo la parte triangolare inferiore della matrice essendo che 2 fratture hanno la stessa traccia
         for (unsigned int j = 0; j < i; j++) {
 
             Trace trace;
-            unsigned int c = 0;
+
 
             Fracture F1 = fractures[i];
             Fracture F2 = fractures[j];

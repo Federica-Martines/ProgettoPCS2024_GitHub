@@ -91,7 +91,7 @@ void printFractures(vector<Fracture> fractures, unsigned int expectedNumFracture
 }
 
 void printTraces(vector<Trace> traces) {
-    cout << "Numero di fratture: " << traces.size() << endl << endl;
+    cout << "Numero di tracce: " << traces.size() << endl << endl;
 
     for (unsigned int j = 0; j < traces.size(); j++){
         Trace trace = traces[j];
