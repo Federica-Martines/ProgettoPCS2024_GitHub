@@ -32,6 +32,7 @@ bool checkSegmentIntersection(vector<Vector3d>& intersections, const Vector3d pl
     else if (value1*value2 < tol){
         // il segmento attraversa il piano
         double t = planeNormal.dot(planePoint - a) / planeNormal.dot(direction);
+
         Vector3d intersection =  a + direction * t;
 
         intersections.push_back(intersection);
@@ -201,20 +202,43 @@ void sortTraces(vector<Fracture>& fractures) {
 
 
 
+void splitPolygons(const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
+    bool writePol1 = true;
+    vector<Vector3d> P1Vertices;
+    vector<Vector3d> P2Vertices;
+
+    for (unsigned int i = 0; i < F.vertices.size(); ++i) {
+        Vector3d intersection;
+        Vector3d v1 = F.vertices[i];
+        Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()];
+
+        // aggiungo il vertice corrente al poligono corrente (si parte da 1 e switch ogni intersezione)
+        if (writePol1) {
+            P1Vertices.push_back(v1);
+        }
+        else {
+            P2Vertices.push_back(v1);
+        }
+
+        // cerco un'intersezione con il lato
+        if (findLineSegmentIntersection(intersection, t1, t2, v1, v2, tol))
+        {
+            // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
+            writePol1 = !writePol1;
+
+            P1Vertices.push_back(intersection);
+            P2Vertices.push_back(intersection);
+        }
 
 
 
+    }
+}
+
+void cuttingFractures(vector<Fracture>& fractures, double tol) {
+    Fracture frac = fractures[0];
+    vector<Vector3d> extremes = frac.passingTraces[0].extremes;
+    splitPolygons(frac, extremes[0], extremes[1], tol);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+}

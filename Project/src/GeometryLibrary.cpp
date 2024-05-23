@@ -200,5 +200,58 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
     return crossings != 0;
 }
 
+int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNormal, const Vector3d& s1, const Vector3d& s2)
+{
+    // Compute the signed distances from the segment endpoints to the plane
+    double d1 = (s1 - planePoint).dot(planeNormal);
+    double d2 = (s2 - planePoint).dot(planeNormal);
+
+    if (d1 > 0 && d2 > 0) {
+        return 1; // Above the plane
+    } else if (d1 < 0 && d2 < 0) {
+        return -1; // Below the plane
+    } else {
+        return 0; // Crossing the plane
+    }
+}
+
+bool findLineSegmentIntersection(
+    Vector3d& intersection,
+    const Vector3d& l1,
+    const Vector3d& l2,
+    const Vector3d& s1,
+    const Vector3d& s2,
+    double tol
+    )
+{
+    // Define the direction vector of the line
+    Vector3d lineDir = l2 - l1;
+
+    // Define the direction vectors of the segment
+    Vector3d segmentDir = s2 - s1;
+
+    // Calculate the normal vector of the plane
+    Vector3d normal = lineDir.cross(segmentDir);
+
+    // If the normal vector is zero, the line and segment are parallel
+    if (normal.norm() < tol) {
+        return false;
+    }
+
+    // Calculate the distance from l1 to the intersection point
+    double t = (s1 - l1).dot(lineDir) / lineDir.squaredNorm();
+
+    // Calculate the intersection point
+    intersection = l1 + t * lineDir;
+
+    // Check if the intersection point lies within the segment
+    double u = (intersection - s1).dot(segmentDir) / segmentDir.dot(segmentDir);
+
+    if (u >= 0.0 && u <= 1.0) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 }

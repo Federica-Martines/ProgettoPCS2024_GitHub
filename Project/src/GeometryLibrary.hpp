@@ -68,29 +68,9 @@ void projectVertices(vector<Vector2d>& projVertices, Fracture F);
 
 bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, double tol);
 
+int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNormal, const Vector3d& s1, const Vector3d& s2);
+
+bool findLineSegmentIntersection(Vector3d& intersection, const Vector3d& l1, const Vector3d& l2, const Vector3d& s1, const Vector3d& s2, double tol);
+
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

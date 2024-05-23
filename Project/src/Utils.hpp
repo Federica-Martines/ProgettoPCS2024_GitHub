@@ -15,3 +15,4 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol);
 
 void sortTraces(vector<Fracture>& fractures);
 
+void cuttingFractures(vector<Fracture>& fractures, double tol);
