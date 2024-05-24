@@ -8,6 +8,12 @@ using namespace Eigen;
 
 namespace Geometry {
 
+// given 3 points not aligned returns the normal to the plane passing in the 3 points
+Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3);
+
+// returns the plane the fracture is lying on (done to prevent checking all the time and for debugging
+unsigned int findLyingPlane(const Vector3d n, double tol);
+
 struct BoundingSphere {
     Vector3d center;
     double radius;
@@ -29,11 +35,18 @@ struct Fracture{
     unsigned int numVertices;
     Vector3d normal;
     unsigned int lyingPlane;
-    vector <Vector3d> vertices={}; //coordinate dei vertici della frattura
-    vector <Trace> passingTraces={}; //vettore con gli id delle tracce passanti per la frattura corrente
-    vector <Trace> notPassingTraces={};
+    vector<Vector3d> vertices={}; //coordinate dei vertici della frattura
+    vector<Trace> passingTraces={}; //vettore con gli id delle tracce passanti per la frattura corrente
+    vector<Trace> notPassingTraces={};
 
     Fracture()=default;
+    Fracture(unsigned int id, vector<Vector3d> vertices, double tol) {
+        this->idFrac = id;
+        this->numVertices = vertices.size();
+        this->vertices = vertices;
+        this->normal = findNormal(vertices[0], vertices[1], vertices[2]);
+        this->lyingPlane = findLyingPlane(this->normal, tol);
+    }
 
     bool checkFractureEdges(double tol);
 };
@@ -41,13 +54,6 @@ struct Fracture{
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices);
 
 bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2);
-
-
-// given 3 points not aligned returns the normal to the plane passing in the 3 points
-Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3);
-
-// returns the plane the fracture is lying on (done to prevent checking all the time and for debugging
-unsigned int findLyingPlane(const Vector3d n, double tol);
 
 // Function to project a 3D point onto the XY plane
 Vector2d projectOntoXY(const Vector3d& point);

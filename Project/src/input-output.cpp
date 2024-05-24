@@ -32,7 +32,6 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     fractures.reserve(numFractures);
 
     while(getline(ifstr,line)){
-        Fracture frac;
         unsigned int id, numVertices;
         vector<Vector3d> vertices = {};
 
@@ -58,12 +57,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
         }
 
         // Assegnamo i dati alla frattura
-        frac.idFrac = id;
-        frac.numVertices = numVertices;
-        frac.vertices = vertices;
-        frac.normal = findNormal(vertices[0], vertices[1], vertices[2]);
-        frac.lyingPlane = findLyingPlane(frac.normal, tol);
-
+        Fracture frac = Fracture(id, vertices, tol);
 
         // Eseguo un controllo sulle tracce per verificare che non abbiano lati null
         if (frac.checkFractureEdges(tol))

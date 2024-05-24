@@ -6,6 +6,7 @@
 #include <Eigen/Eigen>
 #include <vector>
 #include <algorithm>
+#include <deque>
 
 using namespace std;
 using namespace Geometry;
@@ -20,7 +21,7 @@ int main(int argc, char **argv)
     }
 
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR3_data.txt";
+    string path = "./DFN/FR10_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
     unsigned int expectedNumFractures = readFractures(path, fractures, tol);
@@ -30,7 +31,17 @@ int main(int argc, char **argv)
 
     sortTraces(fractures);
 
-    cuttingFractures(fractures, tol);
+
+    vector<Fracture> cuttedFractures;
+    for (Fracture& frac : fractures) {
+
+        deque<Trace> cuts = {};
+        cuts.insert(cuts.end(), frac.passingTraces.begin(), frac.passingTraces.end());
+        cuts.insert(cuts.end(), frac.notPassingTraces.begin(), frac.notPassingTraces.end());
+
+        cuttingFracture(cuttedFractures, frac, cuts, tol);
+    }
+
 
     // printFractures(fractures, expectedNumFractures);
     // printTraces(traces);

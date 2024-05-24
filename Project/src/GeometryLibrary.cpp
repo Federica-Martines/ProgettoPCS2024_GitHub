@@ -215,14 +215,7 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNorma
     }
 }
 
-bool findLineSegmentIntersection(
-    Vector3d& intersection,
-    const Vector3d& l1,
-    const Vector3d& l2,
-    const Vector3d& s1,
-    const Vector3d& s2,
-    double tol
-    )
+bool findLineSegmentIntersection(Vector3d& intersection, const Vector3d& l1, const Vector3d& l2, const Vector3d& s1, const Vector3d& s2, double tol)
 {
     // Define the direction vector of the line
     Vector3d lineDir = l2 - l1;

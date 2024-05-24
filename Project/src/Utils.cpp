@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 #include <vector>
 #include <algorithm>
+#include <deque>
 
 using namespace std;
 using namespace Eigen;
@@ -11,7 +12,7 @@ using namespace Geometry;
 using namespace SortLibrary;
 
 
-bool checkSegmentIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol) {
+bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol) {
 
     Vector3d direction = (b - a).normalized();
     double value1 = planeNormal.dot(a-planePoint);
@@ -41,7 +42,6 @@ bool checkSegmentIntersection(vector<Vector3d>& intersections, const Vector3d pl
     return false;
 }
 
-
 void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
 {
     vector<Vector3d> intersections;
@@ -49,9 +49,9 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
 
     // controllo se ogni lato della frattura 1 interseca il piano della frattura 2
     for (unsigned int v = 0; v < F1.vertices.size()-1; v++ ) {
-        checkSegmentIntersection(intersections, F2.normal, F2.vertices[0], F1.vertices[v], F1.vertices[v+1], tol);
+        checkSegmentPlaneIntersection(intersections, F2.normal, F2.vertices[0], F1.vertices[v], F1.vertices[v+1], tol);
     }
-    checkSegmentIntersection(intersections, F2.normal, F2.vertices[0],  F1.vertices[0], F1.vertices[F1.vertices.size()-1], tol);
+    checkSegmentPlaneIntersection(intersections, F2.normal, F2.vertices[0],  F1.vertices[0], F1.vertices[F1.vertices.size()-1], tol);
 
     // per ogni intersezione controlliamo che sia interna alla frattura, proiettando su un piano e usando il ray casting algorithm
     vector<Vector2d> projVertices;
@@ -151,16 +151,16 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
             Vector3d n1 = F1.normal;
             Vector3d n2 = F2.normal;
 
+            BoundingSphere sphere1 = computeBoundingSphere(F1.vertices);
+            BoundingSphere sphere2 = computeBoundingSphere(F2.vertices);
+            // Se le sfere non si intersecano skippa alle prossime fratture per ottimizzare
+            if (!spheresIntersect(sphere1, sphere2))
+                continue;
+
             if (n1.cross(n2).norm() < tol && abs(n1.dot(F1.vertices[0] - F2.vertices[0])) < tol) {
                 // le due fratture sono complanari
             }
             else {
-                BoundingSphere sphere1 = computeBoundingSphere(F1.vertices);
-                BoundingSphere sphere2 = computeBoundingSphere(F2.vertices);
-                // Se le sfere non si intersecano skippa alle prossime fratture per ottimizzare
-                if (!spheresIntersect(sphere1, sphere2))
-                    continue;
-
                 // le due fratture giaciono su piani diversi
 
                 // insersechiamo ogni lato della frattura 1 con la frattura 2 e viceversa
@@ -199,16 +199,13 @@ void sortTraces(vector<Fracture>& fractures) {
     }
 }
 
-
-
-
-void splitPolygons(const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
+void cutFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
     bool writePol1 = true;
     vector<Vector3d> P1Vertices;
     vector<Vector3d> P2Vertices;
 
     for (unsigned int i = 0; i < F.vertices.size(); ++i) {
-        Vector3d intersection;
+        Vector3d intersection = {};
         Vector3d v1 = F.vertices[i];
         Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()];
 
@@ -225,20 +222,73 @@ void splitPolygons(const Fracture& F, const Vector3d& t1, const Vector3d& t2, do
         {
             // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
             writePol1 = !writePol1;
+            cutPoints.push_back(intersection);
 
             P1Vertices.push_back(intersection);
             P2Vertices.push_back(intersection);
         }
-
-
-
     }
+
+    Fracture P1 = Fracture(1, P1Vertices, tol);
+    Fracture P2 = Fracture(2, P2Vertices, tol);
+
+    subFractures.push_back(P1);
+    subFractures.push_back(P2);
+
+
 }
 
-void cuttingFractures(vector<Fracture>& fractures, double tol) {
-    Fracture frac = fractures[0];
-    vector<Vector3d> extremes = frac.passingTraces[0].extremes;
-    splitPolygons(frac, extremes[0], extremes[1], tol);
+void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& frac, deque<Trace>& cuts, double tol) {
+    vector<Fracture> subFractures = {};
+    deque<Trace> P1Cuts, P2Cuts = {};
+    vector<Vector3d> cutPoints = {};
 
+    // passo base
+    if(cuts.size() == 0) {
+        // aggiungo le fratture appena trovate all'elenco generale
+        resultFractures.push_back(frac);
+        return;
+    }
+
+
+    vector<Vector3d> extremes = cuts[0].extremes;
+
+    // taglio la frattura in due sottofratture
+    cutFracture(subFractures, cutPoints, frac, extremes[0], extremes[1], tol);
+    // tolgo il taglio appena fatto
+    cuts.pop_front();
+
+
+
+    Vector3d cutDirection = extremes[0] - extremes[1];
+    Vector3d separatorPlane = frac.normal.cross(cutDirection);
+
+    // decido quali tagli passeranno alla ricorsione successiva
+    for (Trace& cut : cuts) {
+        //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
+        if (cut.tips == true) {
+            if(checkTraceTips(frac, cut, tol)) {
+
+                //guardo da che parte si trova il taglio rispetto al taglio passato
+                int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
+                switch(position){
+                case 1:
+                    P1Cuts.push_back(cut);
+                    break;
+                case -1:
+                    P2Cuts.push_back(cut);
+                    break;
+                case 0:
+                    P1Cuts.push_back(cut);
+                    P2Cuts.push_back(cut);
+                    break;
+
+                }
+            }
+        }
+    }
+
+    cuttingFracture(resultFractures, subFractures[0], P1Cuts, tol);
+    cuttingFracture(resultFractures, subFractures[1], P2Cuts, tol);
 
 }
