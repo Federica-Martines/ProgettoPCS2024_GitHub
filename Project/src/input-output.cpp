@@ -173,6 +173,25 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
     outFile.close();
 }
 
+void printFractureToDebug(const Fracture& fracture, const string& filename) {
+        std::ofstream file(filename, std::ios_base::app);
+
+        if (!file.is_open()) {
+            std::cerr << "Unable to open file";
+            return;
+        }
+
+        file << "# FractureId; NumVertices\n";
+        file << fracture.idFrac << "; " << fracture.numVertices << "\n";
+        file << "# Vertices\n";
+
+        for (const auto& vertex : fracture.vertices) {
+            file << std::scientific << vertex.x() << "; " << vertex.y() << "; " << vertex.z() << "\n";
+        }
+
+        file.close();
+    }
+
 
 
 

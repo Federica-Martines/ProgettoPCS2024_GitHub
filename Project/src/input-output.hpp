@@ -18,4 +18,5 @@ void printTracesToFile(const vector<Trace>& traces, const string& filename);
 
 void printFracturesToFile(const vector<Fracture>& fractures, const string& filename);
 
+void printFractureToDebug(const Fracture& fracture, const string& filename);
 

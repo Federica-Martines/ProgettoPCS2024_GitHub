@@ -1,7 +1,7 @@
 #include "src/Utils.hpp"
 #include "src/input-output.hpp"
 #include "src/GeometryLibrary.hpp"
-#include <iostream>
+#include <fstream>
 #include <string>
 #include <Eigen/Eigen>
 #include <vector>
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     }
 
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR10_data.txt";
+    string path = "./DFN/FR3_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
     unsigned int expectedNumFractures = readFractures(path, fractures, tol);
@@ -43,14 +43,19 @@ int main(int argc, char **argv)
     }
 
 
-    // printFractures(fractures, expectedNumFractures);
-    // printTraces(traces);
+    printFractures(fractures, expectedNumFractures);
+    // print    Traces(traces);
 
     string outputPathTraces = "./traces.txt";
     printTracesToFile(traces, outputPathTraces);
 
     string outputPathFractures = "./fractures.txt";
     printFracturesToFile(fractures, outputPathFractures);
+
+    string outputPathDebug = "./debug.txt";
+    std::ofstream file(outputPathDebug, std::ios_base::trunc);
+
+
 
 
     return 0;
