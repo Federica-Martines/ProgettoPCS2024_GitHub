@@ -1,6 +1,7 @@
 #include "Utils.hpp"
 #include "GeometryLibrary.hpp"
 #include "SortingAlgorithm.hpp"
+#include "input-output.hpp"
 #include <Eigen/Eigen>
 #include <vector>
 #include <algorithm>
@@ -199,12 +200,12 @@ void sortTraces(vector<Fracture>& fractures) {
     }
 }
 
-void cutFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
+void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
     bool writePol1 = true;
     vector<Vector3d> P1Vertices;
     vector<Vector3d> P2Vertices;
 
-    for (unsigned int i = 0; i < F.vertices.size(); ++i) {
+    for (unsigned int i = 0; i < F.vertices.size(); i++) {
         Vector3d intersection = {};
         Vector3d v1 = F.vertices[i];
         Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()];
@@ -218,7 +219,7 @@ void cutFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, co
         }
 
         // cerco un'intersezione con il lato
-        if (findLineSegmentIntersection(intersection, t1, t2, v1, v2, tol))
+        if (findLineSegmentIntersection(intersection, F.normal,  t1, t2, v1, v2, tol))
         {
             // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
             writePol1 = !writePol1;
@@ -226,69 +227,91 @@ void cutFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, co
 
             P1Vertices.push_back(intersection);
             P2Vertices.push_back(intersection);
+
+            printPointToDebug(intersection,"./debug_points.txt");
         }
     }
 
-    Fracture P1 = Fracture(1, P1Vertices, tol);
-    Fracture P2 = Fracture(2, P2Vertices, tol);
+    printFractureToDebug(F, "./debug.txt");
 
-    subFractures.push_back(P1);
-    subFractures.push_back(P2);
-
+    if (P1Vertices.size() != 0) {
+        Fracture P1 = Fracture(F.idFrac*10 +1, P1Vertices, tol);
+        subFractures.push_back(P1);
+    }
+    if (P2Vertices.size() != 0) {
+        Fracture P2 = Fracture(F.idFrac*10 +2, P2Vertices, tol);
+        subFractures.push_back(P2);
+    }
 
 }
 
-void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& frac, deque<Trace>& cuts, double tol) {
+void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
     vector<Fracture> subFractures = {};
-    deque<Trace> P1Cuts, P2Cuts = {};
+    vector<deque<Trace>> PiCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
     vector<Vector3d> cutPoints = {};
 
     // passo base
     if(cuts.size() == 0) {
         // aggiungo le fratture appena trovate all'elenco generale
-        resultFractures.push_back(frac);
+        resultFractures.push_back(F);
+        printFractureToDebug(F, "./debug.txt");
         return;
     }
-
 
     vector<Vector3d> extremes = cuts[0].extremes;
 
     // taglio la frattura in due sottofratture
-    cutFracture(subFractures, cutPoints, frac, extremes[0], extremes[1], tol);
+    splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
     // tolgo il taglio appena fatto
     cuts.pop_front();
 
-
-
     Vector3d cutDirection = extremes[0] - extremes[1];
-    Vector3d separatorPlane = frac.normal.cross(cutDirection);
+    Vector3d separatorPlane = F.normal.cross(cutDirection);
 
-    // decido quali tagli passeranno alla ricorsione successiva
-    for (Trace& cut : cuts) {
-        //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
-        if (cut.tips == true) {
-            if(checkTraceTips(frac, cut, tol)) {
+    // se il taglio ha diviso la frattura in due
+    if (subFractures.size() == 2) {
+        deque<Trace> P1Cuts, P2Cuts = {};
 
-                //guardo da che parte si trova il taglio rispetto al taglio passato
-                int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
-                switch(position){
-                case 1:
-                    P1Cuts.push_back(cut);
-                    break;
-                case -1:
-                    P2Cuts.push_back(cut);
-                    break;
-                case 0:
-                    P1Cuts.push_back(cut);
-                    P2Cuts.push_back(cut);
-                    break;
+        // decido quali tagli passeranno alla ricorsione successiva
+        for (Trace& cut : cuts) {
+            //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
+            if (cut.tips == true) {
+                if(checkTraceTips(F, cut, tol)) {
 
+                    //guardo da che parte si trova il taglio rispetto al taglio passato
+                    int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
+
+                    // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
+                    if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0 ) position *= -1;
+
+                    switch(position){
+                    case 1:
+                        P1Cuts.push_back(cut);
+                        break;
+                    case -1:
+                        P2Cuts.push_back(cut);
+                        break;
+                    case 0:
+                        P1Cuts.push_back(cut);
+                        P2Cuts.push_back(cut);
+                        break;
+
+                    }
                 }
             }
         }
+
+        PiCuts = {P1Cuts, P2Cuts};
+    }
+    else {
+        // se il taglio non ha diviso la frattura, riprovo senza questo taglio (poppato prima)
+        PiCuts = {cuts};
     }
 
-    cuttingFracture(resultFractures, subFractures[0], P1Cuts, tol);
-    cuttingFracture(resultFractures, subFractures[1], P2Cuts, tol);
+    // Di solito fa 2 chiamate, una per la sottofrattura 1 e una per la 2 ma a volte ne fa una sola
+    // questo succede nel caso una traccia sia passata a una sottofrattura ma non la intersechi
+    for (unsigned int i = 0; i < subFractures.size(); i++) {
+        cuttingFracture(resultFractures, subFractures[i], PiCuts[i], tol);
+    }
 
 }

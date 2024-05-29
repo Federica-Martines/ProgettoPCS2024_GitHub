@@ -59,9 +59,37 @@ def read_traces(filename: str, fractures: List[Fracture]) -> List[Trace]:
             trace = Trace(trace_id, fracture_id1, fracture_id2, extremes, length, tips)
 
             for fracture in fractures:
-                if fracture.fracture_id == fracture_id1:
+                if (
+                    fracture.fracture_id == fracture_id1
+                    or fracture.fracture_id == fracture_id2
+                ):
                     fracture.traces.append(trace)
 
             traces.append(trace)
 
+    traces = sorted(traces, key=lambda t: t.length, reverse=True)
+    # for t in traces:
+    #     print(t.idTrace, t.length)
     return traces
+
+
+def read_points(file_path):
+    points = []
+
+    with open(file_path, "r") as file:
+        lines = file.readlines()
+
+        # Skip the first line as it contains the number of fractures
+        line_idx = 0
+
+        while line_idx < len(lines):
+            if lines[line_idx].startswith("# Point"):
+                line_idx += 1
+
+                point = [float(coords) for coords in lines[line_idx].strip().split(";")]
+
+                points.append(point)
+
+            else:
+                line_idx += 1
+    return points

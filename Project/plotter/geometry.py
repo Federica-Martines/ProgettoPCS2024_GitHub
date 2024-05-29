@@ -14,8 +14,8 @@ class Fracture:
 
     def __repr__(self):
         return (
-            f"Fracture(id={self.fracture_id}, num_vertices={self.num_vertices}, "
-            f"vertices={self.vertices}, traces={self.traces})"
+            f"Fracture(\n id={self.fracture_id}\n num_vertices={self.num_vertices}\n "
+            f"vertices={self.vertices}\n tracesNumber={len(self.traces)})"
         )
 
 

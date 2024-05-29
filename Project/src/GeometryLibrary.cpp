@@ -215,36 +215,47 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNorma
     }
 }
 
-bool findLineSegmentIntersection(Vector3d& intersection, const Vector3d& l1, const Vector3d& l2, const Vector3d& s1, const Vector3d& s2, double tol)
-{
-    // Define the direction vector of the line
-    Vector3d lineDir = l2 - l1;
 
-    // Define the direction vectors of the segment
-    Vector3d segmentDir = s2 - s1;
+bool findLineSegmentIntersection(Vector3d& intersection,
+                                 Vector3d planeNormal,
+                                 const Vector3d& l1,
+                                 const Vector3d& l2,
+                                 const Vector3d& s1
+                                 , const Vector3d& s2,
+                                 double tol) {
+    Vector3d cutDirection = l2 - l1;
+    Vector3d separatorPlane = cutDirection.cross(planeNormal);
 
-    // Calculate the normal vector of the plane
-    Vector3d normal = lineDir.cross(segmentDir);
+    double value1 = separatorPlane.dot(s1-l1); // l1 è un punto del piano
+    double value2 = separatorPlane.dot(s2-l1);
 
-    // If the normal vector is zero, the line and segment are parallel
-    if (normal.norm() < tol) {
-        return false;
-    }
-
-    // Calculate the distance from l1 to the intersection point
-    double t = (s1 - l1).dot(lineDir) / lineDir.squaredNorm();
-
-    // Calculate the intersection point
-    intersection = l1 + t * lineDir;
-
-    // Check if the intersection point lies within the segment
-    double u = (intersection - s1).dot(segmentDir) / segmentDir.dot(segmentDir);
-
-    if (u >= 0.0 && u <= 1.0) {
+    if (abs(value1) < tol){
+        intersection = s1;
         return true;
-    } else {
+    }
+    else if (abs(value2) < tol){
+        intersection = s2;
+        return true;
+    }
+    else if (value1*value2 > tol) {
+        // il segmento è completamente sopra o sotto il piano e non c'è intersezione
         return false;
     }
+    else if (value1*value2 < tol){
+        // il segmento attraversa il piano
+        Vector3d P = s1 - l1;
+
+        MatrixXd M(3, 2);
+
+        M.col(0)=cutDirection;
+        M.col(1)=s2-s1;
+
+        Vector2d alfa = M.householderQr().solve(P);
+        intersection = alfa[0]*cutDirection+l1;
+
+        return true;
+    }
+    return false;
 }
 
 }

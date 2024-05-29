@@ -43,3 +43,4 @@ externals
 
 #MAC
 *.DS_Store
+Project/plotter/__pycache__/

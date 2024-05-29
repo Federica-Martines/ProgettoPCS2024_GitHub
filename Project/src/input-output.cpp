@@ -173,7 +173,7 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
     outFile.close();
 }
 
-void printFractureToDebug(const Fracture& fracture, const string& filename) {
+void      printFractureToDebug(const Fracture& fracture, const string& filename) {
         std::ofstream file(filename, std::ios_base::app);
 
         if (!file.is_open()) {
@@ -192,6 +192,20 @@ void printFractureToDebug(const Fracture& fracture, const string& filename) {
         file.close();
     }
 
+void printPointToDebug(const Vector3d& point, const string& filename) {
+    std::ofstream file(filename, std::ios_base::app);
+
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file";
+        return;
+    }
+
+    file << "# Point\n";
+    file << std::scientific << point.x() << "; " << point.y() << "; " << point.z() << "\n";
+
+
+    file.close();
+}
 
 
 
