@@ -61,7 +61,9 @@ list (APPEND ${CMAKE_PROJECT_NAME}_includes ${src_paraview_includes})
 ################################################################################
 add_executable(${CMAKE_PROJECT_NAME} main.cpp ${${CMAKE_PROJECT_NAME}_sources}  ${${CMAKE_PROJECT_NAME}_headers}
     src/input-output
-    src/input-output.hpp)
+    src/input-output.hpp
+    src/PolygonalMesh.hpp
+    src/PolygonalMesh.cpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES} )
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${${CMAKE_PROJECT_NAME}_includes})
