@@ -6,7 +6,7 @@
 #include <deque>
 
 using namespace std;
-using namespace Geometry;
+using namespace GeometryLibrary;
 
 unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, const double& tol);
 

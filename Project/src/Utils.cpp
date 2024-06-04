@@ -1,6 +1,5 @@
 #include "Utils.hpp"
 #include "GeometryLibrary.hpp"
-#include "SortingAlgorithm.hpp"
 #include "input-output.hpp"
 #include <Eigen/Eigen>
 #include <vector>
@@ -9,8 +8,7 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace Geometry;
-using namespace SortLibrary;
+using namespace GeometryLibrary;
 
 
 bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol) {
@@ -235,11 +233,11 @@ void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, 
     printFractureToDebug(F, "./debug.txt");
 
     if (P1Vertices.size() != 0) {
-        Fracture P1 = Fracture(F.idFrac*10 +1, P1Vertices, tol);
+        Fracture P1 = Fracture(F.idFrac*10 +1, P1Vertices, F.normal, F.lyingPlane);
         subFractures.push_back(P1);
     }
     if (P2Vertices.size() != 0) {
-        Fracture P2 = Fracture(F.idFrac*10 +2, P2Vertices, tol);
+        Fracture P2 = Fracture(F.idFrac*10 +2, P2Vertices, F.normal, F.lyingPlane);
         subFractures.push_back(P2);
     }
 

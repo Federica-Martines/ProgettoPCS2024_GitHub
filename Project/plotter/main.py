@@ -11,9 +11,9 @@ def __main__():
     fractures = read_fractures(debug_fractures_path)
     traces = read_traces(debug_traces_path, fractures)
     points = read_points(debug_points_path)
-
-    print(fractures)
-    plot(fractures, [], range(20, 50))
+    points = [[0.21174, 0.86746, 0.381013]]
+    print(fractures, traces, points, [0])
+    plot(fractures, points)
 
 
 __main__()

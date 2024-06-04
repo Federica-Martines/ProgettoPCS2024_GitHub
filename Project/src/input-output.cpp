@@ -7,7 +7,7 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace Geometry;
+using namespace GeometryLibrary;
 
 unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol){
 

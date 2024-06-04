@@ -4,9 +4,9 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace Geometry;
+using namespace GeometryLibrary;
 
-namespace Geometry {
+namespace GeometryLibrary {
 
 bool Fracture::checkFractureEdges(double tol){
 
@@ -28,6 +28,10 @@ bool Fracture::checkFractureEdges(double tol){
     }
     return true;
 };
+
+bool vectorsAreEqual(Vector3d v1, Vector3d v2, double tol) {
+    return ((v2-v1).norm() < tol);
+}
 
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
     Vector3d centroid = Vector3d::Zero();

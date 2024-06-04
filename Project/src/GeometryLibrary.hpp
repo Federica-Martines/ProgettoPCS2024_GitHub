@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Eigen;
 
-namespace Geometry {
+namespace GeometryLibrary {
 
 // given 3 points not aligned returns the normal to the plane passing in the 3 points
 Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3);
@@ -48,6 +48,14 @@ struct Fracture{
         this->lyingPlane = findLyingPlane(this->normal, tol);
     }
 
+    Fracture(unsigned int id, vector<Vector3d> vertices, Vector3d normal, unsigned int lyingPlane) {
+        this->idFrac = id;
+        this->numVertices = vertices.size();
+        this->vertices = vertices;
+        this->normal = normal;
+        this->lyingPlane = lyingPlane;
+    }
+
     bool checkFractureEdges(double tol);
 };
 
@@ -78,4 +86,5 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNorma
 
 bool findLineSegmentIntersection(Vector3d& intersection, Vector3d planeNormal,  const Vector3d& l1, const Vector3d& l2, const Vector3d& s1, const Vector3d& s2, double tol);
 
+bool vectorsAreEqual(Vector3d v1, Vector3d v2, double tol);
 }
