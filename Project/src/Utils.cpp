@@ -10,19 +10,20 @@ using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
 
+// s1, s2 sono gli estremi di ogni lato della frattura. il punto e la normale sono del piano dell'altra frattura
+bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d s1, Vector3d s2, double tol) {
 
-bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol) {
+    Vector3d direction = (s2 - s1).normalized(); //normalizzato così ottengo il versore
+    double value1 = planeNormal.dot(s1-planePoint);
+    double value2 = planeNormal.dot(s2-planePoint);
 
-    Vector3d direction = (b - a).normalized();
-    double value1 = planeNormal.dot(a-planePoint);
-    double value2 = planeNormal.dot(b-planePoint);
-
+    // Se il punto è sul piano value1 restituisce zero e quindi si intersecano
     if (abs(value1) < tol){
-        intersections.push_back(a);
+        intersections.push_back(s1);
         return true;
     }
     else if (abs(value2) < tol){
-        intersections.push_back(b);
+        intersections.push_back(s2);
         return true;
     }
     else if (value1*value2 > tol) {
@@ -31,9 +32,9 @@ bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector
     }
     else if (value1*value2 < tol){
         // il segmento attraversa il piano
-        double t = planeNormal.dot(planePoint - a) / planeNormal.dot(direction);
+        double t = planeNormal.dot(planePoint - s1) / planeNormal.dot(direction);
 
-        Vector3d intersection =  a + direction * t;
+        Vector3d intersection =  s1 + direction * t;
 
         intersections.push_back(intersection);
         return true;
@@ -46,7 +47,7 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
     vector<Vector3d> intersections;
     intersections.reserve(F1.vertices.size());
 
-    // controllo se ogni lato della frattura 1 interseca il piano della frattura 2
+    // controllo se ogni lato della frattura 1 interseca il piano della frattura 2 (successivamente dovrò controllare che le interesezioni siano interne alla frattura (della quale considero il piano)
     for (unsigned int v = 0; v < F1.vertices.size()-1; v++ ) {
         checkSegmentPlaneIntersection(intersections, F2.normal, F2.vertices[0], F1.vertices[v], F1.vertices[v+1], tol);
     }
@@ -60,15 +61,15 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
     for (unsigned int v = 0; v < intersections.size(); v++ ) {
         Vector2d projIntersection;
 
-        // Check if intersections[v] is already in trace.extremes
-        if (find(trace.extremes.begin(), trace.extremes.end(), intersections[v]) == trace.extremes.end())
-        {
+        // Controlla se intersections[v] è già in trace.extremes
+        if (find(trace.extremes.begin(), trace.extremes.end(), intersections[v]) == trace.extremes.end()) //se la find va fino in fondo trova end
+        {   //se non lo trova ritorna end, e controlla che sia interno
             projectIntersection(projIntersection, F2, intersections[v]);
 
-            // If not present, check if projIntersection is inside projVertices
+            // Se non è presente, controlla se projIntersection è dentro projVertices (la frattura proeittato)
             if (isPointIn2DPolygon(projIntersection, projVertices, tol)) {
 
-                // If so, push intersections[v] into trace.extremes
+                // Se il punto è interno, push intersections[v] in trace.extremes
                 trace.extremes.push_back(intersections[v]);
             }
         }
@@ -78,19 +79,19 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
 bool checkTraceTips(Fracture F, Trace T, double tol) {
     unsigned int v_size = F.vertices.size();
 
-    // flagE1 dice se il primo estremo è stato trovato nei segmenti
+    // flagE1 dice se il primo estremo è stato trovato nei segmenti (su uno dei lati della frattura)
     bool flagE1 = false;
     for (unsigned int v = 0; v < v_size; v++) {
         if (isPointOn3DSegment(T.extremes[0], F.vertices[v % v_size], F.vertices[(v+1) % v_size], tol))
         {
             // se lo trova lo segna true e esce, altrimenti continua a cercarlo
             flagE1 = true;
-            break;
+            break; //smetti di fare il for
         }
     }
     // se non lo trova, vuol dire che l'estremo non è su un lato della frattura, quindi la traccia è non passante e ritorniamo true
     if (flagE1 == false)
-        return true;
+        return true; //true significa NON passante
 
     // ripetiamo per l'altro estremo della traccia
     bool flagE2 = false;
@@ -104,7 +105,7 @@ bool checkTraceTips(Fracture F, Trace T, double tol) {
     if (flagE2 == false)
         return true;
 
-    // se tutto va bene, e troviamo entrambi gli estremi su uno dei lati della frattura ritorniamo flase cioè passante
+    // se tutto va bene, e troviamo entrambi gli estremi su uno dei lati della frattura ritorniamo false cioè passante
     return false;
 }
 
@@ -135,8 +136,9 @@ void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol) {
 
 }
 
+//funzione : prima cose da riempire, poi i dati; in questo caso vogliamo rimpeire il vettore di tracce
 unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, const double& tol) {
-    unsigned int c = 0;
+    unsigned int idTraces = 0;
 
     for (unsigned int i = 0; i < fractures.size(); i++) {
         // j < i perche prendiamo solo la parte triangolare inferiore della matrice essendo che 2 fratture hanno la stessa traccia
@@ -144,12 +146,13 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
 
             Trace trace;
 
-            Fracture& F1 = fractures[i];
+            Fracture& F1 = fractures[i]; //& reference (accorcio il nome)
             Fracture& F2 = fractures[j];
 
             Vector3d n1 = F1.normal;
             Vector3d n2 = F2.normal;
 
+            //creiamo due sfere
             BoundingSphere sphere1 = computeBoundingSphere(F1.vertices);
             BoundingSphere sphere2 = computeBoundingSphere(F2.vertices);
             // Se le sfere non si intersecano skippa alle prossime fratture per ottimizzare
@@ -158,9 +161,10 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
 
             if (n1.cross(n2).norm() < tol && abs(n1.dot(F1.vertices[0] - F2.vertices[0])) < tol) {
                 // le due fratture sono complanari
+                cerr << "le fratture " << F1.idFrac << " e " << F2.idFrac << " sono complanari." << endl;
             }
             else {
-                // le due fratture giaciono su piani diversi
+                // le due fratture giacciono su piani diversi
 
                 // insersechiamo ogni lato della frattura 1 con la frattura 2 e viceversa
                 findIntersections(trace, F1, F2, tol);
@@ -168,14 +172,14 @@ unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, cons
 
                 if (trace.extremes.size() > 1)
                 {
-                    trace.idTrace = c++;
+                    trace.idTrace = idTraces++;
                     trace.idGenerator1 = F1.idFrac;
                     trace.idGenerator2 = F2.idFrac;
                     trace.length = (trace.extremes[0] - trace.extremes[1]).norm();
 
                     addTraceToFractures(F1, F2, trace, tol);
 
-                    traces.push_back(trace);
+                    traces.push_back(trace); //traces è una lista
                 }
             }
         }
@@ -189,7 +193,7 @@ void sortTraces(vector<Fracture>& fractures) {
         // Sort passingTraces
         sort(fractures[i].passingTraces.begin(), fractures[i].passingTraces.end(),
              [] (const Trace& a, const Trace& b) { return a.length > b.length; }
-             );
+             ); //funzione inline dal [] in poi. non chiama lo stack frame. è la funzione di confronto
 
         // Sort notPassingTraces
         sort(fractures[i].notPassingTraces.begin(), fractures[i].notPassingTraces.end(),
@@ -198,6 +202,8 @@ void sortTraces(vector<Fracture>& fractures) {
     }
 }
 
+
+// t1 e t2 sono gli estremi del taglio (traccia)
 void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
     bool writePol1 = true;
     vector<Vector3d> P1Vertices;
@@ -206,7 +212,7 @@ void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, 
     for (unsigned int i = 0; i < F.vertices.size(); i++) {
         Vector3d intersection = {};
         Vector3d v1 = F.vertices[i];
-        Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()];
+        Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()]; //prendi una coppia di vertici consecutivi
 
         // aggiungo il vertice corrente al poligono corrente (si parte da 1 e switch ogni intersezione)
         if (writePol1) {
@@ -238,37 +244,41 @@ void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, 
     }
     if (P2Vertices.size() != 0) {
         Fracture P2 = Fracture(F.idFrac*10 +2, P2Vertices, F.normal, F.lyingPlane);
-        subFractures.push_back(P2);
+        subFractures.push_back(P2); //uno dei due tra P1 e P2 non sarà mai vuoto
     }
 
 }
 
+//d deque: duble ended queque (coda a cui posso attingere e mettere sia in capo che in coda)
 void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
-    vector<Fracture> subFractures = {};
-    vector<deque<Trace>> PiCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
-    vector<Vector3d> cutPoints = {};
+    vector<Fracture> subFractures = {}; //avremmo potuto usato array di 2
+    vector<deque<Trace>> Sub_iCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
+    vector<Vector3d> cutPoints = {}; // sono i punti dove abbiamo tagliato. (i nuovi vertici)
 
     // passo base
+    // Se ho una foglia
     if(cuts.size() == 0) {
-        // aggiungo le fratture appena trovate all'elenco generale
+        // aggiungo le fratture appena trovate all'elenco generale (delle foglie)
         resultFractures.push_back(F);
-        printFractureToDebug(F, "./debug.txt");
+        printFractureToDebug(F, "./debug.txt"); //serve per python
         return;
     }
 
-    vector<Vector3d> extremes = cuts[0].extremes;
+    vector<Vector3d> extremes = cuts[0].extremes; // salviamo gli estremi del primo taglio (li rinomino)
 
     // taglio la frattura in due sottofratture
     splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
     // tolgo il taglio appena fatto
     cuts.pop_front();
 
+    // Mi segno la direzione del taglio e il piano separatore
     Vector3d cutDirection = extremes[0] - extremes[1];
     Vector3d separatorPlane = F.normal.cross(cutDirection);
 
+    // Assegnazione delle fratture
     // se il taglio ha diviso la frattura in due
     if (subFractures.size() == 2) {
-        deque<Trace> P1Cuts, P2Cuts = {};
+        deque<Trace> Sub_1Cuts, Sub_2Cuts = {};
 
         // decido quali tagli passeranno alla ricorsione successiva
         for (Trace& cut : cuts) {
@@ -277,21 +287,21 @@ void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trac
                 if(checkTraceTips(F, cut, tol)) {
 
                     //guardo da che parte si trova il taglio rispetto al taglio passato
-                    int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
+                   int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
 
                     // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
                     if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0 ) position *= -1;
 
                     switch(position){
                     case 1:
-                        P1Cuts.push_back(cut);
+                        Sub_1Cuts.push_back(cut);
                         break;
                     case -1:
-                        P2Cuts.push_back(cut);
+                        Sub_2Cuts.push_back(cut);
                         break;
                     case 0:
-                        P1Cuts.push_back(cut);
-                        P2Cuts.push_back(cut);
+                        Sub_1Cuts.push_back(cut);
+                        Sub_2Cuts.push_back(cut);
                         break;
 
                     }
@@ -299,17 +309,17 @@ void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trac
             }
         }
 
-        PiCuts = {P1Cuts, P2Cuts};
+        Sub_iCuts = {Sub_1Cuts, Sub_2Cuts};
     }
     else {
         // se il taglio non ha diviso la frattura, riprovo senza questo taglio (poppato prima)
-        PiCuts = {cuts};
+        Sub_iCuts = {cuts};
     }
 
     // Di solito fa 2 chiamate, una per la sottofrattura 1 e una per la 2 ma a volte ne fa una sola
     // questo succede nel caso una traccia sia passata a una sottofrattura ma non la intersechi
     for (unsigned int i = 0; i < subFractures.size(); i++) {
-        cuttingFracture(resultFractures, subFractures[i], PiCuts[i], tol);
+        cuttingFracture(resultFractures, subFractures[i], Sub_iCuts[i], tol);
     }
 
 }

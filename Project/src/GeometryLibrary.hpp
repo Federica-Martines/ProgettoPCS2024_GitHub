@@ -14,6 +14,7 @@ Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3);
 // returns the plane the fracture is lying on (done to prevent checking all the time and for debugging
 unsigned int findLyingPlane(const Vector3d n, double tol);
 
+//scrivi sempre "struttura" (PUBBLICA), non "classe" (privata)
 struct BoundingSphere {
     Vector3d center;
     double radius;
@@ -30,15 +31,17 @@ struct Trace{
     Trace()=default;
 };
 
+//struttura
 struct Fracture{
     unsigned int idFrac;
     unsigned int numVertices;
     Vector3d normal;
-    unsigned int lyingPlane;
+    unsigned int lyingPlane; //piano su cui si appoggia
     vector<Vector3d> vertices={}; //coordinate dei vertici della frattura
     vector<Trace> passingTraces={}; //vettore con gli id delle tracce passanti per la frattura corrente
     vector<Trace> notPassingTraces={};
 
+    //costruttore (o questa: calcoli la roba)
     Fracture()=default;
     Fracture(unsigned int id, vector<Vector3d> vertices, double tol) {
         this->idFrac = id;
@@ -48,6 +51,7 @@ struct Fracture{
         this->lyingPlane = findLyingPlane(this->normal, tol);
     }
 
+    //(o questa: hai già le cose. quando fai i tagli chiami il costruttore della frattura)
     Fracture(unsigned int id, vector<Vector3d> vertices, Vector3d normal, unsigned int lyingPlane) {
         this->idFrac = id;
         this->numVertices = vertices.size();

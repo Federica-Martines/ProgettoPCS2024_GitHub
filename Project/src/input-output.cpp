@@ -14,7 +14,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     ifstream ifstr(fileName);
     if(ifstr.fail()){
         cerr << "errore nell'apertura del file" << endl;
-        return false;
+        return 0 //(false);
     }
 
     // togliamo il # di header
@@ -22,7 +22,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     getline(ifstr, header);
 
     string line;
-    char semicolon;
+    char semicolon; //semicolon=;
 
     // prendiamo il numero di fratture e riserviamo la memoria
     getline(ifstr, line);
@@ -31,9 +31,9 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     convert >> numFractures;
     fractures.reserve(numFractures);
 
-    while(getline(ifstr,line)){
-        unsigned int id, numVertices;
-        vector<Vector3d> vertices = {};
+    while(getline(ifstr,line)){ //finché ci sono righe
+        unsigned int id, numVertices; //definiamo variabili
+        vector<Vector3d> vertices = {}; //inizializziamo vettore dei vertici
 
         getline(ifstr, line);
         istringstream convert(line);
@@ -45,7 +45,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
         // tolgo il #
         getline(ifstr, line);
 
-
+        //per ogni dimensione, per ogni vertici, salviamo le coordinate dei vertici
         for (unsigned int i=0; i<3; i++){ //3 dimensioni (i=0 componente x)
             getline(ifstr, line);
             istringstream convert2(line);
@@ -56,7 +56,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
             }
         }
 
-        // Assegnamo i dati alla frattura
+        // Assegnamo i dati alla frattura (utilizziamo il costruttore della frattura per generarla
         Fracture frac = Fracture(id, vertices, tol);
 
         // Eseguo un controllo sulle tracce per verificare che non abbiano lati null

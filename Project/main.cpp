@@ -48,12 +48,12 @@ int main(int argc, char **argv)
 
     //PARTE 2
 
+    //le seguenti 4 righe di codice servono per stampare attraverso un codice python
     string outputPathDebug = "./debug.txt";
     std::ofstream fileDebug(outputPathDebug, std::ios_base::trunc);
 
     string outputPathPointsDebug = "./debug_points.txt";
     std::ofstream filePoint(outputPathPointsDebug, std::ios_base::trunc);
-
 
 
     for (Fracture& frac : fractures) {
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
         cuts.insert(cuts.end(), frac.passingTraces.begin(), frac.passingTraces.end());
         cuts.insert(cuts.end(), frac.notPassingTraces.begin(), frac.notPassingTraces.end());
 
-        cuttingFracture(cuttedFractures, frac, cuts, tol);
+        cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = transformChildrenFracturesToMesh(cuttedFractures, tol);
         saveMesh(mesh, frac.idFrac);
@@ -72,9 +72,11 @@ int main(int argc, char **argv)
         cout << "Saved mesh: " << frac.idFrac << endl;
     }
 
+    // Per python
     // string outputPathDebugFractures = "./log_fractures.txt";
     // std::ofstream fileDebugFracture(outputPathDebugFractures, std::ios_base::trunc);
 
+    // Stampa sul terminale
     // for (Fracture& F : cuttedFractures) {
     //     printFractureToDebug(F, outputPathDebugFractures);
     // }

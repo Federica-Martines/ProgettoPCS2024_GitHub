@@ -8,7 +8,7 @@ using namespace GeometryLibrary;
 
 namespace GeometryLibrary {
 
-bool Fracture::checkFractureEdges(double tol){
+bool Fracture::checkFractureEdges(double tol){ //guarda esercitazione sulla mesh
 
     //controlliamo che non ci siano lati di lunghezza nulla.
     for (unsigned int k=0; k<this->numVertices-1; k++){
@@ -33,12 +33,13 @@ bool vectorsAreEqual(Vector3d v1, Vector3d v2, double tol) {
     return ((v2-v1).norm() < tol);
 }
 
+//questa funzione crea la sfera attorno alla frattura
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
-    Vector3d centroid = Vector3d::Zero();
+    Vector3d centroid = Vector3d::Zero(); //inizializzo un centroide
     for (const auto& vertex : vertices) {
         centroid += vertex;
     }
-    centroid /= vertices.size();
+    centroid /= vertices.size(); //il centroide è la mediana(?)
 
     double maxRadius = 0.0;
     for (const auto& vertex : vertices) {
@@ -54,7 +55,7 @@ BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
 bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2) {
     double distance = (sphere1.center - sphere2.center).norm();
     double radiusSum = sphere1.radius + sphere2.radius;
-    return distance <= radiusSum;
+    return distance <= radiusSum; //se è maggiore non si interesecano
 }
 
 // given 3 points not aligned returns the normal to the plane passing in the 3 points
@@ -102,7 +103,7 @@ Vector2d projectOntoYZ(const Vector3d& point)
     return Vector2d(point.y(), point.z());
 }
 
-
+//proietta solo un punto, ovvero l'interesezione
 void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d intersection) {
 
     switch (F.lyingPlane) {
@@ -124,7 +125,7 @@ void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d inters
 
 void projectVertices(vector<Vector2d>& projVertices, Fracture F) {
 
-    switch (F.lyingPlane) {
+    switch (F.lyingPlane) { //switch è un if con i casi
     case 0:
     case 1:
         for (unsigned int ver = 0; ver < F.vertices.size(); ver++) {
@@ -176,8 +177,9 @@ bool isPointOn3DSegment(const Vector3d& point, const Vector3d& s1, const Vector3
     return true;
 }
 
+// Ray casting algorithm (Point in polygon su wikipedia) prende una retta che passa dal punto e vede quante volte tale retta interseca il poligono
 bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, double tol) {
-    int crossings = 0;
+    int crossings = 0; //se il raggio passa atraverso il poligono
     int n = polygon.size();
     for (int i = 0; i < n; i++) {
         const Vector2d& p1 = polygon[i];
@@ -219,21 +221,21 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNorma
     }
 }
 
-
+//t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
 bool findLineSegmentIntersection(Vector3d& intersection,
                                  Vector3d planeNormal,
-                                 const Vector3d& l1,
-                                 const Vector3d& l2,
+                                 const Vector3d& t1,
+                                 const Vector3d& t2,
                                  const Vector3d& s1
                                  , const Vector3d& s2,
                                  double tol) {
-    Vector3d cutDirection = l2 - l1;
+    Vector3d cutDirection = t2 - t1;
     Vector3d separatorPlane = cutDirection.cross(planeNormal);
 
-    double value1 = separatorPlane.dot(s1-l1); // l1 è un punto del piano
-    double value2 = separatorPlane.dot(s2-l1);
+    double value1 = separatorPlane.dot(s1-t1); // t1 è un punto del piano
+    double value2 = separatorPlane.dot(s2-t1);
 
-    if (abs(value1) < tol){
+    if (abs(value1) < tol){ //il punto s1 appartiene al piano separatore (signfica che stai tagliando lungo i vertici della frattura)
         intersection = s1;
         return true;
     }
@@ -247,15 +249,15 @@ bool findLineSegmentIntersection(Vector3d& intersection,
     }
     else if (value1*value2 < tol){
         // il segmento attraversa il piano
-        Vector3d P = s1 - l1;
+        Vector3d P = s1 - t1;
 
         MatrixXd M(3, 2);
 
         M.col(0)=cutDirection;
         M.col(1)=s2-s1;
 
-        Vector2d alfa = M.householderQr().solve(P);
-        intersection = alfa[0]*cutDirection+l1;
+        Vector2d alfa = M.householderQr().solve(P); //householderQr è in eigen
+        intersection = alfa[0]*cutDirection+t1;
 
         return true;
     }
