@@ -25,6 +25,7 @@ int main(int argc, char **argv)
         tol=max(tol, tolInput);
     }
 
+    //inizializziamo le fratture
     vector<Fracture> fractures = {};
     string path = "./DFN/FR10_data.txt";
     // string path = "./DFN/FR362_data.txt";
@@ -36,7 +37,6 @@ int main(int argc, char **argv)
 
     sortTraces(fractures);
 
-
     string outputPathTraces = "./traces.txt";
     std::ofstream fileTraces(outputPathTraces, std::ios_base::trunc);
     printTracesToFile(traces, outputPathTraces);
@@ -45,6 +45,8 @@ int main(int argc, char **argv)
     std::ofstream fileFractures(outputPathFractures, std::ios_base::trunc);
     //printFracturesToFile(fractures, outputPathFractures);
 
+
+    //PARTE 2
 
     string outputPathDebug = "./debug.txt";
     std::ofstream fileDebug(outputPathDebug, std::ios_base::trunc);
