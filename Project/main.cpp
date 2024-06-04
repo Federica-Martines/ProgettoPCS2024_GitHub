@@ -55,6 +55,8 @@ int main(int argc, char **argv)
     string outputPathPointsDebug = "./debug_points.txt";
     std::ofstream filePoint(outputPathPointsDebug, std::ios_base::trunc);
 
+    string outputPathTracesDebug = "./debug_traces.txt";
+    std::ofstream fileTracesDebug(outputPathTracesDebug, std::ios_base::trunc);
 
     for (Fracture& frac : fractures) {
         vector<Fracture> cuttedFractures;

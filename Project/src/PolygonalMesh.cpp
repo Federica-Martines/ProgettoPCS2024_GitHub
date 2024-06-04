@@ -28,7 +28,7 @@ PolygonalMesh transformChildrenFracturesToMesh(vector<Fracture>& fractures, doub
             bool found = false;
             unsigned int foundVectorId;
             for (unsigned int compV = 0; compV < mesh.Cell0DCoordinates.size(); compV++) {
-                if (vectorsAreEqual(v, mesh.Cell0DCoordinates[compV], tol)) {
+                if (areVectorsEqual(v, mesh.Cell0DCoordinates[compV], tol)) {
                     found = true;
                     foundVectorId = compV;
                     break;

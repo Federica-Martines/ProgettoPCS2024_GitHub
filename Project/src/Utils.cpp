@@ -1,4 +1,5 @@
 #include "Utils.hpp"
+#include <iostream>
 #include "GeometryLibrary.hpp"
 #include "input-output.hpp"
 #include <Eigen/Eigen>
@@ -266,6 +267,7 @@ void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trac
 
     vector<Vector3d> extremes = cuts[0].extremes; // salviamo gli estremi del primo taglio (li rinomino)
 
+    printTraceToDebug(cuts[0], "./debug_traces.txt");
     // taglio la frattura in due sottofratture
     splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
     // tolgo il taglio appena fatto
@@ -283,30 +285,27 @@ void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trac
         // decido quali tagli passeranno alla ricorsione successiva
         for (Trace& cut : cuts) {
             //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
-            if (cut.tips == true) {
-                if(checkTraceTips(F, cut, tol)) {
 
-                    //guardo da che parte si trova il taglio rispetto al taglio passato
-                   int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
+            //guardo da che parte si trova il taglio rispetto al taglio passato
+            int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
 
-                    // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
-                    if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0 ) position *= -1;
+            // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
+            if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0) position *= -1;
 
-                    switch(position){
-                    case 1:
-                        Sub_1Cuts.push_back(cut);
-                        break;
-                    case -1:
-                        Sub_2Cuts.push_back(cut);
-                        break;
-                    case 0:
-                        Sub_1Cuts.push_back(cut);
-                        Sub_2Cuts.push_back(cut);
-                        break;
+            switch(position){
+            case 1:
+                Sub_1Cuts.push_back(cut);
+                break;
+            case -1:
+                Sub_2Cuts.push_back(cut);
+                break;
+            case 0:
+                Sub_1Cuts.push_back(cut);
+                Sub_2Cuts.push_back(cut);
+                break;
 
-                    }
-                }
             }
+
         }
 
         Sub_iCuts = {Sub_1Cuts, Sub_2Cuts};

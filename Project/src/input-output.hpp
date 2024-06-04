@@ -20,4 +20,6 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
 
 void printFractureToDebug(const Fracture& fracture, const string& filename);
 
+void printTraceToDebug(const Trace& trace, const string& filename);
+
 void printPointToDebug(const Vector3d& point, const string& filename);

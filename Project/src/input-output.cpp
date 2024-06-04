@@ -14,7 +14,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
     ifstream ifstr(fileName);
     if(ifstr.fail()){
         cerr << "errore nell'apertura del file" << endl;
-        return 0 //(false);
+        return 0; //(false)
     }
 
     // togliamo il # di header
@@ -173,7 +173,7 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
     outFile.close();
 }
 
-void      printFractureToDebug(const Fracture& fracture, const string& filename) {
+void printFractureToDebug(const Fracture& fracture, const string& filename) {
         std::ofstream file(filename, std::ios_base::app);
 
         if (!file.is_open()) {
@@ -191,6 +191,34 @@ void      printFractureToDebug(const Fracture& fracture, const string& filename)
 
         file.close();
     }
+
+
+void printTraceToDebug(const Trace& trace, const string& filename) {
+    std::ofstream outFile(filename, std::ios_base::app);
+
+    if (!outFile.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        return;
+    }
+
+
+        if (trace.extremes.size() >= 2) {
+            const Vector3d& start = trace.extremes[0];
+            const Vector3d& end = trace.extremes[1];
+            outFile << trace.idTrace << "; "
+                    << trace.idGenerator1 << "; "
+                    << trace.idGenerator2 << "; "
+                    << start.x() << "; "
+                    << start.y() << "; "
+                    << start.z() << "; "
+                    << end.x() << "; "
+                    << end.y() << "; "
+                    << end.z() << endl;
+        }
+
+
+    outFile.close();
+}
 
 void printPointToDebug(const Vector3d& point, const string& filename) {
     std::ofstream file(filename, std::ios_base::app);

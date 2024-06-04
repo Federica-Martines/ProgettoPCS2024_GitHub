@@ -29,7 +29,7 @@ bool Fracture::checkFractureEdges(double tol){ //guarda esercitazione sulla mesh
     return true;
 };
 
-bool vectorsAreEqual(Vector3d v1, Vector3d v2, double tol) {
+bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol) {
     return ((v2-v1).norm() < tol);
 }
 
@@ -63,7 +63,7 @@ Vector3d findNormal(const Vector3d p1, const Vector3d p2, const Vector3d p3) {
 
     // Calcolo i vettori che generano la normale
     Vector3d u1 = p3 - p1;
-    Vector3d v1 = p2 - p1;
+    Vector3d v1 = p1 - p2;
     return u1.cross(v1).normalized();
 }
 

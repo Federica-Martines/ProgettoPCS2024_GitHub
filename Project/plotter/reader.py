@@ -45,7 +45,7 @@ def read_traces(filename: str, fractures: List[Fracture]) -> List[Trace]:
     with open(filename, "r") as file:
         lines = file.readlines()
 
-        for line in lines[3:]:
+        for line in lines:
             trace_data = line.strip().split("; ")
             trace_id = int(trace_data[0])
             fracture_id1 = int(trace_data[1])
