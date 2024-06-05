@@ -63,7 +63,9 @@ add_executable(${CMAKE_PROJECT_NAME} main.cpp ${${CMAKE_PROJECT_NAME}_sources}  
     src/input-output
     src/input-output.hpp
     src/PolygonalMesh.hpp
-    src/PolygonalMesh.cpp)
+    src/PolygonalMesh.cpp
+    src/PolygonalMesh.hpp
+    src/PolyognalMesh.hpp)
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES} )
 target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${${CMAKE_PROJECT_NAME}_includes})
@@ -83,6 +85,7 @@ add_executable(${CMAKE_PROJECT_NAME}_TEST main_TEST.cpp
     ${${CMAKE_PROJECT_NAME}_headers}
     ${${CMAKE_PROJECT_NAME}_TEST_sources}
     ${${CMAKE_PROJECT_NAME}_TEST_headers}
+
 )
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN
      DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

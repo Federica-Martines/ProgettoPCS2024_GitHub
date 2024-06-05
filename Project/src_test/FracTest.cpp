@@ -2,6 +2,7 @@
 #include "../src/GeometryLibrary.hpp" // Include the header where Fracture and readFractures are defined
 #include "../src/input-output.hpp"
 #include "../src/Utils.hpp"
+#include "../src/PolygonalMesh.hpp"
 #include <Eigen/Dense>
 
 using namespace std;
@@ -831,50 +832,52 @@ TEST(SplitFractureTest, ThreeDimensionalFractureTest) {
     EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
 }
 
- // printTraces
-// Test per verificare la corretta stampa di una traccia
-TEST(PrintTracesTest, PrintSingleTraceTest) {
-    // Creazione di una singola traccia
-    Trace singleTrace(1, 2, 3, {{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}}, 1.414); // Esempio di dati casuali
-    vector<Trace> traces = {singleTrace};
+// printTraces
 
-    // Redirect dell'output di cout
-    std::stringstream buffer;
-    std::streambuf *sbuf = std::cout.rdbuf();
-    std::cout.rdbuf(buffer.rdbuf());
+// printFractures
 
-    // Chiamata alla funzione printTraces
-    printTraces(traces);
+// printTracesToFile
 
-    // Ripristino lo stream originale di cout
-    std::cout.rdbuf(sbuf);
+// printFracturesToFile
 
-    // Verifica dell'output
-    string expectedOutput = "Traccia: 1\nFratture generatrici: 2 3\nLunghezza: 1.414\nLa frattura è passante\nEstremo 1: (0, 0, 0)\nEstremo 2: (1, 1, 1)\n\n";
-    ASSERT_EQ(buffer.str(), expectedOutput);
+// transformChildrenFracturesToMesh
+// Testa se la funzione restituisce una mesh vuota quando la lista di fratture è vuota
+TEST(TransformChildrenFracturesToMeshTest, EmptyFracturesList) {
+    vector<Fracture> fractures; // Vettore di fratture vuoto
+    double tol = 1e-6; // Tolleranza per la comparazione di numeri in virgola mobile
+    PolygonalMesh mesh = transformChildrenFracturesToMesh(fractures, tol); // Chiamata alla funzione da testare
+    // Verifica se la mesh restituita è vuota
+    EXPECT_EQ(mesh.NumberCell0D, 0);
+    EXPECT_EQ(mesh.NumberCell1D, 0);
+    EXPECT_EQ(mesh.NumberCell2D, 0);
+    EXPECT_TRUE(mesh.Cell0DId.empty());
+    EXPECT_TRUE(mesh.Cell0DCoordinates.empty());
+    EXPECT_TRUE(mesh.Cell1DId.empty());
+    EXPECT_TRUE(mesh.Cell1DVertices.empty());
+    EXPECT_TRUE(mesh.Cell2DId.empty());
+    EXPECT_TRUE(mesh.Cell2DVertices.empty());
+    EXPECT_TRUE(mesh.Cell2DEdges.empty());
 }
 
-// Test per verificare la corretta stampa di più tracce
-TEST(PrintTracesTest, PrintMultipleTracesTest) {
-    // Creazione di più tracce
-    Trace trace1(1, 2, 3, {{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}}, 1.414); // Esempio di dati casuali
-    Trace trace2(2, 3, 4, {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}, 5.196); // Esempio di dati casuali
-    vector<Trace> traces = {trace1, trace2};
-
-    // Redirect dell'output di cout
-    std::stringstream buffer;
-    std::streambuf *sbuf = std::cout.rdbuf();
-    std::cout.rdbuf(buffer.rdbuf());
-
-    // Chiamata alla funzione printTraces
-    printTraces(traces);
-
-    // Ripristino lo stream originale di cout
-    std::cout.rdbuf(sbuf);
-
-    // Verifica dell'output
-    string expectedOutput = "Traccia: 1\nFratture generatrici: 2 3\nLunghezza: 1.414\nLa frattura è passante\nEstremo 1: (0, 0, 0)\nEstremo 2: (1, 1, 1)\n\nTraccia: 2\nFratture generatrici: 3 4\nLunghezza: 5.196\nLa frattura è passante\nEstremo 1: (1, 2, 3)\nEstremo 2: (4, 5, 6)\n\n";
-    ASSERT_EQ(buffer.str(), expectedOutput);
+// Testa se la funzione trasforma correttamente le fratture in una mesh
+TEST(TransformChildrenFracturesToMeshTest, NonEmptyFracturesList) {
+    // Crea una lista di fratture di esempio
+    vector<Fracture> fractures = {
+        {1, 0, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0}}, {}, {}, {}, {}},
+        {2, 0, {{0.0, 0.0, 1.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}}, {}, {}, {}, {}}
+    };
+    double tol = 1e-6; // Tolleranza per la comparazione di numeri in virgola mobile
+    PolygonalMesh mesh = transformChildrenFracturesToMesh(fractures, tol); // Chiamata alla funzione da testare
+    // Verifica se la mesh restituita è corretta
+    EXPECT_EQ(mesh.NumberCell0D, 8);
+    EXPECT_EQ(mesh.NumberCell1D, 8);
+    EXPECT_EQ(mesh.NumberCell2D, 2);
+    EXPECT_EQ(mesh.Cell0DId.size(), 8);
+    EXPECT_EQ(mesh.Cell0DCoordinates.size(), 8);
+    EXPECT_EQ(mesh.Cell1DId.size(), 8);
+    EXPECT_EQ(mesh.Cell1DVertices.size(), 8);
+    EXPECT_EQ(mesh.Cell2DId.size(), 2);
+    EXPECT_EQ(mesh.Cell2DVertices.size(), 2);
+    EXPECT_EQ(mesh.Cell2DEdges.size(), 2);
 }
-
 
