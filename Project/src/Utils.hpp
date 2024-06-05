@@ -17,3 +17,9 @@ void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol);
 void sortTraces(vector<Fracture>& fractures);
 
 void cuttingFracture(vector<Fracture>& resultFractures, Fracture& frac, deque<Trace>& cuts, double tol);
+
+bool checkTraceTips(Fracture F, Trace T, double tol);
+
+void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol);
+
+void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol);

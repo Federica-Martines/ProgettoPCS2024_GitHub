@@ -563,3 +563,318 @@ TEST(FindTracesTest, IntersectionsPresent) {
     EXPECT_EQ(traces[0].idGenerator1, 1);
     EXPECT_EQ(traces[0].idGenerator2, 2);
 }
+
+// sortTraces
+// Test per la funzione sortTraces
+TEST(SortTracesTest, SortTraces) {
+    // Creazione di una frattura di esempio con tracce non ordinate
+    Fracture fracture;
+    fracture.idFrac = 1;
+
+    // Traccia 1 (non ordinata)
+    Trace trace1;
+    trace1.idTrace = 1;
+    trace1.length = 5.0;
+    fracture.passingTraces.push_back(trace1);
+
+    // Traccia 2 (non ordinata)
+    Trace trace2;
+    trace2.idTrace = 2;
+    trace2.length = 3.0;
+    fracture.passingTraces.push_back(trace2);
+
+    // Traccia 3 (non ordinata)
+    Trace trace3;
+    trace3.idTrace = 3;
+    trace3.length = 7.0;
+    fracture.passingTraces.push_back(trace3);
+
+    // Applica la funzione sortTraces
+    vector<Fracture> fractures;
+    fractures.push_back(fracture);
+    sortTraces(fractures);
+
+    // Verifica che le tracce siano ordinate in modo decrescente per lunghezza
+    EXPECT_EQ(fractures[0].passingTraces.size(), 3);
+    EXPECT_EQ(fractures[0].passingTraces[0].length, 7.0);
+    EXPECT_EQ(fractures[0].passingTraces[1].length, 5.0);
+    EXPECT_EQ(fractures[0].passingTraces[2].length, 3.0);
+}
+
+// classifyTracePosition
+TEST(classifyTracePositionTest, TestAbovePlane) {
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d s1(1.0, 1.0, 1.0);
+    Vector3d s2(2.0, 2.0, 2.0);
+    int result = classifyTracePosition(planePoint, planeNormal, s1, s2);
+    EXPECT_EQ(result, 1); // Sopra il piano
+}
+
+TEST(classifyTracePositionTest, TestBelowPlane) {
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d s1(-1.0, -1.0, -1.0);
+    Vector3d s2(-2.0, -2.0, -2.0);
+    int result = classifyTracePosition(planePoint, planeNormal, s1, s2);
+    EXPECT_EQ(result, -1); // Sotto il piano
+}
+
+TEST(classifyTracePositionTest, TestCrossingPlane) {
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d s1(-1.0, -1.0, 1.0);
+    Vector3d s2(1.0, 1.0, -1.0);
+    int result = classifyTracePosition(planePoint, planeNormal, s1, s2);
+    EXPECT_EQ(result, 0); // Attraversa il piano
+}
+
+// checkTraceTips
+TEST(checkTraceTipsTest, TestNonPassingTrace) {
+    Fracture F;
+    F.idFrac = 1;
+    F.vertices.push_back(Vector3d(0.0, 0.0, 0.0));
+    F.vertices.push_back(Vector3d(1.0, 0.0, 0.0));
+    F.vertices.push_back(Vector3d(1.0, 1.0, 0.0));
+    F.vertices.push_back(Vector3d(0.0, 1.0, 0.0));
+
+    Trace T;
+    T.idTrace = 1;
+    T.extremes.push_back(Vector3d(0.5, 0.5, 1.0)); // Punto fuori dalla frattura
+    T.extremes.push_back(Vector3d(0.5, 0.5, -1.0)); // Punto fuori dalla frattura
+
+    double tol = 1e-6;
+    bool result = checkTraceTips(F, T, tol);
+    EXPECT_TRUE(result); // La traccia non è passante
+}
+
+TEST(checkTraceTipsTest, TestPassingTrace) {
+    Fracture F;
+    F.idFrac = 1;
+    F.vertices.push_back(Vector3d(0.0, 0.0, 0.0));
+    F.vertices.push_back(Vector3d(1.0, 0.0, 0.0));
+    F.vertices.push_back(Vector3d(1.0, 1.0, 0.0));
+    F.vertices.push_back(Vector3d(0.0, 1.0, 0.0));
+
+    Trace T;
+    T.idTrace = 1;
+    T.extremes.push_back(Vector3d(0.5, 0.5, 0.0)); // Punto all'interno della frattura
+    T.extremes.push_back(Vector3d(0.5, 0.5, 0.0)); // Punto all'interno della frattura
+
+    double tol = 1e-6;
+    bool result = checkTraceTips(F, T, tol);
+    EXPECT_FALSE(result); // La traccia è passante
+}
+
+// addTraceToFractures
+TEST(AddTraceToFracturesTest, TestPassingTrace) {
+    Fracture F1;
+    Fracture F2;
+    Trace trace;
+    trace.idTrace = 1;
+    trace.extremes.push_back(Vector3d(0.5, 0.5, 0.0)); // Punto all'interno della frattura
+    trace.extremes.push_back(Vector3d(0.5, 0.5, 0.0)); // Punto all'interno della frattura
+    trace.length = 1.0;
+    double tol = 1e-6;
+
+    addTraceToFractures(F1, F2, trace, tol);
+
+    // Assicurati che la traccia sia stata aggiunta alle tracce non passanti della frattura F1
+    ASSERT_EQ(F1.notPassingTraces.size(), 1);
+    EXPECT_EQ(F1.notPassingTraces[0].idTrace, 1);
+}
+
+TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
+    Fracture F1;
+    Fracture F2;
+    Trace trace;
+    trace.idTrace = 1;
+    trace.extremes.push_back(Vector3d(2.0, 2.0, 2.0)); // Punto fuori dalla frattura
+    trace.extremes.push_back(Vector3d(3.0, 3.0, 3.0)); // Punto fuori dalla frattura
+    trace.length = 1.0;
+    double tol = 1e-6;
+
+    addTraceToFractures(F1, F2, trace, tol);
+
+    // Assicurati che la traccia sia stata aggiunta alle tracce passanti della frattura F1
+    ASSERT_EQ(F1.passingTraces.size(), 1);
+    EXPECT_EQ(F1.passingTraces[0].idTrace, 1);
+}
+
+// findLineSegmentIntersection
+TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
+    Vector3d intersection;
+    Vector3d planeNormal(1.0, 0.0, 0.0);
+    Vector3d t1(0.0, 0.0, 0.0);
+    Vector3d t2(0.0, 1.0, 0.0);
+    Vector3d s1(0.0, 0.5, 0.0); // Punto interno al segmento
+    Vector3d s2(0.0, 1.0, 0.0);
+    double tol = 1e-6;
+
+    bool result = findLineSegmentIntersection(intersection, planeNormal, t1, t2, s1, s2, tol);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(intersection, s1);
+}
+
+TEST(FindLineSegmentIntersectionTest, IntersectionOutsideSegment) {
+    Vector3d intersection;
+    Vector3d planeNormal(1.0, 0.0, 0.0);
+    Vector3d t1(0.0, 0.0, 0.0);
+    Vector3d t2(0.0, 1.0, 0.0);
+    Vector3d s1(1.0, 1.0, 0.0); // Punto esterno al segmento
+    Vector3d s2(1.0, 2.0, 0.0);
+    double tol = 1e-6;
+
+    bool result = findLineSegmentIntersection(intersection, planeNormal, t1, t2, s1, s2, tol);
+
+    EXPECT_FALSE(result);
+}
+
+TEST(FindLineSegmentIntersectionTest, IntersectionOnSegment) {
+    Vector3d intersection;
+    Vector3d planeNormal(1.0, 0.0, 0.0);
+    Vector3d t1(0.0, 0.0, 0.0);
+    Vector3d t2(0.0, 1.0, 0.0);
+    Vector3d s1(0.0, 0.0, 0.0); // Punto coincidente con un'estremità del segmento
+    Vector3d s2(0.0, 0.5, 0.0);
+    double tol = 1e-6;
+
+    bool result = findLineSegmentIntersection(intersection, planeNormal, t1, t2, s1, s2, tol);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(intersection, s1);
+}
+
+// splitFracture
+TEST(SplitFractureTest, SplitFractureTest1) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    Fracture F(1, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0}}, {0.0, 0.0, 1.0}, 0);
+    Vector3d t1(0.5, 0.5, 0.0);
+    Vector3d t2(0.5, -0.5, 0.0);
+    double tol = 1e-6;
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    ASSERT_EQ(subFractures.size(), 2); // Dovrebbero esserci due sotto-fratture
+
+    // Verifica che le sotto-fratture siano correttamente create
+    EXPECT_EQ(subFractures[0].idFrac, 11); // Id della prima sotto-frattura
+    EXPECT_EQ(subFractures[1].idFrac, 12); // Id della seconda sotto-frattura
+
+    // Verifica che i punti di taglio siano correttamente identificati
+    ASSERT_EQ(cutPoints.size(), 1); // Dovrebbe esserci un solo punto di taglio
+    EXPECT_EQ(cutPoints[0], Vector3d(0.5, 0.5, 0.0)); // Il punto di taglio dovrebbe essere corretto
+}
+// Test per la funzione splitFracture con nessuna intersezione tra il taglio e i lati della frattura
+TEST(SplitFractureTest, NoIntersectionTest) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    Fracture F(1, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0}}, {0.0, 0.0, 1.0}, 0);
+    Vector3d t1(2.0, 2.0, 0.0); // Estremi del taglio al di fuori della frattura
+    Vector3d t2(3.0, 3.0, 0.0);
+    double tol = 1e-6;
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    ASSERT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
+    EXPECT_EQ(subFractures[0].idFrac, 1); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
+    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
+}
+
+// Test per la funzione splitFracture con un segmento di taglio che attraversa la frattura completamente
+TEST(SplitFractureTest, FullIntersectionTest) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    Fracture F(1, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0}}, {0.0, 0.0, 1.0}, 0);
+    Vector3d t1(-1.0, -1.0, 0.0); // Estremi del taglio al di fuori della frattura
+    Vector3d t2(2.0, 2.0, 0.0);
+    double tol = 1e-6;
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    ASSERT_EQ(subFractures.size(), 0); // Non ci dovrebbero essere sotto-fratture, il taglio attraversa completamente la frattura
+    EXPECT_EQ(cutPoints.size(), 2); // Dovrebbero esserci due punti di taglio sugli estremi della frattura
+    EXPECT_EQ(cutPoints[0], Vector3d(0.0, 0.0, 0.0)); // Il primo punto di taglio dovrebbe essere l'origine
+    EXPECT_EQ(cutPoints[1], Vector3d(1.0, 1.0, 0.0)); // Il secondo punto di taglio dovrebbe essere l'ultimo vertice della frattura
+}
+
+// Test per la funzione splitFracture con una frattura vuota
+TEST(SplitFractureTest, EmptyFractureTest) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    Fracture F(1, {}, {0.0, 0.0, 1.0}, 0); // Frattura vuota
+    Vector3d t1(-1.0, -1.0, 0.0);
+    Vector3d t2(1.0, 1.0, 0.0);
+    double tol = 1e-6;
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    ASSERT_EQ(subFractures.size(), 0); // Non ci dovrebbero essere sotto-fratture
+    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
+}
+
+// Test per la funzione splitFracture con una frattura in 3D
+TEST(SplitFractureTest, ThreeDimensionalFractureTest) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    Fracture F(1, {{0.0, 0.0, 0.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 0.0}}, {0.0, 0.0, 1.0}, 0);
+    Vector3d t1(-1.0, -1.0, 1.0); // Estremi del taglio al di fuori della frattura
+    Vector3d t2(2.0, 2.0, 1.0);
+    double tol = 1e-6;
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    ASSERT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
+    EXPECT_EQ(subFractures[0].idFrac, 1); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
+    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
+}
+
+ // printTraces
+// Test per verificare la corretta stampa di una traccia
+TEST(PrintTracesTest, PrintSingleTraceTest) {
+    // Creazione di una singola traccia
+    Trace singleTrace(1, 2, 3, {{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}}, 1.414); // Esempio di dati casuali
+    vector<Trace> traces = {singleTrace};
+
+    // Redirect dell'output di cout
+    std::stringstream buffer;
+    std::streambuf *sbuf = std::cout.rdbuf();
+    std::cout.rdbuf(buffer.rdbuf());
+
+    // Chiamata alla funzione printTraces
+    printTraces(traces);
+
+    // Ripristino lo stream originale di cout
+    std::cout.rdbuf(sbuf);
+
+    // Verifica dell'output
+    string expectedOutput = "Traccia: 1\nFratture generatrici: 2 3\nLunghezza: 1.414\nLa frattura è passante\nEstremo 1: (0, 0, 0)\nEstremo 2: (1, 1, 1)\n\n";
+    ASSERT_EQ(buffer.str(), expectedOutput);
+}
+
+// Test per verificare la corretta stampa di più tracce
+TEST(PrintTracesTest, PrintMultipleTracesTest) {
+    // Creazione di più tracce
+    Trace trace1(1, 2, 3, {{0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}}, 1.414); // Esempio di dati casuali
+    Trace trace2(2, 3, 4, {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}}, 5.196); // Esempio di dati casuali
+    vector<Trace> traces = {trace1, trace2};
+
+    // Redirect dell'output di cout
+    std::stringstream buffer;
+    std::streambuf *sbuf = std::cout.rdbuf();
+    std::cout.rdbuf(buffer.rdbuf());
+
+    // Chiamata alla funzione printTraces
+    printTraces(traces);
+
+    // Ripristino lo stream originale di cout
+    std::cout.rdbuf(sbuf);
+
+    // Verifica dell'output
+    string expectedOutput = "Traccia: 1\nFratture generatrici: 2 3\nLunghezza: 1.414\nLa frattura è passante\nEstremo 1: (0, 0, 0)\nEstremo 2: (1, 1, 1)\n\nTraccia: 2\nFratture generatrici: 3 4\nLunghezza: 5.196\nLa frattura è passante\nEstremo 1: (1, 2, 3)\nEstremo 2: (4, 5, 6)\n\n";
+    ASSERT_EQ(buffer.str(), expectedOutput);
+}
+
+
