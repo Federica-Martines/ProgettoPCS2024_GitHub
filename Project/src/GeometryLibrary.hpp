@@ -18,6 +18,7 @@ unsigned int findLyingPlane(const Vector3d n, double tol);
 struct BoundingSphere {
     Vector3d center;
     double radius;
+    Vector3d centroid;
 };
 
 struct Trace{
