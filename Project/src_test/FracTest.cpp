@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "../src/GeometryLibrary.hpp" // Include the header where Fracture and readFractures are defined
 #include "../src/input-output.hpp"
+#include "../src/Utils.hpp"
 #include <Eigen/Dense>
 
 using namespace std;
@@ -220,7 +221,345 @@ TEST(SpheresIntersectTest, SpheresWithZeroRadius) {
     EXPECT_FALSE(spheresIntersect(sphere1, sphere3));
 }
 
+// projectOntoXY
+// Test per un punto generico
+TEST(ProjectOntoXYTest, GenericPoint) {
+    Vector3d point(1.0, 2.0, 3.0);
+    Vector2d result = projectOntoXY(point);
+    EXPECT_EQ(result, Vector2d(1.0, 2.0));
+}
 
+// Test per il punto origine
+TEST(ProjectOntoXYTest, OriginPoint) {
+    Vector3d point(0.0, 0.0, 0.0);
+    Vector2d result = projectOntoXY(point);
+    EXPECT_EQ(result, Vector2d(0.0, 0.0));
+}
 
+// Test per un punto con coordinate negative
+TEST(ProjectOntoXYTest, NegativeCoordinates) {
+    Vector3d point(-1.0, -2.0, -3.0);
+    Vector2d result = projectOntoXY(point);
+    EXPECT_EQ(result, Vector2d(-1.0, -2.0));
+}
 
+// Test per un punto con z non nullo
+TEST(ProjectOntoXYTest, NonZeroZCoordinate) {
+    Vector3d point(1.0, 2.0, 5.0);
+    Vector2d result = projectOntoXY(point);
+    EXPECT_EQ(result, Vector2d(1.0, 2.0));
+}
 
+// Test per grandi valori
+TEST(ProjectOntoXYTest, LargeValues) {
+    Vector3d point(1e6, 2e6, 3e6);
+    Vector2d result = projectOntoXY(point);
+    EXPECT_EQ(result, Vector2d(1e6, 2e6));
+}
+
+// projectOntoXZ
+// Test per un punto generico
+TEST(ProjectOntoXZTest, GenericPoint) {
+    Vector3d point(1.0, 2.0, 3.0);
+    Vector2d result = projectOntoXZ(point);
+    EXPECT_EQ(result, Vector2d(1.0, 3.0));
+}
+
+// Test per il punto origine
+TEST(ProjectOntoXZTest, OriginPoint) {
+    Vector3d point(0.0, 0.0, 0.0);
+    Vector2d result = projectOntoXZ(point);
+    EXPECT_EQ(result, Vector2d(0.0, 0.0));
+}
+
+// Test per un punto con coordinate negative
+TEST(ProjectOntoXZTest, NegativeCoordinates) {
+    Vector3d point(-1.0, -2.0, -3.0);
+    Vector2d result = projectOntoXZ(point);
+    EXPECT_EQ(result, Vector2d(-1.0, -3.0));
+}
+
+// Test per un punto con y non nullo
+TEST(ProjectOntoXZTest, NonZeroYCoordinate) {
+    Vector3d point(1.0, 5.0, 2.0);
+    Vector2d result = projectOntoXZ(point);
+    EXPECT_EQ(result, Vector2d(1.0, 2.0));
+}
+
+// Test per grandi valori
+TEST(ProjectOntoXZTest, LargeValues) {
+    Vector3d point(1e6, 2e6, 3e6);
+    Vector2d result = projectOntoXZ(point);
+    EXPECT_EQ(result, Vector2d(1e6, 3e6));
+}
+
+// projectOntoYZ
+// Test per un punto generico
+TEST(ProjectOntoYZTest, GenericPoint) {
+    Vector3d point(1.0, 2.0, 3.0);
+    Vector2d result = projectOntoYZ(point);
+    EXPECT_EQ(result, Vector2d(2.0, 3.0));
+}
+
+// Test per il punto origine
+TEST(ProjectOntoYZTest, OriginPoint) {
+    Vector3d point(0.0, 0.0, 0.0);
+    Vector2d result = projectOntoYZ(point);
+    EXPECT_EQ(result, Vector2d(0.0, 0.0));
+}
+
+// Test per un punto con coordinate negative
+TEST(ProjectOntoYZTest, NegativeCoordinates) {
+    Vector3d point(-1.0, -2.0, -3.0);
+    Vector2d result = projectOntoYZ(point);
+    EXPECT_EQ(result, Vector2d(-2.0, -3.0));
+}
+
+// Test per un punto con x non nullo
+TEST(ProjectOntoYZTest, NonZeroXCoordinate) {
+    Vector3d point(5.0, 1.0, 2.0);
+    Vector2d result = projectOntoYZ(point);
+    EXPECT_EQ(result, Vector2d(1.0, 2.0));
+}
+
+// Test per grandi valori
+TEST(ProjectOntoYZTest, LargeValues) {
+    Vector3d point(1e6, 2e6, 3e6);
+    Vector2d result = projectOntoYZ(point);
+    EXPECT_EQ(result, Vector2d(2e6, 3e6));
+}
+
+// projectIntersection
+
+// projectVertices;
+
+// Test per proiezione su piano XY
+TEST(ProjectVerticesTest, ProjectOntoXY) {
+    Fracture F;
+    F.lyingPlane = 1; // Plane 1 represents XY plane
+    F.vertices.push_back(Vector3d(1.0, 2.0, 3.0));
+    F.vertices.push_back(Vector3d(4.0, 5.0, 6.0));
+    vector<Vector2d> result;
+    projectVertices(result, F);
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], Vector2d(1.0, 2.0));
+    EXPECT_EQ(result[1], Vector2d(4.0, 5.0));
+}
+
+// Test per proiezione su piano XZ
+TEST(ProjectVerticesTest, ProjectOntoXZ) {
+    Fracture F;
+    F.lyingPlane = 2; // Plane 2 represents XZ plane
+    F.vertices.push_back(Vector3d(1.0, 2.0, 3.0));
+    F.vertices.push_back(Vector3d(4.0, 5.0, 6.0));
+    vector<Vector2d> result;
+    projectVertices(result, F);
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], Vector2d(1.0, 3.0));
+    EXPECT_EQ(result[1], Vector2d(4.0, 6.0));
+}
+
+// Test per proiezione su piano YZ
+TEST(ProjectVerticesTest, ProjectOntoYZ) {
+    Fracture F;
+    F.lyingPlane = 3; // Plane 3 represents YZ plane
+    F.vertices.push_back(Vector3d(1.0, 2.0, 3.0));
+    F.vertices.push_back(Vector3d(4.0, 5.0, 6.0));
+    vector<Vector2d> result;
+    projectVertices(result, F);
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], Vector2d(2.0, 3.0));
+    EXPECT_EQ(result[1], Vector2d(5.0, 6.0));
+}
+
+//  isPointOn2DSegment(
+// Test per un punto all'interno del segmento
+TEST(PointOn2DSegmentTest, PointInsideSegment) {
+    Vector2d point(1.0, 1.0);
+    Vector2d s1(0.0, 0.0);
+    Vector2d s2(2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn2DSegment(point, s1, s2, tol));
+}
+
+// Test per un punto esterno al segmento
+TEST(PointOn2DSegmentTest, PointOutsideSegment) {
+    Vector2d point(3.0, 3.0);
+    Vector2d s1(0.0, 0.0);
+    Vector2d s2(2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_FALSE(isPointOn2DSegment(point, s1, s2, tol));
+}
+
+// Test per un punto coincidente con un'estremità del segmento
+TEST(PointOn2DSegmentTest, PointCoincideWithEndpoint) {
+    Vector2d point(0.0, 0.0);
+    Vector2d s1(0.0, 0.0);
+    Vector2d s2(2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn2DSegment(point, s1, s2, tol));
+}
+
+// Test per un segmento verticale
+TEST(PointOn2DSegmentTest, VerticalSegment) {
+    Vector2d point(1.0, 1.0);
+    Vector2d s1(1.0, 0.0);
+    Vector2d s2(1.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn2DSegment(point, s1, s2, tol));
+}
+
+// isPointOn3DSegment
+// Test per un punto all'interno del segmento
+TEST(PointOn3DSegmentTest, PointInsideSegment) {
+    Vector3d point(1.0, 1.0, 1.0);
+    Vector3d s1(0.0, 0.0, 0.0);
+    Vector3d s2(2.0, 2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn3DSegment(point, s1, s2, tol));
+}
+
+// Test per un punto esterno al segmento
+TEST(PointOn3DSegmentTest, PointOutsideSegment) {
+    Vector3d point(3.0, 3.0, 3.0);
+    Vector3d s1(0.0, 0.0, 0.0);
+    Vector3d s2(2.0, 2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_FALSE(isPointOn3DSegment(point, s1, s2, tol));
+}
+
+// Test per un punto coincidente con un'estremità del segmento
+TEST(PointOn3DSegmentTest, PointCoincideWithEndpoint) {
+    Vector3d point(0.0, 0.0, 0.0);
+    Vector3d s1(0.0, 0.0, 0.0);
+    Vector3d s2(2.0, 2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn3DSegment(point, s1, s2, tol));
+}
+
+// Test per un segmento verticale
+TEST(PointOn3DSegmentTest, VerticalSegment) {
+    Vector3d point(1.0, 1.0, 1.0);
+    Vector3d s1(1.0, 0.0, 1.0);
+    Vector3d s2(1.0, 2.0, 1.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointOn3DSegment(point, s1, s2, tol));
+}
+
+// isPointIn2DPolygon
+// Test per un punto all'interno del poligono
+TEST(PointIn2DPolygonTest, PointInsidePolygon) {
+    vector<Vector2d> polygon;
+    polygon.push_back(Vector2d(1.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 2.0));
+    polygon.push_back(Vector2d(1.0, 2.0));
+    Vector2d point(1.5, 1.5);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointIn2DPolygon(point, polygon, tol));
+}
+
+// Test per un punto all'esterno del poligono
+TEST(PointIn2DPolygonTest, PointOutsidePolygon) {
+    vector<Vector2d> polygon;
+    polygon.push_back(Vector2d(1.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 2.0));
+    polygon.push_back(Vector2d(1.0, 2.0));
+    Vector2d point(0.5, 0.5);
+    double tol = 1e-6;
+    EXPECT_FALSE(isPointIn2DPolygon(point, polygon, tol));
+}
+
+// Test per un punto sul bordo del poligono
+TEST(PointIn2DPolygonTest, PointOnPolygonEdge) {
+    vector<Vector2d> polygon;
+    polygon.push_back(Vector2d(1.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 1.0));
+    polygon.push_back(Vector2d(2.0, 2.0));
+    polygon.push_back(Vector2d(1.0, 2.0));
+    Vector2d point(1.0, 1.0);
+    double tol = 1e-6;
+    EXPECT_TRUE(isPointIn2DPolygon(point, polygon, tol));
+}
+
+// checkSegmentPlaneIntersection
+// Test per un segmento che interseca il piano
+TEST(CheckSegmentPlaneIntersectionTest, SegmentIntersectsPlane) {
+    vector<Vector3d> intersections;
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d s1(1.0, 1.0, 1.0);
+    Vector3d s2(-1.0, -1.0, 0.0); // Segment intersects the plane at (0,0,0)
+    double tol = 1e-6;
+    EXPECT_TRUE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
+    ASSERT_EQ(intersections.size(), 1);
+    EXPECT_EQ(intersections[0], Vector3d(0.0, 0.0, 0.0));
+}
+
+// Test per un segmento che giace completamente sopra il piano
+TEST(CheckSegmentPlaneIntersectionTest, SegmentAbovePlane) {
+    vector<Vector3d> intersections;
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d s1(1.0, 1.0, 1.0);
+    Vector3d s2(2.0, 2.0, 2.0);
+    double tol = 1e-6;
+    EXPECT_FALSE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
+    ASSERT_EQ(intersections.size(), 0);
+}
+
+// Test per un segmento che giace completamente sotto il piano
+TEST(CheckSegmentPlaneIntersectionTest, SegmentBelowPlane) {
+    vector<Vector3d> intersections;
+    Vector3d planeNormal(0.0, 0.0, 1.0);
+    Vector3d planePoint(0.0, 0.0, 0.0);
+    Vector3d s1(-1.0, -1.0, -1.0);
+    Vector3d s2(-2.0, -2.0, -2.0);
+    double tol = 1e-6;
+    EXPECT_FALSE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
+    ASSERT_EQ(intersections.size(), 0);
+}
+
+// findIntersections
+
+// findTraces
+// Test per il caso in cui non ci siano intersezioni tra le fratture
+TEST(FindTracesTest, NoIntersections) {
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+    double tol = 1e-6;
+    unsigned int numTraces = findTraces(traces, fractures, tol);
+    EXPECT_EQ(numTraces, 0);
+}
+
+// Test per il caso in cui ci siano intersezioni tra le fratture
+TEST(FindTracesTest, IntersectionsPresent) {
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+
+    // Frattura 1
+    Fracture F1;
+    F1.idFrac = 1;
+    F1.normal = Vector3d(0.0, 0.0, 1.0);
+    F1.vertices.push_back(Vector3d(0.0, 0.0, 0.0));
+    F1.vertices.push_back(Vector3d(1.0, 0.0, 0.0));
+
+    // Frattura 2
+    Fracture F2;
+    F2.idFrac = 2;
+    F2.normal = Vector3d(0.0, 0.0, 1.0);
+    F2.vertices.push_back(Vector3d(0.5, 0.0, 1.0));
+    F2.vertices.push_back(Vector3d(0.5, 0.0, -1.0));
+
+    fractures.push_back(F1);
+    fractures.push_back(F2);
+
+    double tol = 1e-6;
+    unsigned int numTraces = findTraces(traces, fractures, tol);
+    EXPECT_EQ(numTraces, 1);
+    ASSERT_EQ(traces.size(), 1);
+    EXPECT_EQ(traces[0].idTrace, 0);
+    EXPECT_EQ(traces[0].idGenerator1, 1);
+    EXPECT_EQ(traces[0].idGenerator2, 2);
+}
