@@ -5,7 +5,7 @@
 #include "GeometryLibrary.hpp"
 #include <filesystem>
 
-using namespace GeometryLibrary;
+    using namespace GeometryLibrary;
 using namespace PolygonalLibrary;
 namespace fs = std::filesystem;
 
@@ -105,9 +105,9 @@ void saveMesh(PolygonalMesh& mesh, unsigned int idFracture) {
     cell0DFile << "Id;X;Y;Z" << endl;
     for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
         cell0DFile << mesh.Cell0DId[i] << "; "
-                    << mesh.Cell0DCoordinates[i].x() << "; "
-                    << mesh.Cell0DCoordinates[i].y() << "; "
-                    << mesh.Cell0DCoordinates[i].z()
+                   << mesh.Cell0DCoordinates[i].x() << "; "
+                   << mesh.Cell0DCoordinates[i].y() << "; "
+                   << mesh.Cell0DCoordinates[i].z()
                    << endl;
     }
     cell0DFile.close();
@@ -120,7 +120,6 @@ void saveMesh(PolygonalMesh& mesh, unsigned int idFracture) {
                    << mesh.Cell1DVertices[i][1] << endl;
     }
     cell1DFile.close();
-
     // Save Cell2D data
     ofstream cell2DFile(fileNameCell2D);
     cell2DFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;

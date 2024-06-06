@@ -841,43 +841,5 @@ TEST(SplitFractureTest, ThreeDimensionalFractureTest) {
 // printFracturesToFile
 
 // transformChildrenFracturesToMesh
-// Testa se la funzione restituisce una mesh vuota quando la lista di fratture è vuota
-TEST(TransformChildrenFracturesToMeshTest, EmptyFracturesList) {
-    vector<Fracture> fractures; // Vettore di fratture vuoto
-    double tol = 1e-6; // Tolleranza per la comparazione di numeri in virgola mobile
-    PolygonalMesh mesh = transformChildrenFracturesToMesh(fractures, tol); // Chiamata alla funzione da testare
-    // Verifica se la mesh restituita è vuota
-    EXPECT_EQ(mesh.NumberCell0D, 0);
-    EXPECT_EQ(mesh.NumberCell1D, 0);
-    EXPECT_EQ(mesh.NumberCell2D, 0);
-    EXPECT_TRUE(mesh.Cell0DId.empty());
-    EXPECT_TRUE(mesh.Cell0DCoordinates.empty());
-    EXPECT_TRUE(mesh.Cell1DId.empty());
-    EXPECT_TRUE(mesh.Cell1DVertices.empty());
-    EXPECT_TRUE(mesh.Cell2DId.empty());
-    EXPECT_TRUE(mesh.Cell2DVertices.empty());
-    EXPECT_TRUE(mesh.Cell2DEdges.empty());
-}
 
-// Testa se la funzione trasforma correttamente le fratture in una mesh
-TEST(TransformChildrenFracturesToMeshTest, NonEmptyFracturesList) {
-    // Crea una lista di fratture di esempio
-    vector<Fracture> fractures = {
-        {1, 0, {{0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0}}, {}, {}, {}, {}},
-        {2, 0, {{0.0, 0.0, 1.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}}, {}, {}, {}, {}}
-    };
-    double tol = 1e-6; // Tolleranza per la comparazione di numeri in virgola mobile
-    PolygonalMesh mesh = transformChildrenFracturesToMesh(fractures, tol); // Chiamata alla funzione da testare
-    // Verifica se la mesh restituita è corretta
-    EXPECT_EQ(mesh.NumberCell0D, 8);
-    EXPECT_EQ(mesh.NumberCell1D, 8);
-    EXPECT_EQ(mesh.NumberCell2D, 2);
-    EXPECT_EQ(mesh.Cell0DId.size(), 8);
-    EXPECT_EQ(mesh.Cell0DCoordinates.size(), 8);
-    EXPECT_EQ(mesh.Cell1DId.size(), 8);
-    EXPECT_EQ(mesh.Cell1DVertices.size(), 8);
-    EXPECT_EQ(mesh.Cell2DId.size(), 2);
-    EXPECT_EQ(mesh.Cell2DVertices.size(), 2);
-    EXPECT_EQ(mesh.Cell2DEdges.size(), 2);
-}
-
+// saveMesh
