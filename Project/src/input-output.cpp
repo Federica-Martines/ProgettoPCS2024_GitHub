@@ -163,6 +163,7 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
         for (const auto& trace : fracture.passingTraces) {
             outFile << trace.idTrace << "; " << trace.tips << "; " << trace.length << endl;
         }
+        // Print Trace details for not Passing Traces
         for (const auto& trace : fracture.notPassingTraces) {
             outFile << trace.idTrace << "; " << trace.tips << "; " << trace.length << endl;
         }
