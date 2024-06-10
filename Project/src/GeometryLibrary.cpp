@@ -35,13 +35,20 @@ bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol) {
 
 //questa funzione crea la sfera attorno alla frattura
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
+
     Vector3d centroid = Vector3d::Zero(); //inizializzo un centroide
+    double maxRadius = 0.0;
+
+    if(vertices.size() < 3) {
+        cerr << "Computing Sphere with less than 3 points" << endl;
+        return {centroid, maxRadius};
+    }
+
     for (const auto& vertex : vertices) {
         centroid += vertex;
     }
     centroid /= vertices.size(); //il centroide è la mediana(?)
 
-    double maxRadius = 0.0;
     for (const auto& vertex : vertices) {
         double distance = (vertex - centroid).norm();
         if (distance > maxRadius) {
