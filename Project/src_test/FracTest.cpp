@@ -830,15 +830,25 @@ TEST(checkTraceTipsTest, TestTraceIsEdge) {
 
 // addTraceToFractures
 TEST(AddTraceToFracturesTest, TestPassingTrace) {
-    Fracture F1;
-    Fracture F2;
+    double tol=10*numeric_limits<double>::epsilon();
+    vector<Vector3d> verticesF1, verticesF2;
+
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
+    verticesF2.push_back(Vector3d(0.5, 0, 0));
+    verticesF2.push_back(Vector3d(0.5, 1, 0));
+    verticesF2.push_back(Vector3d(0, 1, 1));
+    verticesF2.push_back(Vector3d(0, 0, 1));
+    Fracture F2 = Fracture(2, verticesF2, tol);
+
     Trace T;
     T.idTrace = 1;
     T.extremes.push_back(Vector3d(0.5, 0, 0)); // Punto all'interno della frattura
     T.extremes.push_back(Vector3d(0.5, 1, 0)); // Punto all'interno della frattura
-
-    T.length = 1;
-    double tol=10*numeric_limits<double>::epsilon();
 
     addTraceToFractures(F1, F2, T, tol);
 
@@ -848,16 +858,29 @@ TEST(AddTraceToFracturesTest, TestPassingTrace) {
 }
 
 TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
-    Fracture F1;
-    Fracture F2;
-    Trace trace;
-    trace.idTrace = 1;
-    trace.extremes.push_back(Vector3d(2, 2, 2)); // Punto fuori dalla frattura
-    trace.extremes.push_back(Vector3d(3, 3, 3)); // Punto fuori dalla frattura
-    trace.length = 1;
     double tol=10*numeric_limits<double>::epsilon();
+    vector<Vector3d> verticesF1, verticesF2;
 
-    addTraceToFractures(F1, F2, trace, tol);
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
+    verticesF2.push_back(Vector3d(0.5, 0.5, 0));
+    verticesF2.push_back(Vector3d(0.5, 0.3, 0));
+    verticesF2.push_back(Vector3d(0, 1, 1));
+    verticesF2.push_back(Vector3d(0, 0, 1));
+    Fracture F2 = Fracture(2, verticesF2, tol);
+
+    Trace T;
+    T.idTrace = 1;
+    T.extremes.push_back(Vector3d(0.5, 0.5, 0));
+    T.extremes.push_back(Vector3d(0.5, 0.3, 0));
+    T.length = 0.2;
+
+
+    addTraceToFractures(F1, F2, T, tol);
 
     // Assicurati che la traccia sia stata aggiunta alle tracce passanti della frattura F1
     ASSERT_EQ(F1.notPassingTraces.size(), 1);
