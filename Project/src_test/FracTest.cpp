@@ -756,19 +756,19 @@ TEST(classifyTracePositionTest, TestCrossingPlane) {
 
 // checkTraceTips
 TEST(checkTraceTipsTest, TestNonPassingTrace) {
-    Fracture F;
-    F.idFrac = 1;
-    F.vertices.push_back(Vector3d(0, 0, 0));
-    F.vertices.push_back(Vector3d(1, 0, 0));
-    F.vertices.push_back(Vector3d(1, 1, 0));
-    F.vertices.push_back(Vector3d(0, 1, 0));
-
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+    vector<Vector3d> verticesF;
+    double tol=10*numeric_limits<double>::epsilon();
+    verticesF.push_back(Vector3d(0, 0, 0));
+    verticesF.push_back(Vector3d(1, 0, 0));
+    verticesF.push_back(Vector3d(1, 1, 0));
+    verticesF.push_back(Vector3d(0, 1, 0));
+    Fracture F = Fracture(1, verticesF, tol);
     Trace T;
     T.idTrace = 1;
-    T.extremes.push_back(Vector3d(0.5, 0.5, 0)); // Punto fuori dalla frattura
-    T.extremes.push_back(Vector3d(0.5, 1, 0)); // Punto fuori dalla frattura
-
-    double tol=10*numeric_limits<double>::epsilon();
+    T.extremes.push_back(Vector3d(0.5, 0.5, 0)); // Punto interno alla frattura
+    T.extremes.push_back(Vector3d(0.5, 1, 0)); // Punto sul bordo della frattura
     bool result = checkTraceTips(F, T, tol);
     EXPECT_TRUE(result); // La traccia non è passante
 }
