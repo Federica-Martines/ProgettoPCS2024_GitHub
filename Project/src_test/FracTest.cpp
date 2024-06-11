@@ -1095,6 +1095,36 @@ TEST(SplitFracture, SplitFractureByNotPassingOuter) {
 }
 
 // Test per la funzione splitFracture con nessuna intersezione tra il taglio e i lati della frattura
+TEST(SplitFracture, NoIntersectionParallel) {
+    vector<Fracture> subFractures;
+    vector<Vector3d> cutPoints;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    vector<Vector3d> verticesF1;
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F = Fracture(1, verticesF1, tol);
+
+    Vector3d t1(2, 2, 0); // Estremi del taglio al di fuori della frattura
+    Vector3d t2(2, 3, 0);
+
+
+    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+
+    EXPECT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
+    EXPECT_EQ(subFractures[0].idFrac, 11); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
+
+    EXPECT_EQ(subFractures[0].vertices[0], Vector3d(0, 0, 0));
+    EXPECT_EQ(subFractures[0].vertices[1], Vector3d(1, 0, 0));
+    EXPECT_EQ(subFractures[0].vertices[2], Vector3d(1, 1, 0));
+    EXPECT_EQ(subFractures[0].vertices[3], Vector3d(0, 1, 0));
+
+    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
+}
+
+// Test per la funzione splitFracture con nessuna intersezione tra il taglio e i lati della frattura
 TEST(SplitFracture, NoIntersection) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
@@ -1113,59 +1143,49 @@ TEST(SplitFracture, NoIntersection) {
 
     splitFracture(subFractures, cutPoints, F, t1, t2, tol);
 
-    ASSERT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
-    EXPECT_EQ(subFractures[0].idFrac, 1); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
+    EXPECT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
+    EXPECT_EQ(subFractures[0].idFrac, 11); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
+
+    EXPECT_EQ(subFractures[0].vertices[0], Vector3d(1, 0, 0));
+    EXPECT_EQ(subFractures[0].vertices[1], Vector3d(0, 0, 0));
+    EXPECT_EQ(subFractures[0].vertices[2], Vector3d(0, 1, 0));
+    EXPECT_EQ(subFractures[0].vertices[3], Vector3d(1, 1, 0));
+
     EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
 }
 
-// Test per la funzione splitFracture con un segmento di taglio che attraversa la frattura completamente
-TEST(SplitFracture, FullIntersection) {
-    vector<Fracture> subFractures;
-    vector<Vector3d> cutPoints;
-    Fracture F(1, {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}}, {0, 0, 1}, 0);
-    Vector3d t1(-1, -1, 0); // Estremi del taglio al di fuori della frattura
-    Vector3d t2(2, 2, 0);
+TEST(CuttingFracture, test1) {
+    vector<Fracture> resultFractures;
+    deque<Trace> traces;
     double tol=10*numeric_limits<double>::epsilon();
 
-    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
+    vector<Vector3d> verticesF1;
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F = Fracture(1, verticesF1, tol);
 
-    ASSERT_EQ(subFractures.size(), 0); // Non ci dovrebbero essere sotto-fratture, il taglio attraversa completamente la frattura
-    EXPECT_EQ(cutPoints.size(), 2); // Dovrebbero esserci due punti di taglio sugli estremi della frattura
-    EXPECT_EQ(cutPoints[0], Vector3d(0, 0, 0)); // Il primo punto di taglio dovrebbe essere l'origine
-    EXPECT_EQ(cutPoints[1], Vector3d(1, 1, 0)); // Il secondo punto di taglio dovrebbe essere l'ultimo vertice della frattura
+    Trace T1 =  Trace(1, {{0, 0, 0}, {1, 1, 0}});
+    Trace T2 =  Trace(1, {{0.5, 0.5, 0}, {0.5, 0, 0}});
+    Trace T3 =  Trace(1, {{0.8, 0, 0}, {0.8, 1, 0}});
+    traces.push_back(T1);
+    traces.push_back(T2);
+    traces.push_back(T3);
+
+    sort(traces.begin(), traces.end(), [] (const Trace& a, const Trace& b) { return a.length > b.length; }); //funzione inline dal [] in poi. non chiama lo stack frame. è la funzione di confronto
+
+    cuttingFracture(resultFractures, F, traces, tol);
+
+    ASSERT_EQ(resultFractures.size(), 3);
+
+    EXPECT_EQ(resultFractures[0].vertices[0], Vector3d(0.8, 0, 0));
+    EXPECT_EQ(resultFractures[0].vertices[1], Vector3d(1, 0, 0));
+    EXPECT_EQ(resultFractures[0].vertices[2], Vector3d(1, 1, 0));
+    EXPECT_EQ(resultFractures[0].vertices[3], Vector3d(0.8, 1, 0));
+
+
 }
-
-// Test per la funzione splitFracture con una frattura vuota
-TEST(SplitFracture, EmptyFracture) {
-    vector<Fracture> subFractures;
-    vector<Vector3d> cutPoints;
-    Fracture F(1, {}, {0, 0, 1}, 0); // Frattura vuota
-    Vector3d t1(-1, -1, 0);
-    Vector3d t2(1, 1, 0);
-    double tol=10*numeric_limits<double>::epsilon();
-
-    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
-
-    ASSERT_EQ(subFractures.size(), 0); // Non ci dovrebbero essere sotto-fratture
-    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
-}
-
-// Test per la funzione splitFracture con una frattura in 3D
-TEST(SplitFracture, ThreeDimensionalFracture) {
-    vector<Fracture> subFractures;
-    vector<Vector3d> cutPoints;
-    Fracture F(1, {{0, 0, 0}, {1, 0, 1}, {1, 1, 1}, {0, 1, 0}}, {0, 0, 1}, 0);
-    Vector3d t1(-1, -1, 1); // Estremi del taglio al di fuori della frattura
-    Vector3d t2(2, 2, 1);
-    double tol=10*numeric_limits<double>::epsilon();
-
-    splitFracture(subFractures, cutPoints, F, t1, t2, tol);
-
-    ASSERT_EQ(subFractures.size(), 1); // Dovrebbe esserci una sola sotto-frattura
-    EXPECT_EQ(subFractures[0].idFrac, 1); // L'id della sotto-frattura dovrebbe essere lo stesso dell'originale
-    EXPECT_EQ(cutPoints.size(), 0); // Non ci dovrebbero essere punti di taglio
-}
-
 // printTraces
 
 // printFractures

@@ -33,6 +33,21 @@ struct Trace{
     vector <Vector3d> extremes={}; //coordinate dei vertici della frattura
 
     Trace()=default;
+
+    // debug only
+    Trace(unsigned int idTrace, vector <Vector3d> extremes) {
+        this->idTrace = idTrace;
+        this->extremes = extremes;
+        this->length = (extremes[0] - extremes[1]).norm();
+    }
+
+    Trace(unsigned int idTrace, unsigned int idGenerator1, unsigned int idGenerator2, vector <Vector3d> extremes) {
+        this->idTrace = idTrace;
+        this->idGenerator1 = idGenerator1;
+        this->idGenerator2 = idGenerator2;
+        this->extremes = extremes;
+        this->length = (extremes[0] - extremes[1]).norm();
+    }
 };
 
 //struttura

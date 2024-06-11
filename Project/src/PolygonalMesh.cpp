@@ -54,9 +54,12 @@ PolygonalMesh transformChildrenFracturesToMesh(vector<Fracture>& fractures, doub
             int to = currentPolygonVertices[(i + 1) % F.numVertices];
 
             bool found = false;
-            for (Vector2i& compE : mesh.Cell1DVertices) {
+            unsigned int foundEdgeId;
+            for (unsigned int e = 0; e < mesh.Cell1DVertices.size(); e++) {
+                Vector2i compE = mesh.Cell1DVertices[e];
                 if ((compE[0] == from && compE[1] == to ) || (compE[0] == to && compE[1] == from)) {
                     found = true;
+                    foundEdgeId = e;
                     break;
                 }
             }
@@ -67,7 +70,9 @@ PolygonalMesh transformChildrenFracturesToMesh(vector<Fracture>& fractures, doub
                 mesh.Cell1DVertices.push_back(edge);
                 edgeId++;
             }
-            currentPolygonEdges.push_back(edgeId);
+            else {
+                currentPolygonEdges.push_back(foundEdgeId);
+            }
         }
 
         // Add polygons

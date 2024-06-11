@@ -213,11 +213,11 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
     return crossings != 0;
 }
 
-int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNormal, const Vector3d& s1, const Vector3d& s2)
+int classifyTracePosition(const Vector3d& planePoint, const Vector3d& separatorPlane, const Vector3d& s1, const Vector3d& s2)
 {
     // Compute the signed distances from the segment endpoints to the plane
-    double d1 = (s1 - planePoint).dot(planeNormal);
-    double d2 = (s2 - planePoint).dot(planeNormal);
+    double d1 = separatorPlane.dot(s1 - planePoint);
+    double d2 = separatorPlane.dot(s2 - planePoint);
 
     if (d1 > 0 && d2 > 0) {
         return 1; // Above the plane

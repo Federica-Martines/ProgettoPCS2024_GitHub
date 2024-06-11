@@ -251,7 +251,7 @@ void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, 
 }
 
 //d deque: duble ended queque (coda a cui posso attingere e mettere sia in capo che in coda)
-void  cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
+void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
     vector<Fracture> subFractures = {}; //avremmo potuto usato array di 2
     vector<deque<Trace>> Sub_iCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
     vector<Vector3d> cutPoints = {}; // sono i punti dove abbiamo tagliato. (i nuovi vertici)
