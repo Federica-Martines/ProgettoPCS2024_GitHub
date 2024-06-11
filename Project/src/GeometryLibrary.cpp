@@ -60,7 +60,7 @@ BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices) {
 }
 
 bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2) {
-    double distance = (sphere1.center - sphere2.center).norm();
+    double distance = (sphere1.centroid - sphere2.centroid).norm();
     double radiusSum = sphere1.radius + sphere2.radius;
     return distance <= radiusSum; //se è maggiore non si interesecano
 }

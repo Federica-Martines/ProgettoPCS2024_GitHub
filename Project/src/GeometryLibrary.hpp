@@ -16,9 +16,12 @@ unsigned int findLyingPlane(const Vector3d n, double tol);
 
 //scrivi sempre "struttura" (PUBBLICA), non "classe" (privata)
 struct BoundingSphere {
-    Vector3d center;
-    double radius;
     Vector3d centroid;
+    double radius;
+    BoundingSphere(Vector3d centroid, double radius){
+        this->centroid = centroid;
+        this->radius = radius;
+    }
 };
 
 struct Trace{
