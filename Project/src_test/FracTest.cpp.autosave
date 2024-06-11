@@ -775,7 +775,7 @@ TEST(checkTraceTipsTest, TestNonPassingTrace) {
     EXPECT_TRUE(result); // La traccia non è passante
 }
 
-TEST(checkTraceTipsTest, TestPassingTrace) {
+TEST(checkTraceTipsTest, PassingTrace) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -793,7 +793,7 @@ TEST(checkTraceTipsTest, TestPassingTrace) {
     EXPECT_FALSE(result); // La traccia è passante
 }
 
-TEST(checkTraceTipsTest, TestTraceCompletelyNotPassing) {
+TEST(checkTraceTips, TraceCompletelyNotPassing) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -812,7 +812,7 @@ TEST(checkTraceTipsTest, TestTraceCompletelyNotPassing) {
 }
 
 // Test per traccia sul bordo di una frattura
-TEST(checkTraceTipsTest, TestTraceIsEdge) {
+TEST(checkTraceTips, TraceIsEdge) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -831,7 +831,7 @@ TEST(checkTraceTipsTest, TestTraceIsEdge) {
 }
 
 // addTraceToFractures
-TEST(AddTraceToFracturesTest, TestPassingTrace) {
+TEST(AddTraceToFractures, PassingTrace) {
     double tol=10*numeric_limits<double>::epsilon();
     vector<Vector3d> verticesF1, verticesF2;
 
@@ -859,7 +859,7 @@ TEST(AddTraceToFracturesTest, TestPassingTrace) {
     EXPECT_EQ(F1.passingTraces[0].idTrace, 1);
 }
 
-TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
+TEST(AddTraceToFractures, NotPassingTrace) {
     double tol=10*numeric_limits<double>::epsilon();
     vector<Vector3d> verticesF1, verticesF2;
 
@@ -890,7 +890,7 @@ TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
 }
 
 // findLineSegmentIntersection
-TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
+TEST(FindLineSegmentIntersection, IntersectionInsideSegment) {
     Vector3d intersection;
     Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
@@ -905,7 +905,7 @@ TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
     EXPECT_EQ(intersection, s1);
 }
 
-TEST(FindLineSegmentIntersectionTest, intersectionNotPresent) {
+TEST(FindLineSegmentIntersection, intersectionNotPresent) {
     Vector3d intersection;
     Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
@@ -919,7 +919,7 @@ TEST(FindLineSegmentIntersectionTest, intersectionNotPresent) {
     EXPECT_FALSE(result);
 }
 
-TEST(FindLineSegmentIntersectionTest, IntersectionOnSegmentExtreme) {
+TEST(FindLineSegmentIntersection, IntersectionOnSegmentExtreme) {
     Vector3d intersection;
     Vector3d planeNormal(1, 0, 0);
     Vector3d t1(0, 0, 0);
@@ -935,7 +935,7 @@ TEST(FindLineSegmentIntersectionTest, IntersectionOnSegmentExtreme) {
 }
 
 // splitFracture
-TEST(SplitFractureTest, SplitFractureByPassingTest) {
+TEST(SplitFracture, SplitFractureByPassing) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -975,7 +975,7 @@ TEST(SplitFractureTest, SplitFractureByPassingTest) {
 }
 
 // Split nel caso una traccia sia passante ma con il taglio con un punto interno e uno esterno alla frattura
-TEST(SplitFractureTest, SplitFractureByPassingOuter) {
+TEST(SplitFracture, SplitFractureByPassingOuter) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
