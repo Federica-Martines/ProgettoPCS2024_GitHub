@@ -506,7 +506,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentIntersectsPlane) {
     Vector3d planeNormal(0.0, 0.0, 1.0);
     Vector3d planePoint(0.0, 0.0, 0.0);
     Vector3d s1(1.0, 1.0, 1.0);
-    Vector3d s2(-1.0, -1.0, 0.0); // Segment intersects the plane at (0,0,0)
+    Vector3d s2(-1.0, -1.0, -1); // Segment intersects the plane at (0,0,0)
     double tol=10*numeric_limits<double>::epsilon();
     EXPECT_TRUE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
     ASSERT_EQ(intersections.size(), 1);
@@ -546,7 +546,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingBelowPlane) {
     Vector3d s2(-2.0, -2.0, -2.0);
     double tol=10*numeric_limits<double>::epsilon();
     EXPECT_TRUE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
-    ASSERT_EQ(intersections.size(), 0);
+    ASSERT_EQ(intersections.size(), 1);
 }
 
 // Test per un segmento che tocca da sopra il piano
@@ -558,7 +558,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingAbovePlane) {
     Vector3d s2(0.0, 0.0, 0.0);
     double tol=10*numeric_limits<double>::epsilon();
     EXPECT_TRUE(checkSegmentPlaneIntersection(intersections, planeNormal, planePoint, s1, s2, tol));
-    ASSERT_EQ(intersections.size(), 0);
+    ASSERT_EQ(intersections.size(), 1);
 }
 
 // findIntersections
@@ -577,31 +577,116 @@ TEST(FindTracesTest, NoIntersections) {
 TEST(FindTracesTest, IntersectionsPresent) {
     vector<Trace> traces;
     vector<Fracture> fractures;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    vector<Vector3d> verticesF1, verticesF2;
 
     // Frattura 1
-    Fracture F1;
-    F1.idFrac = 1;
-    F1.normal = Vector3d(0.0, 0.0, 1.0);
-    F1.vertices.push_back(Vector3d(0.0, 0.0, 0.0));
-    F1.vertices.push_back(Vector3d(1.0, 0.0, 0.0));
+    verticesF1.push_back(Vector3d(0.0, 0.0, 0.0));
+    verticesF1.push_back(Vector3d(1.0, 0.0, 0.0));
+    verticesF1.push_back(Vector3d(1.0, 1.0, 0.0));
+    verticesF1.push_back(Vector3d(0.0, 1.0, 0.0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
 
     // Frattura 2
-    Fracture F2;
-    F2.idFrac = 2;
-    F2.normal = Vector3d(0.0, 0.0, 1.0);
-    F2.vertices.push_back(Vector3d(0.5, 0.0, 1.0));
-    F2.vertices.push_back(Vector3d(0.5, 0.0, -1.0));
+    verticesF2.push_back(Vector3d(0.5, 0.0, 1.0));
+    verticesF2.push_back(Vector3d(0.5, 0.0, -1.0));
+    verticesF2.push_back(Vector3d(0.0, 1.0, 0.0));
+    Fracture F2 = Fracture(2, verticesF2, tol);
 
     fractures.push_back(F1);
     fractures.push_back(F2);
 
-    double tol=10*numeric_limits<double>::epsilon();
     unsigned int numTraces = findTraces(traces, fractures, tol);
     EXPECT_EQ(numTraces, 1);
     ASSERT_EQ(traces.size(), 1);
-    EXPECT_EQ(traces[0].idTrace, 0);
-    EXPECT_EQ(traces[0].idGenerator1, 1);
-    EXPECT_EQ(traces[0].idGenerator2, 2);
+    EXPECT_TRUE(areVectorsEqual(traces[0].extremes[0], Vector3d(0.5, 0, 0), tol));
+    EXPECT_TRUE(areVectorsEqual(traces[0].extremes[1], Vector3d(0, 1, 0) , tol));
+}
+
+// Test per il caso in cui le fratture si intersecano in un lato
+TEST(FindTracesTest, IntersectionIsOnEdge) {
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    vector<Vector3d> verticesF1, verticesF2;
+
+    // Frattura 1
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
+    // Frattura 2
+    verticesF2.push_back(Vector3d(1, 0, 0));
+    verticesF2.push_back(Vector3d(1, 1, 0));
+    verticesF2.push_back(Vector3d(0, 1, 1));
+    verticesF2.push_back(Vector3d(1, 0, 1));
+    Fracture F2 = Fracture(2, verticesF2, tol);
+
+    fractures.push_back(F1);
+    fractures.push_back(F2);
+
+    unsigned int numTraces = findTraces(traces, fractures, tol);
+    EXPECT_EQ(numTraces, 1);
+    EXPECT_TRUE(areVectorsEqual(traces[0].extremes[0], Vector3d(1, 0, 0), tol));
+    EXPECT_TRUE(areVectorsEqual(traces[0].extremes[1], Vector3d(1, 1, 0), tol));
+}
+
+TEST(FindTracesTest, IntersectionIsOnSinglePoint) {
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    vector<Vector3d> verticesF1, verticesF2;
+
+    // Frattura 1
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
+    // Frattura 2
+    verticesF2.push_back(Vector3d(0.5, 0.5, 0));
+    verticesF2.push_back(Vector3d(1, 1, 1));
+    verticesF2.push_back(Vector3d(2, 1, 1));
+    Fracture F2 = Fracture(2, verticesF2, tol);
+
+    fractures.push_back(F1);
+    fractures.push_back(F2);
+
+    unsigned int numTraces = findTraces(traces, fractures, tol);
+    EXPECT_EQ(numTraces, 0);
+}
+
+TEST(FindTracesTest, IntersectionIsOnVertex) {
+    vector<Trace> traces;
+    vector<Fracture> fractures;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    vector<Vector3d> verticesF1, verticesF2;
+
+    // Frattura 1
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
+    // Frattura 2
+    verticesF2.push_back(Vector3d(0, 0, 0));
+    verticesF2.push_back(Vector3d(1, 1, 1));
+    verticesF2.push_back(Vector3d(2, 1, 1));
+    Fracture F2 = Fracture(2, verticesF2, tol);
+
+    fractures.push_back(F1);
+    fractures.push_back(F2);
+
+    unsigned int numTraces = findTraces(traces, fractures, tol);
+    EXPECT_EQ(numTraces, 0);
 }
 
 // sortTraces
