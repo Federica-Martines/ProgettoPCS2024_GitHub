@@ -9,7 +9,7 @@ using namespace std;
 using namespace Eigen;
 
 
-TEST(FRACTURES, readFractures) {
+TEST(findNormal, readFractures) {
     const std::string path = "./DFN/FR3_data.txt";
 
     std::vector<Fracture> fractures;
@@ -28,7 +28,7 @@ TEST(FRACTURES, readFractures) {
 
 }
 
-TEST(FRACTURES, FindNormal) {
+TEST(findNormal, baseCase) {
     double tol=10*numeric_limits<double>::epsilon();
     Vector3d p1(0, 0, 0);
     Vector3d p2(1, 0, 0);
@@ -40,7 +40,7 @@ TEST(FRACTURES, FindNormal) {
     EXPECT_TRUE(areVectorsEqual(expected, result, tol));
 }
 
-TEST(FRACTURES, FindNormalSamePoints) {
+TEST(findNormal, FindNormalSamePoints) {
     double tol=10*numeric_limits<double>::epsilon();
     Vector3d p1(1, 1, 1);
     Vector3d p2(1, 1, 1);
@@ -52,7 +52,7 @@ TEST(FRACTURES, FindNormalSamePoints) {
     EXPECT_TRUE(areVectorsEqual(expected, result, tol));
 }
 
-TEST(FRACTURES, FindNormalPointsOnSameLine) {
+TEST(findNormal, FindNormalPointsOnSameLine) {
     double tol=10*numeric_limits<double>::epsilon();
     Vector3d p1(1, 1, 1);
     Vector3d p2(2, 2, 2);
@@ -64,7 +64,7 @@ TEST(FRACTURES, FindNormalPointsOnSameLine) {
     EXPECT_TRUE(areVectorsEqual(expected, result, tol));
 }
 
-TEST(FRACTURES, FindLyingPlane) {
+TEST(findLyingPlane, baseCase) {
     // Tolleranza
     double tol=10*numeric_limits<double>::epsilon();
 
@@ -182,7 +182,7 @@ TEST(ComputeBoundingSphere, RandomPoints) {
 
 // spheresIntersect
 // Test per sfere che si intersecano
-TEST(SpheresIntersect, SpheresIntersect) {
+TEST(SpheresIntersect, baseCase) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 1};
     BoundingSphere sphere2 = {Vector3d(1, 0, 0), 1};
 
@@ -691,7 +691,7 @@ TEST(FindTraces, IntersectionIsOnVertex) {
 
 // sortTraces
 // Test per la funzione sortTraces
-TEST(SortTraces, SortTraces) {
+TEST(SortTraces, WithNotSortedTraces) {
     // Creazione di una frattura di esempio con tracce non ordinate
     Fracture fracture;
     fracture.idFrac = 1;
