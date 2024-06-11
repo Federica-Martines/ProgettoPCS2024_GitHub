@@ -64,7 +64,7 @@ TEST(FRACTURES, FindNormalPointsOnSameLine) {
     EXPECT_TRUE(areVectorsEqual(expected, result, tol));
 }
 
-TEST(FRACTURES, FindLyingPlaneTest) {
+TEST(FRACTURES, FindLyingPlane) {
     // Tolleranza
     double tol=10*numeric_limits<double>::epsilon();
 
@@ -89,7 +89,7 @@ TEST(FRACTURES, FindLyingPlaneTest) {
 
 // areVectorsEqual
 // Test per vettori esattamente uguali
-TEST(AreVectorsEqualTest, VectorsExactlyEqual) {
+TEST(AreVectorsEqual, VectorsExactlyEqual) {
     Vector3d v1(1, 2, 3);
     Vector3d v2(1, 2, 3);
     double tol=10*numeric_limits<double>::epsilon();
@@ -98,7 +98,7 @@ TEST(AreVectorsEqualTest, VectorsExactlyEqual) {
 }
 
 // Test per vettori uguali entro la tolleranza
-TEST(AreVectorsEqualTest, VectorsEqualWithinTolerance) {
+TEST(AreVectorsEqual, VectorsEqualWithinTolerance) {
     Vector3d v1(1, 2, 3);
     Vector3d v2(1 + 1e-7, 2 - 1e-7, 3 + 1e-7);
     double tol=1e-6;
@@ -106,7 +106,7 @@ TEST(AreVectorsEqualTest, VectorsEqualWithinTolerance) {
 }
 
 // Test per vettori non uguali oltre la tolleranza
-TEST(AreVectorsEqualTest, VectorsNotEqualBeyondTolerance) {
+TEST(AreVectorsEqual, VectorsNotEqualBeyondTolerance) {
     Vector3d v1(1, 2, 3);
     Vector3d v2(1 + 1e-5, 2 - 1e-5, 3 + 1e-5);
     double tol=1e-6;
@@ -115,7 +115,7 @@ TEST(AreVectorsEqualTest, VectorsNotEqualBeyondTolerance) {
 }
 
 // Test per vettori molto distanti
-TEST(AreVectorsEqualTest, VectorsVeryDifferent) {
+TEST(AreVectorsEqual, VectorsVeryDifferent) {
     Vector3d v1(1, 2, 3);
     Vector3d v2(10, 20, 30);
     double tol=10*numeric_limits<double>::epsilon();
@@ -125,7 +125,7 @@ TEST(AreVectorsEqualTest, VectorsVeryDifferent) {
 
 // computeBoundingSphere
 // Test per un singolo punto
-TEST(ComputeBoundingSphereTest, SinglePoint) {
+TEST(ComputeBoundingSphere, SinglePoint) {
     vector<Vector3d> vertices = {Vector3d(1, 1, 1)};
     BoundingSphere sphere = computeBoundingSphere(vertices);
     double tol=10*numeric_limits<double>::epsilon();
@@ -135,7 +135,7 @@ TEST(ComputeBoundingSphereTest, SinglePoint) {
 }
 
 // Test per due punti
-TEST(ComputeBoundingSphereTest, TwoPoints) {
+TEST(ComputeBoundingSphere, TwoPoints) {
     vector<Vector3d> vertices = {Vector3d(1, 1, 1), Vector3d(-1, -1, -1)};
     BoundingSphere sphere = computeBoundingSphere(vertices);
     double tol=10*numeric_limits<double>::epsilon();
@@ -145,7 +145,7 @@ TEST(ComputeBoundingSphereTest, TwoPoints) {
 }
 
 // Test per quattro punti simmetrici
-TEST(ComputeBoundingSphereTest, FourSymmetricPoints) {
+TEST(ComputeBoundingSphere, FourSymmetricPoints) {
     vector<Vector3d> vertices = {
         Vector3d(1, 0, 0),
         Vector3d(-1, 0, 0),
@@ -161,7 +161,7 @@ TEST(ComputeBoundingSphereTest, FourSymmetricPoints) {
 }
 
 // Test per punti casuali
-TEST(ComputeBoundingSphereTest, RandomPoints) {
+TEST(ComputeBoundingSphere, RandomPoints) {
     vector<Vector3d> vertices = {
         Vector3d(1, 2, 3),
         Vector3d(4, 5, 6),
@@ -182,7 +182,7 @@ TEST(ComputeBoundingSphereTest, RandomPoints) {
 
 // spheresIntersect
 // Test per sfere che si intersecano
-TEST(SpheresIntersectTest, SpheresIntersect) {
+TEST(SpheresIntersect, SpheresIntersect) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 1};
     BoundingSphere sphere2 = {Vector3d(1, 0, 0), 1};
 
@@ -190,7 +190,7 @@ TEST(SpheresIntersectTest, SpheresIntersect) {
 }
 
 // Test per sfere che non si intersecano
-TEST(SpheresIntersectTest, SpheresDoNotIntersect) {
+TEST(SpheresIntersect, SpheresDoNotIntersect) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 1};
     BoundingSphere sphere2 = {Vector3d(3, 0, 0), 1};
 
@@ -198,7 +198,7 @@ TEST(SpheresIntersectTest, SpheresDoNotIntersect) {
 }
 
 // Test per sfere che si toccano esattamente in un punto
-TEST(SpheresIntersectTest, SpheresTouchAtOnePoint) {
+TEST(SpheresIntersect, SpheresTouchAtOnePoint) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 1};
     BoundingSphere sphere2 = {Vector3d(2, 0, 0), 1};
 
@@ -206,7 +206,7 @@ TEST(SpheresIntersectTest, SpheresTouchAtOnePoint) {
 }
 
 // Test per sfere coincidenti
-TEST(SpheresIntersectTest, SpheresAreCoincident) {
+TEST(SpheresIntersect, SpheresAreCoincident) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 1};
     BoundingSphere sphere2 = {Vector3d(0, 0, 0), 1};
 
@@ -214,7 +214,7 @@ TEST(SpheresIntersectTest, SpheresAreCoincident) {
 }
 
 // Test per sfere con raggio zero
-TEST(SpheresIntersectTest, SpheresWithZeroRadius) {
+TEST(SpheresIntersect, SpheresWithZeroRadius) {
     BoundingSphere sphere1 = {Vector3d(0, 0, 0), 0};
     BoundingSphere sphere2 = {Vector3d(0, 0, 0), 0};
 
@@ -227,35 +227,35 @@ TEST(SpheresIntersectTest, SpheresWithZeroRadius) {
 
 // projectOntoXY
 // Test per un punto generico
-TEST(ProjectOntoXYTest, GenericPoint) {
+TEST(ProjectOntoXY, GenericPoint) {
     Vector3d point(1, 2, 3);
     Vector2d result = projectOntoXY(point);
     EXPECT_EQ(result, Vector2d(1, 2));
 }
 
 // Test per il punto origine
-TEST(ProjectOntoXYTest, OriginPoint) {
+TEST(ProjectOntoXY, OriginPoint) {
     Vector3d point(0, 0, 0);
     Vector2d result = projectOntoXY(point);
     EXPECT_EQ(result, Vector2d(0, 0));
 }
 
 // Test per un punto con coordinate negative
-TEST(ProjectOntoXYTest, NegativeCoordinates) {
+TEST(ProjectOntoXY, NegativeCoordinates) {
     Vector3d point(-1, -2, -3);
     Vector2d result = projectOntoXY(point);
     EXPECT_EQ(result, Vector2d(-1, -2));
 }
 
 // Test per un punto con z non nullo
-TEST(ProjectOntoXYTest, NonZeroZCoordinate) {
+TEST(ProjectOntoXY, NonZeroZCoordinate) {
     Vector3d point(1, 2, 5);
     Vector2d result = projectOntoXY(point);
     EXPECT_EQ(result, Vector2d(1, 2));
 }
 
 // Test per grandi valori
-TEST(ProjectOntoXYTest, LargeValues) {
+TEST(ProjectOntoXY, LargeValues) {
     Vector3d point(1e6, 2e6, 3e6);
     Vector2d result = projectOntoXY(point);
     EXPECT_EQ(result, Vector2d(1e6, 2e6));
@@ -263,35 +263,35 @@ TEST(ProjectOntoXYTest, LargeValues) {
 
 // projectOntoXZ
 // Test per un punto generico
-TEST(ProjectOntoXZTest, GenericPoint) {
+TEST(ProjectOntoXZ, GenericPoint) {
     Vector3d point(1, 2, 3);
     Vector2d result = projectOntoXZ(point);
     EXPECT_EQ(result, Vector2d(1, 3));
 }
 
 // Test per il punto origine
-TEST(ProjectOntoXZTest, OriginPoint) {
+TEST(ProjectOntoXZ, OriginPoint) {
     Vector3d point(0, 0, 0);
     Vector2d result = projectOntoXZ(point);
     EXPECT_EQ(result, Vector2d(0, 0));
 }
 
 // Test per un punto con coordinate negative
-TEST(ProjectOntoXZTest, NegativeCoordinates) {
+TEST(ProjectOntoXZ, NegativeCoordinates) {
     Vector3d point(-1, -2, -3);
     Vector2d result = projectOntoXZ(point);
     EXPECT_EQ(result, Vector2d(-1, -3));
 }
 
 // Test per un punto con y non nullo
-TEST(ProjectOntoXZTest, NonZeroYCoordinate) {
+TEST(ProjectOntoXZ, NonZeroYCoordinate) {
     Vector3d point(1, 5, 2);
     Vector2d result = projectOntoXZ(point);
     EXPECT_EQ(result, Vector2d(1, 2));
 }
 
 // Test per grandi valori
-TEST(ProjectOntoXZTest, LargeValues) {
+TEST(ProjectOntoXZ, LargeValues) {
     Vector3d point(1e6, 2e6, 3e6);
     Vector2d result = projectOntoXZ(point);
     EXPECT_EQ(result, Vector2d(1e6, 3e6));
@@ -299,35 +299,35 @@ TEST(ProjectOntoXZTest, LargeValues) {
 
 // projectOntoYZ
 // Test per un punto generico
-TEST(ProjectOntoYZTest, GenericPoint) {
+TEST(ProjectOntoYZ, GenericPoint) {
     Vector3d point(1, 2, 3);
     Vector2d result = projectOntoYZ(point);
     EXPECT_EQ(result, Vector2d(2, 3));
 }
 
 // Test per il punto origine
-TEST(ProjectOntoYZTest, OriginPoint) {
+TEST(ProjectOntoYZ, OriginPoint) {
     Vector3d point(0, 0, 0);
     Vector2d result = projectOntoYZ(point);
     EXPECT_EQ(result, Vector2d(0, 0));
 }
 
 // Test per un punto con coordinate negative
-TEST(ProjectOntoYZTest, NegativeCoordinates) {
+TEST(ProjectOntoYZ, NegativeCoordinates) {
     Vector3d point(-1, -2, -3);
     Vector2d result = projectOntoYZ(point);
     EXPECT_EQ(result, Vector2d(-2, -3));
 }
 
 // Test per un punto con x non nullo
-TEST(ProjectOntoYZTest, NonZeroXCoordinate) {
+TEST(ProjectOntoYZ, NonZeroXCoordinate) {
     Vector3d point(5, 1, 2);
     Vector2d result = projectOntoYZ(point);
     EXPECT_EQ(result, Vector2d(1, 2));
 }
 
 // Test per grandi valori
-TEST(ProjectOntoYZTest, LargeValues) {
+TEST(ProjectOntoYZ, LargeValues) {
     Vector3d point(1e6, 2e6, 3e6);
     Vector2d result = projectOntoYZ(point);
     EXPECT_EQ(result, Vector2d(2e6, 3e6));
@@ -338,7 +338,7 @@ TEST(ProjectOntoYZTest, LargeValues) {
 // projectVertices;
 
 // Test per proiezione su piano XY
-TEST(ProjectVerticesTest, ProjectOntoXY) {
+TEST(ProjectVertices, ProjectOntoXY) {
     Fracture F;
     F.lyingPlane = 1; // Plane 1 represents XY plane
     F.vertices.push_back(Vector3d(1, 2, 3));
@@ -350,8 +350,8 @@ TEST(ProjectVerticesTest, ProjectOntoXY) {
     EXPECT_EQ(result[1], Vector2d(4, 5));
 }
 
-// Test per proiezione su piano XZ
-TEST(ProjectVerticesTest, ProjectOntoXZ) {
+//  per proiezione su piano XZ
+TEST(ProjectVertices, ProjectOntoXZ) {
     Fracture F;
     F.lyingPlane = 2; // Plane 2 represents XZ plane
     F.vertices.push_back(Vector3d(1, 2, 3));
@@ -364,7 +364,7 @@ TEST(ProjectVerticesTest, ProjectOntoXZ) {
 }
 
 // Test per proiezione su piano YZ
-TEST(ProjectVerticesTest, ProjectOntoYZ) {
+TEST(ProjectVertices, ProjectOntoYZ) {
     Fracture F;
     F.lyingPlane = 3; // Plane 3 represents YZ plane
     F.vertices.push_back(Vector3d(1, 2, 3));
@@ -378,7 +378,7 @@ TEST(ProjectVerticesTest, ProjectOntoYZ) {
 
 //  isPointOn2DSegment(
 // Test per un punto all'interno del segmento
-TEST(PointOn2DSegmentTest, PointInsideSegment) {
+TEST(PointOn2DSegment, PointInsideSegment) {
     Vector2d point(1, 1);
     Vector2d s1(0, 0);
     Vector2d s2(2, 2);
@@ -387,7 +387,7 @@ TEST(PointOn2DSegmentTest, PointInsideSegment) {
 }
 
 // Test per un punto esterno al segmento
-TEST(PointOn2DSegmentTest, PointOutsideSegment) {
+TEST(PointOn2DSegment, PointOutsideSegment) {
     Vector2d point(3, 3);
     Vector2d s1(0, 0);
     Vector2d s2(2, 2);
@@ -396,7 +396,7 @@ TEST(PointOn2DSegmentTest, PointOutsideSegment) {
 }
 
 // Test per un punto coincidente con un'estremità del segmento
-TEST(PointOn2DSegmentTest, PointCoincideWithEndpoint) {
+TEST(PointOn2DSegment, PointCoincideWithEndpoint) {
     Vector2d point(0, 0);
     Vector2d s1(0, 0);
     Vector2d s2(2, 2);
@@ -405,7 +405,7 @@ TEST(PointOn2DSegmentTest, PointCoincideWithEndpoint) {
 }
 
 // Test per un segmento verticale
-TEST(PointOn2DSegmentTest, VerticalSegment) {
+TEST(PointOn2DSegment, VerticalSegment) {
     Vector2d point(1, 1);
     Vector2d s1(1, 0);
     Vector2d s2(1, 2);
@@ -415,7 +415,7 @@ TEST(PointOn2DSegmentTest, VerticalSegment) {
 
 // isPointOn3DSegment
 // Test per un punto all'interno del segmento
-TEST(PointOn3DSegmentTest, PointInsideSegment) {
+TEST(PointOn3DSegment, PointInsideSegment) {
     Vector3d point(1, 1, 1);
     Vector3d s1(0, 0, 0);
     Vector3d s2(2, 2, 2);
@@ -424,7 +424,7 @@ TEST(PointOn3DSegmentTest, PointInsideSegment) {
 }
 
 // Test per un punto esterno al segmento
-TEST(PointOn3DSegmentTest, PointOutsideSegment) {
+TEST(PointOn3DSegment, PointOutsideSegment) {
     Vector3d point(3, 3, 3);
     Vector3d s1(0, 0, 0);
     Vector3d s2(2, 2, 2);
@@ -433,7 +433,7 @@ TEST(PointOn3DSegmentTest, PointOutsideSegment) {
 }
 
 // Test per un punto coincidente con un'estremità del segmento
-TEST(PointOn3DSegmentTest, PointCoincideWithEndpoint) {
+TEST(PointOn3DSegment, PointCoincideWithEndpoint) {
     Vector3d point(0, 0, 0);
     Vector3d s1(0, 0, 0);
     Vector3d s2(2, 2, 2);
@@ -442,7 +442,7 @@ TEST(PointOn3DSegmentTest, PointCoincideWithEndpoint) {
 }
 
 // Test per un segmento verticale
-TEST(PointOn3DSegmentTest, VerticalSegment) {
+TEST(PointOn3DSegment, VerticalSegment) {
     Vector3d point(1, 1, 1);
     Vector3d s1(1, 0, 1);
     Vector3d s2(1, 2, 1);
@@ -452,7 +452,7 @@ TEST(PointOn3DSegmentTest, VerticalSegment) {
 
 // isPointIn2DPolygon
 // Test per un punto all'interno del poligono
-TEST(PointIn2DPolygonTest, PointInsidePolygon) {
+TEST(PointIn2DPolygon, PointInsidePolygon) {
     vector<Vector2d> polygon;
     polygon.push_back(Vector2d(1, 1));
     polygon.push_back(Vector2d(2, 1));
@@ -464,7 +464,7 @@ TEST(PointIn2DPolygonTest, PointInsidePolygon) {
 }
 
 // Test per un punto all'esterno del poligono
-TEST(PointIn2DPolygonTest, PointOutsidePolygon) {
+TEST(PointIn2DPolygon, PointOutsidePolygon) {
     vector<Vector2d> polygon;
     polygon.push_back(Vector2d(1, 1));
     polygon.push_back(Vector2d(2, 1));
@@ -476,7 +476,7 @@ TEST(PointIn2DPolygonTest, PointOutsidePolygon) {
 }
 
 // Test per un punto sul bordo del poligono
-TEST(PointIn2DPolygonTest, PointOnPolygonEdge) {
+TEST(PointIn2DPolygon, PointOnPolygonEdge) {
     vector<Vector2d> polygon;
     polygon.push_back(Vector2d(1, 1));
     polygon.push_back(Vector2d(2, 1));
@@ -488,7 +488,7 @@ TEST(PointIn2DPolygonTest, PointOnPolygonEdge) {
 }
 
 // Test per un punto sul vertice del poligono
-TEST(PointIn2DPolygonTest, PointOnPolygonVertex) {
+TEST(PointIn2DPolygon, PointOnPolygonVertex) {
     vector<Vector2d> polygon;
     polygon.push_back(Vector2d(1, 1));
     polygon.push_back(Vector2d(2, 1));
@@ -501,7 +501,7 @@ TEST(PointIn2DPolygonTest, PointOnPolygonVertex) {
 
 // checkSegmentPlaneIntersection
 // Test per un segmento che interseca il piano
-TEST(CheckSegmentPlaneIntersectionTest, SegmentIntersectsPlane) {
+TEST(CheckSegmentPlaneIntersection, SegmentIntersectsPlane) {
     vector<Vector3d> intersections;
     Vector3d planeNormal(0, 0, 1);
     Vector3d planePoint(0, 0, 0);
@@ -514,7 +514,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentIntersectsPlane) {
 }
 
 // Test per un segmento che giace completamente sopra il piano
-TEST(CheckSegmentPlaneIntersectionTest, SegmentAbovePlane) {
+TEST(CheckSegmentPlaneIntersection, SegmentAbovePlane) {
     vector<Vector3d> intersections;
     Vector3d planeNormal(0, 0, 1);
     Vector3d planePoint(0, 0, 0);
@@ -526,7 +526,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentAbovePlane) {
 }
 
 // Test per un segmento che giace completamente sotto il piano
-TEST(CheckSegmentPlaneIntersectionTest, SegmentBelowPlane) {
+TEST(CheckSegmentPlaneIntersection, SegmentBelowPlane) {
     vector<Vector3d> intersections;
     Vector3d planeNormal(0, 0, 1);
     Vector3d planePoint(0, 0, 0);
@@ -538,7 +538,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentBelowPlane) {
 }
 
 // Test per un segmento che tocca da sotto il piano
-TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingBelowPlane) {
+TEST(CheckSegmentPlaneIntersection, SegmentTouchingBelowPlane) {
     vector<Vector3d> intersections;
     Vector3d planeNormal(0, 0, 1);
     Vector3d planePoint(0, 0, 0);
@@ -550,7 +550,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingBelowPlane) {
 }
 
 // Test per un segmento che tocca da sopra il piano
-TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingAbovePlane) {
+TEST(CheckSegmentPlaneIntersection, SegmentTouchingAbovePlane) {
     vector<Vector3d> intersections;
     Vector3d planeNormal(0, 0, 1);
     Vector3d planePoint(0, 0, 0);
@@ -565,7 +565,7 @@ TEST(CheckSegmentPlaneIntersectionTest, SegmentTouchingAbovePlane) {
 
 // findTraces
 // Test per il caso in cui non ci siano intersezioni tra le fratture
-TEST(FindTracesTest, NoIntersections) {
+TEST(FindTraces, NoIntersections) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     double tol=10*numeric_limits<double>::epsilon();
@@ -574,7 +574,7 @@ TEST(FindTracesTest, NoIntersections) {
 }
 
 // Test per il caso in cui ci siano intersezioni tra le fratture
-TEST(FindTracesTest, IntersectionsPresent) {
+TEST(FindTraces, IntersectionsPresent) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     double tol=10*numeric_limits<double>::epsilon();
@@ -605,7 +605,7 @@ TEST(FindTracesTest, IntersectionsPresent) {
 }
 
 // Test per il caso in cui le fratture si intersecano in un lato
-TEST(FindTracesTest, IntersectionIsOnEdge) {
+TEST(FindTraces, IntersectionIsOnEdge) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     double tol=10*numeric_limits<double>::epsilon();
@@ -635,7 +635,7 @@ TEST(FindTracesTest, IntersectionIsOnEdge) {
     EXPECT_TRUE(areVectorsEqual(traces[0].extremes[1], Vector3d(1, 1, 0), tol));
 }
 
-TEST(FindTracesTest, IntersectionIsOnSinglePoint) {
+TEST(FindTraces, IntersectionIsOnSinglePoint) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     double tol=10*numeric_limits<double>::epsilon();
@@ -662,7 +662,7 @@ TEST(FindTracesTest, IntersectionIsOnSinglePoint) {
     EXPECT_EQ(numTraces, 0);
 }
 
-TEST(FindTracesTest, IntersectionIsOnVertex) {
+TEST(FindTraces, IntersectionIsOnVertex) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     double tol=10*numeric_limits<double>::epsilon();
@@ -691,7 +691,7 @@ TEST(FindTracesTest, IntersectionIsOnVertex) {
 
 // sortTraces
 // Test per la funzione sortTraces
-TEST(SortTracesTest, SortTraces) {
+TEST(SortTraces, SortTraces) {
     // Creazione di una frattura di esempio con tracce non ordinate
     Fracture fracture;
     fracture.idFrac = 1;
@@ -727,7 +727,7 @@ TEST(SortTracesTest, SortTraces) {
 }
 
 // classifyTracePosition
-TEST(classifyTracePositionTest, TestAbovePlane) {
+TEST(classifyTracePosition, AbovePlane) {
     Vector3d planePoint(0, 0, 0);
     Vector3d planeNormal(0, 0, 1);
     Vector3d s1(1, 1, 1);
@@ -736,7 +736,7 @@ TEST(classifyTracePositionTest, TestAbovePlane) {
     EXPECT_EQ(result, 1); // Sopra il piano
 }
 
-TEST(classifyTracePositionTest, TestBelowPlane) {
+TEST(classifyTracePosition, BelowPlane) {
     Vector3d planePoint(0, 0, 0);
     Vector3d planeNormal(0, 0, 1);
     Vector3d s1(-1, -1, -1);
@@ -745,7 +745,7 @@ TEST(classifyTracePositionTest, TestBelowPlane) {
     EXPECT_EQ(result, -1); // Sotto il piano
 }
 
-TEST(classifyTracePositionTest, TestCrossingPlane) {
+TEST(classifyTracePosition, CrossingPlane) {
     Vector3d planePoint(0, 0, 0);
     Vector3d planeNormal(0, 0, 1);
     Vector3d s1(-1, -1, 1);
@@ -755,7 +755,7 @@ TEST(classifyTracePositionTest, TestCrossingPlane) {
 }
 
 // checkTraceTips
-TEST(checkTraceTipsTest, TestNonPassingTrace) {
+TEST(checkTraceTips, NonPassingTrace) {
     vector<Trace> traces;
     vector<Fracture> fractures;
     vector<Vector3d> verticesF;
@@ -775,7 +775,7 @@ TEST(checkTraceTipsTest, TestNonPassingTrace) {
     EXPECT_TRUE(result); // La traccia non è passante
 }
 
-TEST(checkTraceTipsTest, TestPassingTrace) {
+TEST(checkTraceTips, PassingTrace) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -793,7 +793,7 @@ TEST(checkTraceTipsTest, TestPassingTrace) {
     EXPECT_FALSE(result); // La traccia è passante
 }
 
-TEST(checkTraceTipsTest, TestTraceCompletelyNotPassing) {
+TEST(checkTraceTips, TraceCompletelyNotPassing) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -812,7 +812,7 @@ TEST(checkTraceTipsTest, TestTraceCompletelyNotPassing) {
 }
 
 // Test per traccia sul bordo di una frattura
-TEST(checkTraceTipsTest, TestTraceIsEdge) {
+TEST(checkTraceTips, TraceIsEdge) {
     Fracture F;
     F.idFrac = 1;
     F.vertices.push_back(Vector3d(0, 0, 0));
@@ -831,7 +831,7 @@ TEST(checkTraceTipsTest, TestTraceIsEdge) {
 }
 
 // addTraceToFractures
-TEST(AddTraceToFracturesTest, TestPassingTrace) {
+TEST(AddTraceToFractures, PassingTrace) {
     double tol=10*numeric_limits<double>::epsilon();
     vector<Vector3d> verticesF1, verticesF2;
 
@@ -859,7 +859,7 @@ TEST(AddTraceToFracturesTest, TestPassingTrace) {
     EXPECT_EQ(F1.passingTraces[0].idTrace, 1);
 }
 
-TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
+TEST(AddTraceToFractures, NotPassingTrace) {
     double tol=10*numeric_limits<double>::epsilon();
     vector<Vector3d> verticesF1, verticesF2;
 
@@ -890,7 +890,7 @@ TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
 }
 
 // findLineSegmentIntersection
-TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
+TEST(FindLineSegmentIntersection, IntersectionInsideSegment) {
     Vector3d intersection;
     Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
@@ -905,7 +905,7 @@ TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
     EXPECT_EQ(intersection, s1);
 }
 
-TEST(FindLineSegmentIntersectionTest, intersectionNotPresent) {
+TEST(FindLineSegmentIntersection, intersectionNotPresent) {
     Vector3d intersection;
     Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
@@ -919,7 +919,7 @@ TEST(FindLineSegmentIntersectionTest, intersectionNotPresent) {
     EXPECT_FALSE(result);
 }
 
-TEST(FindLineSegmentIntersectionTest, IntersectionOnSegmentExtreme) {
+TEST(FindLineSegmentIntersection, IntersectionOnSegmentExtreme) {
     Vector3d intersection;
     Vector3d planeNormal(1, 0, 0);
     Vector3d t1(0, 0, 0);
@@ -935,7 +935,7 @@ TEST(FindLineSegmentIntersectionTest, IntersectionOnSegmentExtreme) {
 }
 
 // splitFracture
-TEST(SplitFractureTest, SplitFractureByPassingTest) {
+TEST(SplitFracture, SplitFractureByPassing) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -975,7 +975,7 @@ TEST(SplitFractureTest, SplitFractureByPassingTest) {
 }
 
 // Split nel caso una traccia sia passante ma con il taglio con un punto interno e uno esterno alla frattura
-TEST(SplitFractureTest, SplitFractureByPassingOuter) {
+TEST(SplitFracture, SplitFractureByPassingOuter) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -1015,7 +1015,7 @@ TEST(SplitFractureTest, SplitFractureByPassingOuter) {
 }
 
 // Split nel caso una traccia sia non passante ma con il taglio con entrambi i punti interni alla frattura
-TEST(SplitFractureTest, SplitFractureByNotPassingInner) {
+TEST(SplitFracture, SplitFractureByNotPassingInner) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -1055,7 +1055,7 @@ TEST(SplitFractureTest, SplitFractureByNotPassingInner) {
 }
 
 // Split nel caso una traccia sia non passante ma con il taglio con un punto interno e uno esterno alla frattura
-TEST(SplitFractureTest, SplitFractureByNotPassingOuter) {
+TEST(SplitFracture, SplitFractureByNotPassingOuter) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -1095,7 +1095,7 @@ TEST(SplitFractureTest, SplitFractureByNotPassingOuter) {
 }
 
 // Test per la funzione splitFracture con nessuna intersezione tra il taglio e i lati della frattura
-TEST(SplitFractureTest, NoIntersectionTest) {
+TEST(SplitFracture, NoIntersection) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     double tol=10*numeric_limits<double>::epsilon();
@@ -1119,7 +1119,7 @@ TEST(SplitFractureTest, NoIntersectionTest) {
 }
 
 // Test per la funzione splitFracture con un segmento di taglio che attraversa la frattura completamente
-TEST(SplitFractureTest, FullIntersectionTest) {
+TEST(SplitFracture, FullIntersection) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     Fracture F(1, {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}}, {0, 0, 1}, 0);
@@ -1136,7 +1136,7 @@ TEST(SplitFractureTest, FullIntersectionTest) {
 }
 
 // Test per la funzione splitFracture con una frattura vuota
-TEST(SplitFractureTest, EmptyFractureTest) {
+TEST(SplitFracture, EmptyFracture) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     Fracture F(1, {}, {0, 0, 1}, 0); // Frattura vuota
@@ -1151,7 +1151,7 @@ TEST(SplitFractureTest, EmptyFractureTest) {
 }
 
 // Test per la funzione splitFracture con una frattura in 3D
-TEST(SplitFractureTest, ThreeDimensionalFractureTest) {
+TEST(SplitFracture, ThreeDimensionalFracture) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
     Fracture F(1, {{0, 0, 0}, {1, 0, 1}, {1, 1, 1}, {0, 1, 0}}, {0, 0, 1}, 0);
