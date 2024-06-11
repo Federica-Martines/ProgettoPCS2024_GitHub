@@ -760,11 +760,13 @@ TEST(checkTraceTipsTest, TestNonPassingTrace) {
     vector<Fracture> fractures;
     vector<Vector3d> verticesF;
     double tol=10*numeric_limits<double>::epsilon();
+
     verticesF.push_back(Vector3d(0, 0, 0));
     verticesF.push_back(Vector3d(1, 0, 0));
     verticesF.push_back(Vector3d(1, 1, 0));
     verticesF.push_back(Vector3d(0, 1, 0));
     Fracture F = Fracture(1, verticesF, tol);
+
     Trace T;
     T.idTrace = 1;
     T.extremes.push_back(Vector3d(0.5, 0.5, 0)); // Punto interno alla frattura
@@ -890,7 +892,7 @@ TEST(AddTraceToFracturesTest, TestNotPassingTrace) {
 // findLineSegmentIntersection
 TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
     Vector3d intersection;
-    Vector3d planeNormal(1, 0, 0);
+    Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
     Vector3d t2(0, 1, 0);
     Vector3d s1(0, 0.5, 0); // Punto interno al segmento
@@ -903,9 +905,9 @@ TEST(FindLineSegmentIntersectionTest, IntersectionInsideSegment) {
     EXPECT_EQ(intersection, s1);
 }
 
-TEST(FindLineSegmentIntersectionTest, IntersectionOutsideSegment) {
+TEST(FindLineSegmentIntersectionTest, intersectionNotPresent) {
     Vector3d intersection;
-    Vector3d planeNormal(1, 0, 0);
+    Vector3d planeNormal(0, 0, 1);
     Vector3d t1(0, 0, 0);
     Vector3d t2(0, 1, 0);
     Vector3d s1(1, 1, 0); // Punto esterno al segmento
@@ -917,7 +919,7 @@ TEST(FindLineSegmentIntersectionTest, IntersectionOutsideSegment) {
     EXPECT_FALSE(result);
 }
 
-TEST(FindLineSegmentIntersectionTest, IntersectionOnSegment) {
+TEST(FindLineSegmentIntersectionTest, IntersectionOnSegmentExtreme) {
     Vector3d intersection;
     Vector3d planeNormal(1, 0, 0);
     Vector3d t1(0, 0, 0);
@@ -936,7 +938,14 @@ TEST(FindLineSegmentIntersectionTest, IntersectionOnSegment) {
 TEST(SplitFractureTest, SplitFractureTest1) {
     vector<Fracture> subFractures;
     vector<Vector3d> cutPoints;
-    Fracture F(1, {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}}, {0, 0, 1}, 0);
+
+        vector<Vector3d> verticesF1;
+    verticesF1.push_back(Vector3d(0, 0, 0));
+    verticesF1.push_back(Vector3d(1, 0, 0));
+    verticesF1.push_back(Vector3d(1, 1, 0));
+    verticesF1.push_back(Vector3d(0, 1, 0));
+    Fracture F1 = Fracture(1, verticesF1, tol);
+
     Vector3d t1(0.5, 0.5, 0);
     Vector3d t2(0.5, -0.5, 0);
     double tol=10*numeric_limits<double>::epsilon();
