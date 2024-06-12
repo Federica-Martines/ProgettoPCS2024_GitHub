@@ -229,7 +229,9 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& separatorP
 }
 
 //t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
-bool findLineSegmentIntersection(Vector3d& intersection,
+int findLineSegmentIntersection(Vector3d& intersection,
+                                 double alpha,
+                                 double beta,
                                  const Vector3d& t1,
                                  const Vector3d& t2,
                                  const Vector3d& s1,
@@ -242,7 +244,7 @@ bool findLineSegmentIntersection(Vector3d& intersection,
 
     // the lines are parallel
     if (cutDirection.cross(segmentDirection).norm() < tol) {
-        return false;
+        return -1;
     }
 
     // il segmento attraversa il piano
@@ -253,10 +255,22 @@ bool findLineSegmentIntersection(Vector3d& intersection,
     M.col(0)=cutDirection;
     M.col(1)=segmentDirection;
 
-    Vector2d alfa = M.householderQr().solve(P); //householderQr è in eigen
-    intersection = alfa[0]*cutDirection+t1;
+    Vector2d solution = M.householderQr().solve(P);    //householderQr è in eigen
+    alpha = solution[0];
+    beta = solution[1];
 
-    return true;
+    // the intersection is in outside the edge
+    if (beta < -tol || beta > 1+tol) {
+        return -1;
+    }
+    // the intersection is the vertex
+    else if (abs(beta) <= tol || abs(beta-1) <= tol) {
+        return 0;
+    }
+
+    // the intersection is inside the edge
+    intersection = t1+alpha*cutDirection;
+    return 1;
 }
 
 }

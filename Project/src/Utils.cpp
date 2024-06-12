@@ -324,18 +324,65 @@ void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace
 
 }
 
-
+//DOBBIAMO AGGIUNGERE IL NUOVO LATO CHE TAGLIA IN 2 E SPLITTARE LE CELLE2D
 void cutMesh(PolygonalMesh mesh, vector<Trace> cuts, double tol) {
     for (Trace& cut : cuts) {
-        for (Cell1D& edge : mesh.cells1D) {
+        vector<unsigned int> intersectionsId;
+
+        // mi salvo il vettore in modo da poterci iterare anche se lo modifico aggiungendo lati
+        vector<Cell1D> cells1D = mesh.cells1D;
+
+         // cerchiamo le due intersezioni
+        for (unsigned int e = 0; e < cells1D.size(); e++) {
+            Cell1D edge = cells1D[e];
+            double alpha, beta;
+
+
             Vector3d intersection;
+
             Vector3d startCoord = mesh.cells0D[edge.start].coordinates;
             Vector3d endCoord = mesh.cells0D[edge.end].coordinates;
 
-            findLineSegmentIntersection(intersection, cut.extremes[0], cut.extremes[1], startCoord, endCoord, tol);
+            int position = findLineSegmentIntersection(intersection, alpha, beta, cut.extremes[0], cut.extremes[1], startCoord, endCoord, tol);
 
+            // a seconda se l'intersezione è su un lato o in un vertice
+            switch (position) {
+            case 1:
+            {
+                unsigned int id = mesh.addCell0D(intersection);
+                intersectionsId.push_back(id);
+
+                // aggiungiamo il due lati appena nati e aggiorniamo gli facciamo ereditare i vecchi vicini
+                mesh.addCell1D(edge.start, id);
+                mesh.cells1D.end()->neighbours = mesh.cells1D[e].neighbours;
+                mesh.addCell1D(id, edge.end);
+                mesh.cells1D.end()->neighbours = mesh.cells1D[e].neighbours;
+
+                // cancelliamo il lato vecchio
+                mesh.cells1D.erase(mesh.cells1D.begin() + e);
+                break;
+            }
+
+            // in questo caso abbiamo intersecato il lato in un estremo quindi beta varrà 0 o 1
+            // a seconda se era il vertice start o end del segmento
+            case 0:
+            {
+                unsigned int intId;
+                if (round(beta) == 0) intId = edge.start;
+                if (round(beta) == 1) intId = edge.end;
+
+                auto it = find(intersectionsId.begin(), intersectionsId.end(), intId);
+
+                // se l'iteratore è end non l'ha trovato
+                if (it == intersectionsId.end()) intersectionsId.push_back(intId);
+
+                break;
+            }
+            }
 
         }
+
+
     }
 }
 

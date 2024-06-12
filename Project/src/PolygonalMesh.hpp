@@ -35,11 +35,6 @@ struct Cell1D {
         this->start = start;
         this->end = end;
     }
-    Cell1D(unsigned int id, Vector2i extremes) {
-        this->id = id;
-        this->start = extremes[0];
-        this->end = extremes[1];
-    }
 };
 
 struct Cell2D {
@@ -65,6 +60,20 @@ struct PolygonalMesh
 
     unsigned int NumberCell2D = 0; ///< number of Cell2D
     vector<Cell2D> cells2D;
+
+    // crea e aggiunge un vertice
+    unsigned int addCell0D(Vector3d coordinates) {
+        Cell0D cell = Cell0D(NumberCell0D, coordinates);
+        this->cells0D.push_back(cell);
+        this->NumberCell0D++;
+        return cell.id;
+    }
+
+    void addCell1D(unsigned int start, unsigned int end) {
+        Cell1D cell = Cell1D(NumberCell1D, start, end);
+        this->cells1D.push_back(cell);
+        this->NumberCell1D++;
+    }
 };
 
 

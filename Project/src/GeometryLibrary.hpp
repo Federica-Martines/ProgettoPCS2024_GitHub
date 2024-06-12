@@ -107,7 +107,7 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
 
 int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNormal, const Vector3d& s1, const Vector3d& s2);
 
-bool findLineSegmentIntersection(Vector3d& intersection, const Vector3d& t1, const Vector3d& t2, const Vector3d& s1 , const Vector3d& s2, double tol);
+int findLineSegmentIntersection(Vector3d& intersection, double alpha, double beta, const Vector3d& t1, const Vector3d& t2, const Vector3d& s1 , const Vector3d& s2, double tol);
 
 bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol);
 }
