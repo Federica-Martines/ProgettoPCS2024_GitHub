@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 
     for (Fracture& F : fractures) {
 
-        deque<Trace> cuts = {};
+        vector<Trace> cuts = {};
         // creo  i tagli da fare concatenando le tracce passanti e poi le non passanti
         cuts.insert(cuts.end(), F.passingTraces.begin(), F.passingTraces.end());
         cuts.insert(cuts.end(), F.notPassingTraces.begin(), F.notPassingTraces.end());
@@ -68,6 +68,7 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
+        cutMesh(mesh, cuts);
         saveMesh(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;

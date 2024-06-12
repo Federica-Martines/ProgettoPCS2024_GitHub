@@ -10,6 +10,7 @@
 using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
+using namespace PolygonalLibrary;
 
 // s1, s2 sono gli estremi di ogni lato della frattura. il punto e la normale sono del piano dell'altra frattura
 bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d s1, Vector3d s2, double tol) {
@@ -322,3 +323,13 @@ void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace
     }
 
 }
+
+
+void cutMesh(PolygonalMesh mesh, vector<Trace> cuts) {
+
+}
+
+
+
+
+
