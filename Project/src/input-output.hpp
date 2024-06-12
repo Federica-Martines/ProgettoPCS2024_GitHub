@@ -7,7 +7,7 @@
 using namespace std;
 using namespace GeometryLibrary;
 
-unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol);
+bool readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol);
 
 void printFractures(vector<Fracture> fractures, unsigned int expectedNumFractures);
 

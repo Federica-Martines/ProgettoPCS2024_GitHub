@@ -27,10 +27,10 @@ int main(int argc, char **argv)
 
     //inizializziamo le fratture
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR10_data.txt";
+    string path = "./DFN/FR3_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
-    unsigned int expectedNumFractures = readFractures(path, fractures, tol);
+    readFractures(path, fractures, tol);
 
     vector<Trace> traces = {};
     findTraces(traces, fractures, tol);
@@ -58,20 +58,19 @@ int main(int argc, char **argv)
     string outputPathTracesDebug = "./debug_traces.txt";
     std::ofstream fileTracesDebug(outputPathTracesDebug, std::ios_base::trunc);
 
-    for (Fracture& frac : fractures) {
-        vector<Fracture> cuttedFractures;
+    for (Fracture& F : fractures) {
 
         deque<Trace> cuts = {};
         // creo  i tagli da fare concatenando le tracce passanti e poi le non passanti
-        cuts.insert(cuts.end(), frac.passingTraces.begin(), frac.passingTraces.end());
-        cuts.insert(cuts.end(), frac.notPassingTraces.begin(), frac.notPassingTraces.end());
+        cuts.insert(cuts.end(), F.passingTraces.begin(), F.passingTraces.end());
+        cuts.insert(cuts.end(), F.notPassingTraces.begin(), F.notPassingTraces.end());
 
-        cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
+        // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
-        PolygonalMesh mesh = transformChildrenFracturesToMesh(cuttedFractures, tol);
-        saveMesh(mesh, frac.idFrac);
+        PolygonalMesh mesh = convertFractureToMesh(F, tol);
+        saveMesh(mesh, F.idFrac);
 
-        cout << "Saved mesh: " << frac.idFrac << endl;
+        cout << "Saved mesh: " << F.idFrac << endl;
     }
 
     // Per python

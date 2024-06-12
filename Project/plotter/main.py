@@ -13,6 +13,7 @@ def __main__():
     points = read_points(debug_points_path)
     # points = [[0.21174, 0.86746, 0.381013]]
     print(fractures, traces, points, [0])
+
     plot(fractures, points)
 
 

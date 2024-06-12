@@ -9,12 +9,12 @@ using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
 
-unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol){
+bool readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol){
 
     ifstream ifstr(fileName);
     if(ifstr.fail()){
         cerr << "errore nell'apertura del file" << endl;
-        return 0; //(false)
+        return false;
     }
 
     // togliamo il # di header
@@ -63,7 +63,7 @@ unsigned int readFractures(const string& fileName, vector<Fracture>& fractures, 
         if (frac.checkFractureEdges(tol))
             fractures.push_back(frac);
     }
-    return numFractures;
+    return true;
 }
 
 void printTraces(vector<Trace> traces) {

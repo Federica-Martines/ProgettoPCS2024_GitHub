@@ -33,7 +33,7 @@ struct PolygonalMesh
     std::vector<unsigned int> Cell2DMarkers = {};
 };
 
-PolygonalMesh transformChildrenFracturesToMesh(vector<Fracture>& fractures, double tol);
+PolygonalMesh transformFractureToMesh(vector<Fracture>& fractures, double tol);
 
 void saveMesh(PolygonalMesh& mesh, unsigned int idFracture);
 

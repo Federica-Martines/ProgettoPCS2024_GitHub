@@ -15,64 +15,76 @@ def plot(fractures, points, selected_fracture_ids=None):
     # Dictionary to track plotted vertices and their labels
     plotted_vertices = {}
 
+    # Separate the vertices into x, y, and z components
+    x = [vertex[0] for vertex in fractures[0].vertices]
+    y = [vertex[1] for vertex in fractures[0].vertices]
+    z = [vertex[2] for vertex in fractures[0].vertices]
+
+    # Create a list of tuples for the Poly3DCollection
+    vertices = [list(zip(x, y, z))]
+    poly = Poly3DCollection(vertices, alpha=0.5, facecolors=["r"])
+    ax.scatter(x, y, z, c="r", marker="o")
+    ax.add_collection3d(poly)
+
     # Plot fractures
     for fracture in fractures:
         # Check if selected_fracture_ids is provided and if the fracture ID is in the list
+
         if (
             selected_fracture_ids is None
             or fracture.fracture_id in selected_fracture_ids
         ):
-            # Separate the vertices into x, y, and z components
-            x = [vertex[0] for vertex in fracture.vertices]
-            y = [vertex[1] for vertex in fracture.vertices]
-            z = [vertex[2] for vertex in fracture.vertices]
+            #     # Separate the vertices into x, y, and z components
+            #     x = [vertex[0] for vertex in fracture.vertices]
+            #     y = [vertex[1] for vertex in fracture.vertices]
+            #     z = [vertex[2] for vertex in fracture.vertices]
 
-            # Create a list of tuples for the Poly3DCollection
-            vertices = [list(zip(x, y, z))]
+            #     # Create a list of tuples for the Poly3DCollection
+            #     vertices = [list(zip(x, y, z))]
 
-            # Generate a random color for the polygon
-            color = np.random.rand(
-                3,
-            )
+            #     # Generate a random color for the polygon
+            #     color = np.random.rand(
+            #         3,
+            #     )
 
-            # Plot the polygon with the random color
-            poly = Poly3DCollection(vertices, alpha=0.5, facecolors=[color])
-            ax.add_collection3d(poly)
+            #     # Plot the polygon with the random color
+            #     poly = Poly3DCollection(vertices, alpha=0.5, facecolors=[color])
+            #     ax.add_collection3d(poly)
 
-            # Plot the vertices
-            ax.scatter(x, y, z, c="r", marker="o")
+            #     # Plot the vertices
+            #     ax.scatter(x, y, z, c="r", marker="o")
 
-            # Label each vertex with a letter and the fracture ID
-            for i, (vx, vy, vz) in enumerate(zip(x, y, z)):
-                vertex = (vx, vy, vz)
-                letter = string.ascii_uppercase[i % 26]  # Cycle through A-Z
-                label = f"{letter}{fracture.fracture_id}"
+            #     # Label each vertex with a letter and the fracture ID
+            #     for i, (vx, vy, vz) in enumerate(zip(x, y, z)):
+            #         vertex = (vx, vy, vz)
+            #         letter = string.ascii_uppercase[i % 26]  # Cycle through A-Z
+            #         label = f"{letter}{fracture.fracture_id}"
 
-                # If the vertex is already plotted, update the label
-                if vertex in plotted_vertices:
-                    plotted_vertices[vertex].set_text(label)
-                else:
-                    # Add the label if it is not plotted yet
-                    text_obj = ax.text(
-                        vx, vy, vz, label, color="blue", fontsize=8, ha="right"
-                    )
-                    plotted_vertices[vertex] = text_obj
+            #         # If the vertex is already plotted, update the label
+            #         if vertex in plotted_vertices:
+            #             plotted_vertices[vertex].set_text(label)
+            #         else:
+            #             # Add the label if it is not plotted yet
+            #             text_obj = ax.text(
+            #                 vx, vy, vz, label, color="blue", fontsize=8, ha="right"
+            #             )
+            #             plotted_vertices[vertex] = text_obj
 
-            # Label the fracture with its ID
-            centroid_x = sum(x) / len(x)
-            centroid_y = sum(y) / len(y)
-            centroid_z = sum(z) / len(z)
-            ax.text(
-                centroid_x,
-                centroid_y,
-                centroid_z,
-                f"ID {fracture.fracture_id}",
-                color="black",
-                fontsize=10,
-                ha="center",
-            )
+            #     # Label the fracture with its ID
+            #     centroid_x = sum(x) / len(x)
+            #     centroid_y = sum(y) / len(y)
+            #     centroid_z = sum(z) / len(z)
+            #     ax.text(
+            #         centroid_x,
+            #         centroid_y,
+            #         centroid_z,
+            #         f"ID {fracture.fracture_id}",
+            #         color="black",
+            #         fontsize=10,
+            #         ha="center",
+            #     )
 
-            # Plot and label traces
+            #     # Plot and label traces
             for trace in fracture.traces:
                 trace_x = [point[0] for point in trace.extremes]
                 trace_y = [point[1] for point in trace.extremes]
