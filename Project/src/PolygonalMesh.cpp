@@ -16,7 +16,7 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     PolygonalMesh mesh;
 
     // Step 1: Convert vertices
-    for (unsigned int i = 0; i < fracture.numVertices; ++i) {
+    for (unsigned int i = 0; i < fracture.numVertices; i++) {
         bool found = false;
         for (unsigned int j = 0; j < mesh.Cell0DCoordinates.size(); j++) {
             if (areVectorsEqual(mesh.Cell0DCoordinates[j], fracture.vertices[i], tol)) {
@@ -33,7 +33,7 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     }
 
     // Step 2: Convert edges
-    for (unsigned int i = 0; i < fracture.numVertices; i++) {
+    for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
         unsigned int fromId = mesh.Cell0DId[i];
         unsigned int toId = mesh.Cell0DId[(i + 1) % fracture.numVertices]; // Wrap around to the first vertex
         mesh.Cell1DId.push_back(mesh.NumberCell1D);
@@ -47,7 +47,7 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     // creo il primo poligono (Cell2DVertices è un vettore di vettori di indici)
     mesh.Cell2DVertices.push_back({});
 
-    for (unsigned int i = 0; i < fracture.numVertices; i++) {
+    for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
         //aggiungo i vertici al vettore del primo poligono
         mesh.Cell2DVertices.back().push_back(mesh.Cell0DId[i]);
     }

@@ -3,10 +3,12 @@
 #include <Eigen/Eigen>
 #include <vector>
 #include "GeometryLibrary.hpp"
+#include "PolygonalMesh.hpp"
 #include <deque>
 
 using namespace std;
 using namespace GeometryLibrary;
+using namespace PolygonalLibrary;
 
 unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, const double& tol);
 
@@ -23,3 +25,5 @@ bool checkTraceTips(Fracture F, Trace T, double tol);
 void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol);
 
 void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol);
+
+void cutMesh(PolygonalMesh mesh, vector<Trace> cuts);
