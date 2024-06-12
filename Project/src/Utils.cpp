@@ -225,17 +225,17 @@ void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, 
         }
 
         // cerco un'intersezione con il lato
-        if (findLineSegmentIntersection(intersection, F.normal,  t1, t2, v1, v2, tol))
-        {
-            // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
-            writePol1 = !writePol1;
-            cutPoints.push_back(intersection);
+        // if (findLineSegmentIntersection(intersection, F.normal,  t1, t2, v1, v2, tol))
+        // {
+        //     // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
+        //     writePol1 = !writePol1;
+        //     cutPoints.push_back(intersection);
 
-            P1Vertices.push_back(intersection);
-            P2Vertices.push_back(intersection);
+        //     P1Vertices.push_back(intersection);
+        //     P2Vertices.push_back(intersection);
 
-            printPointToDebug(intersection,"./debug_points.txt");
-        }
+        //     printPointToDebug(intersection,"./debug_points.txt");
+        // }
     }
 
     printFractureToDebug(F, "./debug.txt");
@@ -325,8 +325,18 @@ void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace
 }
 
 
-void cutMesh(PolygonalMesh mesh, vector<Trace> cuts) {
+void cutMesh(PolygonalMesh mesh, vector<Trace> cuts, double tol) {
+    for (Trace& cut : cuts) {
+        for (Cell1D& edge : mesh.cells1D) {
+            Vector3d intersection;
+            Vector3d startCoord = mesh.cells0D[edge.start].coordinates;
+            Vector3d endCoord = mesh.cells0D[edge.end].coordinates;
 
+            findLineSegmentIntersection(intersection, cut.extremes[0], cut.extremes[1], startCoord, endCoord, tol);
+
+
+        }
+    }
 }
 
 

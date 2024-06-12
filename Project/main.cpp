@@ -7,7 +7,6 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <deque>
 #include "src/PolygonalMesh.hpp"
 
 using namespace std;
@@ -68,7 +67,7 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
-        cutMesh(mesh, cuts);
+        cutMesh(mesh, cuts, tol);
         saveMesh(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;

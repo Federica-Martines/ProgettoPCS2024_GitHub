@@ -230,45 +230,33 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& separatorP
 
 //t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
 bool findLineSegmentIntersection(Vector3d& intersection,
-                                 Vector3d planeNormal,
                                  const Vector3d& t1,
                                  const Vector3d& t2,
-                                 const Vector3d& s1
-                                 , const Vector3d& s2,
-                                 double tol) {
+                                 const Vector3d& s1,
+                                 const Vector3d& s2,
+                                 double tol
+                                 ) {
+
     Vector3d cutDirection = t2 - t1;
-    Vector3d separatorPlane = cutDirection.cross(planeNormal);
+    Vector3d segmentDirection = s2 - s1;
 
-    double value1 = separatorPlane.dot(s1-t1); // t1 è un punto del piano
-    double value2 = separatorPlane.dot(s2-t1);
-
-    if (abs(value1) < tol){ //il punto s1 appartiene al piano separatore (signfica che stai tagliando lungo i vertici della frattura)
-        intersection = s1;
-        return true;
-    }
-    else if (abs(value2) < tol){
-        intersection = s2;
-        return true;
-    }
-    else if (value1*value2 > tol) {
-        // il segmento è completamente sopra o sotto il piano e non c'è intersezione
+    // the lines are parallel
+    if (cutDirection.cross(segmentDirection).norm() < tol) {
         return false;
     }
-    else if (value1*value2 < tol){
-        // il segmento attraversa il piano
-        Vector3d P = s1 - t1;
 
-        MatrixXd M(3, 2);
+    // il segmento attraversa il piano
+    Vector3d P = s1 - t1;
 
-        M.col(0)=cutDirection;
-        M.col(1)=s2-s1;
+    MatrixXd M(3, 2);
 
-        Vector2d alfa = M.householderQr().solve(P); //householderQr è in eigen
-        intersection = alfa[0]*cutDirection+t1;
+    M.col(0)=cutDirection;
+    M.col(1)=segmentDirection;
 
-        return true;
-    }
-    return false;
+    Vector2d alfa = M.householderQr().solve(P); //householderQr è in eigen
+    intersection = alfa[0]*cutDirection+t1;
+
+    return true;
 }
 
 }

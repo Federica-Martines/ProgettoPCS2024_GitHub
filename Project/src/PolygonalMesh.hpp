@@ -14,27 +14,67 @@ using namespace GeometryLibrary;
 
 namespace PolygonalLibrary {
 
+struct Cell0D {
+    unsigned int id;
+    Vector3d coordinates = {};
+    Cell0D() = default;
+    Cell0D(unsigned int id, Vector3d coordinates) {
+        this->id = id;
+        this->coordinates = coordinates;
+    }
+};
+
+struct Cell1D {
+    unsigned int id;
+    unsigned int start;
+    unsigned int end;
+    vector<unsigned int> neighbours = {0}; // id delle celle2D adiacenti al lato
+    Cell1D() = default;
+    Cell1D(unsigned int id, unsigned int start, unsigned int end) {
+        this->id = id;
+        this->start = start;
+        this->end = end;
+    }
+    Cell1D(unsigned int id, Vector2i extremes) {
+        this->id = id;
+        this->start = extremes[0];
+        this->end = extremes[1];
+    }
+};
+
+struct Cell2D {
+    unsigned int id;
+    vector<Cell0D> vertices;
+    vector<Cell1D> edges;
+    vector<unsigned int> neighbours; // id delle celle2D adiacenti a sè stessa (anche solo per un vertice)
+    Cell2D() = default;
+    Cell2D(unsigned int id, vector<Cell0D> vertices, vector<Cell1D> edges) {
+        this->id = id;
+        this->vertices = vertices;
+        this->edges = edges;
+    }
+};
+
 struct PolygonalMesh
 {
     unsigned int NumberCell0D = 0; ///< number of Cell0D
-    vector<unsigned int> Cell0DId = {}; ///< Cell0D id, size 1 x NumberCell0D
-    vector<Vector3d> Cell0DCoordinates = {}; ///< Cell0D coordinates, size 2 x NumberCell0D (x,y)
+    vector<Cell0D> cells0D;
 
     unsigned int NumberCell1D = 0; ///< number of Cell1D
-    vector<unsigned int> Cell1DId = {}; ///< Cell1D id, size 1 x NumberCell1D
-    vector<Vector2i> Cell1DVertices = {}; ///< Cell1D vertices indices, size 2 x NumberCell1D (fromId,toId)
+    vector<Cell1D> cells1D;
 
     unsigned int NumberCell2D = 0; ///< number of Cell2D
-    vector<unsigned int> Cell2DId = {}; ///< Cell2D id, size 1 x NumberCell2D
-    vector<vector<unsigned int>> Cell2DVertices = {}; ///< Cell2D Vertices indices
-    vector<vector<unsigned int>> Cell2DEdges = {}; ///< Cell2D Cell1D indices //prendi vector dalla libreria standar e fai un vettore di vettori
+    vector<Cell2D> cells2D;
 };
+
+
 
 PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
 
 PolygonalMesh transformFractureToMesh(vector<Fracture>& fractures, double tol);
 
-void saveMesh(PolygonalMesh& mesh, unsigned int idFracture);
+void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
+
 
 }
 
