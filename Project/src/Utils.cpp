@@ -324,42 +324,68 @@ void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace
 
 }
 
-//DOBBIAMO AGGIUNGERE IL NUOVO LATO CHE TAGLIA IN 2 E SPLITTARE LE CELLE2D
-void cutMesh(PolygonalMesh mesh, vector<Trace> cuts, double tol) {
-    for (Trace& cut : cuts) {
-        vector<unsigned int> intersectionsId;
 
+void cutMeshCell2D(PolygonalMesh& mesh, Cell2D cell, vector<Trace> cuts, double tol) {
+    for (Trace& cut : cuts) {
+        bool writeLeft = true;
+        vector<Cell0D> intersectionsId, rightCell2DVertices, leftCell2DVertices;
+        vector<Cell1D> rightCell2DEdges, leftCell2DEdges;
         // mi salvo il vettore in modo da poterci iterare anche se lo modifico aggiungendo lati
-        vector<Cell1D> cells1D = mesh.cells1D;
 
          // cerchiamo le due intersezioni
-        for (unsigned int e = 0; e < cells1D.size(); e++) {
-            Cell1D edge = cells1D[e];
+        for (unsigned int e = 0; e < cell.edges.size(); e++) {
+            Cell1D edge = cell.edges[e];
             double alpha, beta;
-
-
             Vector3d intersection;
 
-            Vector3d startCoord = mesh.cells0D[edge.start].coordinates;
-            Vector3d endCoord = mesh.cells0D[edge.end].coordinates;
+            Vector3d startCoord = edge.start.coordinates;
+            Vector3d endCoord = edge.end.coordinates;
+
 
             int position = findLineSegmentIntersection(intersection, alpha, beta, cut.extremes[0], cut.extremes[1], startCoord, endCoord, tol);
 
+            /* aggiungiamo i vertici alla mesh */
             // a seconda se l'intersezione è su un lato o in un vertice
+            Cell0D newVertex = edge.start;
+            Cell1D newEdge = edge;
             switch (position) {
             case 1:
             {
-                unsigned int id = mesh.addCell0D(intersection);
-                intersectionsId.push_back(id);
+                newVertex = mesh.addCell0D(intersection);
+                intersectionsId.push_back(newVertex);
 
-                // aggiungiamo il due lati appena nati e aggiorniamo gli facciamo ereditare i vecchi vicini
-                mesh.addCell1D(edge.start, id);
-                mesh.cells1D.end()->neighbours = mesh.cells1D[e].neighbours;
-                mesh.addCell1D(id, edge.end);
-                mesh.cells1D.end()->neighbours = mesh.cells1D[e].neighbours;
+                // aggiungiamo il due lati appena nati, aggiorniamo gli facciamo ereditare i vecchi vicini e salviamo gli id
+                Cell1D leftEdge = mesh.addCell1D(edge.start, newVertex);
+                leftEdge.neighbours = edge.neighbours;
+                Cell1D rightEdge = mesh.addCell1D(newVertex, edge.end);
+                rightEdge.neighbours = edge.neighbours;
 
                 // cancelliamo il lato vecchio
                 mesh.cells1D.erase(mesh.cells1D.begin() + e);
+
+                /* aggiungiamo i vertici di intersezione alle nuove celle 2D */
+                leftCell2DVertices.push_back(newVertex);
+                rightCell2DVertices.push_back(newVertex);
+
+                /* aggiungiamo i lati alle nuove celle 2D */
+                if (writeLeft) {
+                    leftCell2DEdges.push_back(leftEdge);
+                    rightCell2DEdges.push_back(rightEdge);
+                }
+                else {
+                    leftCell2DEdges.push_back(rightEdge);
+                    rightCell2DEdges.push_back(leftEdge);
+                }
+
+                /* aggiungiamo il lato del taglio alle nuove celle 2D */
+                if (intersectionsId.size() == 2) {
+                    newEdge = mesh.addCell1D(intersectionsId[0], intersectionsId[1]);
+                    leftCell2DEdges.push_back(newEdge);
+                    rightCell2DEdges.push_back(newEdge);
+                }
+
+                // invertiamo la cella su cui salviamo
+                writeLeft = !writeLeft;
                 break;
             }
 
@@ -367,21 +393,55 @@ void cutMesh(PolygonalMesh mesh, vector<Trace> cuts, double tol) {
             // a seconda se era il vertice start o end del segmento
             case 0:
             {
-                unsigned int intId;
-                if (round(beta) == 0) intId = edge.start;
-                if (round(beta) == 1) intId = edge.end;
 
-                auto it = find(intersectionsId.begin(), intersectionsId.end(), intId);
+                if (round(beta) == 0) newVertex = edge.start;
+                if (round(beta) == 1) newVertex = edge.end;
+
+                auto it = find(intersectionsId.begin(), intersectionsId.end(), newVertex);
 
                 // se l'iteratore è end non l'ha trovato
-                if (it == intersectionsId.end()) intersectionsId.push_back(intId);
+                if (it == intersectionsId.end()) intersectionsId.push_back(newVertex);
 
+                /* aggiungiamo i vertici alle nuove celle 2D */
+                leftCell2DVertices.push_back(newVertex);
+                rightCell2DVertices.push_back(newVertex);
+
+                /* aggiungiamo il lato del taglio alle nuove celle 2D */
+                if (intersectionsId.size() == 2) {
+                    newEdge = mesh.addCell1D(intersectionsId[0], intersectionsId[1]);
+                    leftCell2DEdges.push_back(newEdge);
+                    rightCell2DEdges.push_back(newEdge);
+                }
+
+                // invertiamo la cella su cui salviamo
+                writeLeft = !writeLeft;
                 break;
             }
-            }
+            case -1:
+            {
+                /* aggiungiamo i vertici alle nuove celle 2D */
+                if (writeLeft) leftCell2DVertices.push_back(newVertex);
+                else rightCell2DVertices.push_back(newVertex);
 
+                /* aggiungiamo i lati alle nuove celle 2D */
+                if (writeLeft) {
+                    leftCell2DEdges.push_back(newEdge);
+                }
+                else {
+                    rightCell2DEdges.push_back(newEdge);
+                }
+            }
+            }
         }
 
+        // cancelliamo la vecchia cella
+        mesh.cells2D.erase(mesh.cells2D.begin() + cell.id);
+
+        Cell2D newLeftCell = mesh.addCell2D(leftCell2DVertices, leftCell2DEdges);
+        Cell2D newRightCell = mesh.addCell2D(rightCell2DVertices, rightCell2DEdges);
+
+        mesh.cells2D.push_back(newLeftCell);
+        mesh.cells2D.push_back(newRightCell);
 
     }
 }

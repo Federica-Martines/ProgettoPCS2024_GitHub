@@ -22,18 +22,25 @@ struct Cell0D {
         this->id = id;
         this->coordinates = coordinates;
     }
+    bool operator==(Cell0D cell){
+        return id == cell.id;
+    }
 };
 
 struct Cell1D {
     unsigned int id;
-    unsigned int start;
-    unsigned int end;
+    Cell0D start;
+    Cell0D end;
     vector<unsigned int> neighbours = {0}; // id delle celle2D adiacenti al lato
     Cell1D() = default;
-    Cell1D(unsigned int id, unsigned int start, unsigned int end) {
+    Cell1D(unsigned int id, Cell0D start, Cell0D end) {
         this->id = id;
         this->start = start;
         this->end = end;
+    }
+
+    bool operator==(Cell1D cell){
+        return id == cell.id;
     }
 };
 
@@ -62,17 +69,25 @@ struct PolygonalMesh
     vector<Cell2D> cells2D;
 
     // crea e aggiunge un vertice
-    unsigned int addCell0D(Vector3d coordinates) {
+    Cell0D addCell0D(Vector3d coordinates) {
         Cell0D cell = Cell0D(NumberCell0D, coordinates);
         this->cells0D.push_back(cell);
         this->NumberCell0D++;
-        return cell.id;
+        return cell;
     }
 
-    void addCell1D(unsigned int start, unsigned int end) {
+    Cell1D addCell1D(Cell0D start, Cell0D end) {
         Cell1D cell = Cell1D(NumberCell1D, start, end);
         this->cells1D.push_back(cell);
         this->NumberCell1D++;
+        return cell;
+    }
+
+    Cell2D addCell2D(vector<Cell0D> vertices, vector<Cell1D> edges) {
+        Cell2D cell = Cell2D(NumberCell2D, vertices, edges);
+        this->cells2D.push_back(cell);
+        this->NumberCell2D++;
+        return cell;
     }
 };
 

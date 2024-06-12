@@ -32,8 +32,8 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
 
         // indices of the start and end vertices in cells0D
-        unsigned int start = mesh.cells0D[i].id;
-        unsigned int end = mesh.cells0D[(i + 1) %  mesh.NumberCell0D].id;
+        Cell0D start = mesh.cells0D[i];
+        Cell0D end = mesh.cells0D[(i + 1) %  mesh.NumberCell0D];
 
         Cell1D cell1D = Cell1D(mesh.NumberCell1D, start, end);
 
@@ -81,7 +81,7 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     ofstream cell1DFile(fileNameCell1D);
     cell1DFile << "Id;Origin;End" << endl;
     for (const auto& cell : mesh.cells1D) {
-        cell1DFile << cell.id << ";" << cell.start << ";" << cell.end << endl;
+        cell1DFile << cell.id << ";" << cell.start.id << ";" << cell.end.id << endl;
     }
     cell1DFile.close();
 

@@ -230,8 +230,8 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& separatorP
 
 //t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
 int findLineSegmentIntersection(Vector3d& intersection,
-                                 double alpha,
-                                 double beta,
+                                 double& alpha,
+                                 double& beta,
                                  const Vector3d& t1,
                                  const Vector3d& t2,
                                  const Vector3d& s1,
@@ -248,7 +248,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
     }
 
     // il segmento attraversa il piano
-    Vector3d P = s1 - t1;
+    Vector3d P = t1 - s1;
 
     MatrixXd M(3, 2);
 
