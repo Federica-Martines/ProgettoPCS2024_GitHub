@@ -1,10 +1,12 @@
 #pragma once
 
+#include "PolygonalMesh.hpp"
 #include <Eigen/Eigen>
 #include <vector>
 
 using namespace std;
 using namespace Eigen;
+using namespace PolygonalLibrary;
 
 namespace GeometryLibrary {
 
@@ -82,6 +84,8 @@ struct Fracture{
     bool checkFractureEdges(double tol);
 };
 
+PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
+
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices);
 
 bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2);
@@ -107,7 +111,17 @@ bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, 
 
 int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNormal, const Vector3d& s1, const Vector3d& s2);
 
-int findLineSegmentIntersection(Vector3d& intersection, double& alpha, double& beta, const Vector3d& t1, const Vector3d& t2, const Vector3d& s1 , const Vector3d& s2, double tol);
+bool existDirectionSegmentIntersection(Vector3d t1, Vector3d t2, Vector3d s1, Vector3d s2, double tol) ;
+
+int findLineSegmentIntersection(Vector3d& intersection,
+                                double& alpha,
+                                double& beta,
+                                const Trace cut,
+                                const Cell1D edge,
+                                double tol
+                                );
 
 bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol);
 }
+
+bool pointInPolygon(const Vector3d& point, const Cell2D& cell);

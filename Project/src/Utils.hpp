@@ -26,4 +26,5 @@ void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol);
 
 void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol);
 
-void cutMeshCell2D(PolygonalMesh& mesh, Cell2D cell, vector<Trace> cuts, double tol);
+void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol);
+

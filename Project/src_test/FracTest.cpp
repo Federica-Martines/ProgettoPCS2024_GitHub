@@ -1186,6 +1186,84 @@ TEST(CuttingFracture, test1) {
 
 
 }
+
+
+TEST(PolygonalMeshTest, PointInsidePolygon) {
+    PolygonalMesh mesh;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    // Define vertices
+    Vector3d v1(0, 0, 0);
+    Vector3d v2(1, 0, 0);
+    Vector3d v3(0, 1, 0);
+
+    // Add Cell0D vertices
+    Cell0D cell0D1 = mesh.addCell0D(v1);
+    Cell0D cell0D2 = mesh.addCell0D(v2);
+    Cell0D cell0D3 = mesh.addCell0D(v3);
+
+    // Add Cell1D edges
+    Cell1D cell1D1 = mesh.addCell1D(cell0D1, cell0D2);
+    Cell1D cell1D2 = mesh.addCell1D(cell0D2, cell0D3);
+    Cell1D cell1D3 = mesh.addCell1D(cell0D3, cell0D1);
+
+    // Define a plane for the Cell2D
+    Vector3d normal = Vector3d(0, 0, 1);
+
+    // Add Cell2D polygon
+    vector<Cell0D> vertices = {cell0D1, cell0D2, cell0D3};
+    vector<Cell1D> edges = {cell1D1, cell1D2, cell1D3};
+    Cell2D cell2D = mesh.addCell2D(normal, vertices, edges);
+
+    // Test a point inside the polygon
+    Vector3d pointInside = Vector3d(0.2, 0.2, 0);
+
+    Cell2D foundCell;
+    bool found = findCellContainingPoint(foundCell, mesh, pointInside, tol);
+    ASSERT_TRUE(found);
+    EXPECT_EQ(foundCell.id, cell2D.id);
+
+    // Test a point outside the polygon
+    Vector3d pointOutside(2, 2, 0);
+    found = findCellContainingPoint(foundCell, mesh, pointOutside, tol);
+    EXPECT_FALSE(found);
+}
+
+TEST(PolygonalMeshTest, PointInsidePolygon2) {
+    PolygonalMesh mesh;
+    double tol=10*numeric_limits<double>::epsilon()*10000;
+
+    // Define vertices
+    Vector3d v1(0, 0, 1);
+    Vector3d v2(0, 1, 1);
+    Vector3d v3(0, 1, 0);
+
+    // Add Cell0D vertices
+    Cell0D cell0D1 = mesh.addCell0D(v1);
+    Cell0D cell0D2 = mesh.addCell0D(v2);
+    Cell0D cell0D3 = mesh.addCell0D(v3);
+
+    // Add Cell1D edges
+    Cell1D cell1D1 = mesh.addCell1D(cell0D1, cell0D2);
+    Cell1D cell1D2 = mesh.addCell1D(cell0D2, cell0D3);
+    Cell1D cell1D3 = mesh.addCell1D(cell0D3, cell0D1);
+
+    // Define a plane for the Cell2D
+    Vector3d normal = Vector3d(0, 0, 1);
+
+    // Add Cell2D polygon
+    vector<Cell0D> vertices = {cell0D1, cell0D2, cell0D3};
+    vector<Cell1D> edges = {cell1D1, cell1D2, cell1D3};
+    Cell2D cell2D = mesh.addCell2D(normal, vertices, edges);
+
+    // Test a point inside the polygon
+    Vector3d pointInside = Vector3d(0.27578887488160, 0.44773812760435, 0.72421112511839);
+
+    Cell2D foundCell;
+    bool found = findCellContainingPoint(foundCell, mesh, pointInside, tol);
+    ASSERT_TRUE(found);
+    EXPECT_EQ(foundCell.id, cell2D.id);
+}
 // printTraces
 
 // printFractures

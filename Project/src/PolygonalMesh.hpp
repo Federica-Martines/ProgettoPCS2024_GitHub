@@ -4,13 +4,11 @@
 
 #pragma once
 
-#include <iostream>
 #include "Eigen/Eigen"
-#include "GeometryLibrary.hpp"
+
 
 using namespace std;
 using namespace Eigen;
-using namespace GeometryLibrary;
 
 namespace PolygonalLibrary {
 
@@ -46,12 +44,14 @@ struct Cell1D {
 
 struct Cell2D {
     unsigned int id;
+    Vector3d normal;
     vector<Cell0D> vertices;
     vector<Cell1D> edges;
     vector<unsigned int> neighbours; // id delle celle2D adiacenti a sè stessa (anche solo per un vertice)
     Cell2D() = default;
-    Cell2D(unsigned int id, vector<Cell0D> vertices, vector<Cell1D> edges) {
+    Cell2D(unsigned int id, Vector3d normal, vector<Cell0D> vertices, vector<Cell1D> edges) {
         this->id = id;
+        this->normal = normal;
         this->vertices = vertices;
         this->edges = edges;
     }
@@ -83,23 +83,21 @@ struct PolygonalMesh
         return cell;
     }
 
-    Cell2D addCell2D(vector<Cell0D> vertices, vector<Cell1D> edges) {
-        Cell2D cell = Cell2D(NumberCell2D, vertices, edges);
+    Cell2D addCell2D(Vector3d normal, vector<Cell0D> vertices, vector<Cell1D> edges) {
+        Cell2D cell = Cell2D(NumberCell2D, normal, vertices, edges);
         this->cells2D.push_back(cell);
         this->NumberCell2D++;
         return cell;
     }
 };
 
-
-
-PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
-
-PolygonalMesh transformFractureToMesh(vector<Fracture>& fractures, double tol);
-
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
+void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, Cell0D newVertex);
 
+bool pointInCell2D(const Vector3d& point, const Cell2D& cell, double tol);
+
+bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol);
 }
 
 #endif // POLYGONALMESH_HPP

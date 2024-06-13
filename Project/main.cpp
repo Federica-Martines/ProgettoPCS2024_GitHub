@@ -67,7 +67,7 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
-        cutMeshCell2D(mesh, mesh.cells2D[0], cuts, tol);
+        cutMeshCell2D(mesh, cuts, tol);
         saveMesh(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;

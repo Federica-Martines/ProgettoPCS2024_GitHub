@@ -1,10 +1,12 @@
 #include "GeometryLibrary.hpp"
 #include <iostream>
 #include <Eigen/Eigen>
+#include "PolygonalMesh.hpp"
 
 using namespace std;
 using namespace Eigen;
 using namespace GeometryLibrary;
+using namespace PolygonalLibrary;
 
 namespace GeometryLibrary {
 
@@ -28,6 +30,48 @@ bool Fracture::checkFractureEdges(double tol){ //guarda esercitazione sulla mesh
     }
     return true;
 };
+
+
+PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
+    PolygonalMesh mesh;
+
+    // Add vertices
+    for (const Vector3d& vertex : fracture.vertices) {
+        auto it = find_if(mesh.cells0D.begin(), mesh.cells0D.end(),
+                          [&](const Cell0D& cell) { return areVectorsEqual(cell.coordinates, vertex, tol); });
+
+        // se l'iteratore è end non l'ha trovato
+        if (it == mesh.cells0D.end()) {
+            Cell0D cell0D = Cell0D(mesh.NumberCell0D, vertex);
+            mesh.cells0D.push_back(cell0D);
+            mesh.NumberCell0D++;
+        }
+    }
+
+    // Add edges
+    for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
+
+        // indices of the start and end vertices in cells0D
+        Cell0D start = mesh.cells0D[i];
+        Cell0D end = mesh.cells0D[(i + 1) %  mesh.NumberCell0D];
+
+        Cell1D cell1D = Cell1D(mesh.NumberCell1D, start, end);
+
+        mesh.cells1D.push_back(cell1D);
+        mesh.NumberCell1D++;
+    }
+
+    Vector3d normal = findNormal(fracture.vertices[0], fracture.vertices[1], fracture.vertices[2]);
+
+    // Create Cell2D
+    Cell2D cell2D = Cell2D(mesh.NumberCell2D, normal, mesh.cells0D, mesh.cells1D);
+
+    // Add Cell2D to the mesh
+    mesh.cells2D.push_back(cell2D);
+
+    return mesh;
+}
+
 
 bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol) {
     return ((v2-v1).norm() < tol);
@@ -127,7 +171,6 @@ void projectIntersection(Vector2d& projIntersection, Fracture F, Vector3d inters
     }
 
     return;
-
 }
 
 void projectVertices(vector<Vector2d>& projVertices, Fracture F) {
@@ -228,19 +271,56 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& separatorP
     }
 }
 
-//t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
-int findLineSegmentIntersection(Vector3d& intersection,
-                                 double& alpha,
-                                 double& beta,
-                                 const Vector3d& t1,
-                                 const Vector3d& t2,
-                                 const Vector3d& s1,
-                                 const Vector3d& s2,
-                                 double tol
-                                 ) {
 
+
+
+
+
+
+
+
+
+bool existDirectionSegmentIntersection(Vector3d t1, Vector3d t2, Vector3d s1, Vector3d s2, double tol) {
     Vector3d cutDirection = t2 - t1;
     Vector3d segmentDirection = s1 - s2;
+
+    // the lines are parallel
+    if (cutDirection.cross(segmentDirection).norm() < tol) {
+        return false;
+    }
+
+    // il segmento attraversa il piano
+    Vector3d P =  s1 - t1;
+
+    MatrixXd M(3, 2);
+
+    M.col(0)=cutDirection;
+    M.col(1)=segmentDirection;
+
+    Vector2d solution = M.householderQr().solve(P);    //householderQr è in eigen
+    double alpha = solution[0];
+    double beta = solution[1];
+
+    // the intersection is in outside the edge
+    if (beta < -tol || beta > 1+tol || alpha < tol) {
+        return false;
+    }
+
+    return true;
+}
+
+//t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
+int findLineSegmentIntersection(Vector3d& intersection,
+                                double& alpha,
+                                double& beta,
+                                const Trace cut,
+                                const Cell1D edge,
+                                double tol
+                                ) {
+
+
+    Vector3d cutDirection = cut.extremes[1] - cut.extremes[0];
+    Vector3d segmentDirection = edge.start.coordinates - edge.end.coordinates;
 
     // the lines are parallel
     if (cutDirection.cross(segmentDirection).norm() < tol) {
@@ -248,7 +328,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
     }
 
     // il segmento attraversa il piano
-    Vector3d P = s1 - t1;
+    Vector3d P =  edge.start.coordinates - cut.extremes[0];
 
     MatrixXd M(3, 2);
 
@@ -269,7 +349,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
     }
 
     // the intersection is inside the edge
-    intersection = t1+alpha*cutDirection;
+    intersection = cut.extremes[0]+alpha*cutDirection;
     return 1;
 }
 
