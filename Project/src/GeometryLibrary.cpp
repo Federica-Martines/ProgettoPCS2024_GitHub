@@ -240,7 +240,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
                                  ) {
 
     Vector3d cutDirection = t2 - t1;
-    Vector3d segmentDirection = s2 - s1;
+    Vector3d segmentDirection = s1 - s2;
 
     // the lines are parallel
     if (cutDirection.cross(segmentDirection).norm() < tol) {
@@ -248,7 +248,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
     }
 
     // il segmento attraversa il piano
-    Vector3d P = t1 - s1;
+    Vector3d P = s1 - t1;
 
     MatrixXd M(3, 2);
 

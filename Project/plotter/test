@@ -1,0 +1,4 @@
+1) creo mesh iniziale
+2) per ogni traccia cerco intersezioni con ogni lato di ogni cella2d
+3) salvo ongi intersezione nella mesh
+4) se il modulo dell'ascissa curvilinea è < 1  nella intersezione trovata 
