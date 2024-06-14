@@ -13,22 +13,22 @@ namespace fs = filesystem;
 
 namespace PolygonalLibrary {
 
-void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, Cell0D newVertex) {
-    Cell1D leftEdge = mesh.addCell1D(edge.start, newVertex);
-    Cell1D rightEdge = mesh.addCell1D(newVertex, edge.end);
+void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex){
+    unsigned int leftEdgeId = mesh.addCell1D(edge.start, newVertex);
+    unsigned int rightEdgeId = mesh.addCell1D(newVertex, edge.end);
 
-    leftEdge.neighbours = edge.neighbours;
-    rightEdge.neighbours = edge.neighbours;
+    mesh.cells1D[leftEdgeId].neighbours = edge.neighbours;
+    mesh.cells1D[rightEdgeId].neighbours = edge.neighbours;
 
     // aggiorno i lati della cella vicina
     auto it = find(edge.neighbours.begin(), edge.neighbours.end(), cell.id);
     Cell2D& cellToUpdate = mesh.cells2D[*it];
 
     for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
-        if (cellToUpdate.edges[e].id == edge.id) {
+        if (cellToUpdate.edges[e] == edge.id) {
             cellToUpdate.edges.erase(cellToUpdate.edges.begin() + e);
-            cellToUpdate.edges.push_back(leftEdge);
-            cellToUpdate.edges.push_back(rightEdge);
+            cellToUpdate.edges.push_back(leftEdgeId);
+            cellToUpdate.edges.push_back(rightEdgeId);
             break;
         }
     }
@@ -66,7 +66,7 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     ofstream cell1DFile(fileNameCell1D);
     cell1DFile << "Id;Origin;End" << endl;
     for (const auto& cell : mesh.cells1D) {
-        cell1DFile << cell.id << ";" << cell.start.id << ";" << cell.end.id << endl;
+        cell1DFile << cell.id << ";" << cell.start << ";" << cell.end << endl;
     }
     cell1DFile.close();
 
@@ -76,11 +76,11 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     for (const auto& cell : mesh.cells2D) {
         cell2DFile << cell.id << ";" << cell.vertices.size() << ";";
         for (const auto& vertex : cell.vertices) {
-            cell2DFile << vertex.id << ";";
+            cell2DFile << vertex << ";";
         }
         cell2DFile << cell.edges.size() << ";";
         for (const auto& edge : cell.edges) {
-            cell2DFile << edge.id << ";";
+            cell2DFile << edge << ";";
         }
         cell2DFile << endl;
     }
@@ -89,18 +89,19 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     cout << "Mesh data saved successfully." << endl;
 }
 
-bool pointInCell2D(const Vector3d& rayOrigin, const Cell2D& cell, double tol) {
+bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& rayOrigin, const Cell2D& cell, double tol) {
     const auto& vertices = cell.vertices;
 
-    Vector3d rayEnd = rayOrigin + cell.normal; // Direction of the ray (can be any non-parallel direction)
+
+    Vector3d rayEnd = rayOrigin + mesh.cells0D[1].coordinates - mesh.cells0D[0].coordinates; // Direction of the ray (can be any non-parallel direction)
 
     int intersectionCount = 0;
     size_t numVertices = vertices.size();
 
     // Iterate over polygon edges
     for (unsigned int i = 0; i < numVertices;  i++) {
-        const Vector3d& vi = vertices[i].coordinates;
-        const Vector3d& vj = vertices[(i+1) % numVertices].coordinates;
+        const Vector3d& vi = mesh.cells0D[i].coordinates;
+        const Vector3d& vj = mesh.cells0D[(i+1) % numVertices].coordinates;
 
         // Check if the ray intersects the edge vi-vj
         if (existDirectionSegmentIntersection(rayOrigin, rayEnd, vi, vj, tol)){
@@ -114,7 +115,7 @@ bool pointInCell2D(const Vector3d& rayOrigin, const Cell2D& cell, double tol) {
 
 bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol) {
     for (Cell2D& cell : mesh.cells2D) {
-        if (pointInCell2D(point, cell, tol))  {
+        if (pointInCell2D(mesh, point, cell, tol))  {
             foundCell = cell;
             return true;
         }

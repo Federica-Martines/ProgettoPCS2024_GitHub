@@ -114,6 +114,7 @@ int classifyTracePosition(const Vector3d& planePoint, const Vector3d& planeNorma
 bool existDirectionSegmentIntersection(Vector3d t1, Vector3d t2, Vector3d s1, Vector3d s2, double tol) ;
 
 int findLineSegmentIntersection(Vector3d& intersection,
+                                const PolygonalMesh& mesh,
                                 double& alpha,
                                 double& beta,
                                 const Trace cut,

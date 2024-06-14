@@ -16,10 +16,7 @@ struct Cell0D {
     unsigned int id;
     Vector3d coordinates = {};
     Cell0D() = default;
-    Cell0D(unsigned int id, Vector3d coordinates) {
-        this->id = id;
-        this->coordinates = coordinates;
-    }
+    Cell0D(unsigned int id, Vector3d coordinates):id(id), coordinates(coordinates) { }
     bool operator==(Cell0D cell){
         return id == cell.id;
     }
@@ -27,15 +24,11 @@ struct Cell0D {
 
 struct Cell1D {
     unsigned int id;
-    Cell0D start;
-    Cell0D end;
+    unsigned int start;
+    unsigned int end;
     vector<unsigned int> neighbours = {0}; // id delle celle2D adiacenti al lato
     Cell1D() = default;
-    Cell1D(unsigned int id, Cell0D start, Cell0D end) {
-        this->id = id;
-        this->start = start;
-        this->end = end;
-    }
+    Cell1D(unsigned int id, unsigned int start, unsigned int end): id(id), start(start), end(end) {}
 
     bool operator==(Cell1D cell){
         return id == cell.id;
@@ -45,16 +38,19 @@ struct Cell1D {
 struct Cell2D {
     unsigned int id;
     Vector3d normal;
-    vector<Cell0D> vertices;
-    vector<Cell1D> edges;
+    vector<unsigned int> vertices;
+    vector<unsigned int> edges;
     vector<unsigned int> neighbours; // id delle celle2D adiacenti a sè stessa (anche solo per un vertice)
     Cell2D() = default;
-    Cell2D(unsigned int id, Vector3d normal, vector<Cell0D> vertices, vector<Cell1D> edges) {
-        this->id = id;
-        this->normal = normal;
-        this->vertices = vertices;
-        this->edges = edges;
-    }
+    Cell2D(unsigned int id,
+           const Vector3d& normal,
+           const vector<unsigned int>& vertices,
+           const vector<unsigned int>& edges):
+        id(id),
+        normal(normal),
+        vertices(vertices),
+        edges(edges)
+    {}
 };
 
 struct PolygonalMesh
@@ -69,33 +65,35 @@ struct PolygonalMesh
     vector<Cell2D> cells2D;
 
     // crea e aggiunge un vertice
-    Cell0D addCell0D(Vector3d coordinates) {
+    unsigned int addCell0D(Vector3d coordinates) {
         Cell0D cell = Cell0D(NumberCell0D, coordinates);
-        this->cells0D.push_back(cell);
-        this->NumberCell0D++;
-        return cell;
+        cells0D.push_back(cell);
+        NumberCell0D++;
+        return cell.id;
     }
 
-    Cell1D addCell1D(Cell0D start, Cell0D end) {
+    unsigned int addCell1D(unsigned int start, unsigned int end) {
         Cell1D cell = Cell1D(NumberCell1D, start, end);
-        this->cells1D.push_back(cell);
-        this->NumberCell1D++;
-        return cell;
+        cells1D.push_back(cell);
+        NumberCell1D++;
+        return cell.id;
     }
 
-    Cell2D addCell2D(Vector3d normal, vector<Cell0D> vertices, vector<Cell1D> edges) {
+    unsigned int addCell2D(Vector3d normal,
+                     const vector<unsigned int>& vertices,
+                     const vector<unsigned int>& edges) {
         Cell2D cell = Cell2D(NumberCell2D, normal, vertices, edges);
-        this->cells2D.push_back(cell);
-        this->NumberCell2D++;
-        return cell;
+        cells2D.push_back(cell);
+        NumberCell2D++;
+        return cell.id;
     }
 };
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
-void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, Cell0D newVertex);
+void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex);
 
-bool pointInCell2D(const Vector3d& point, const Cell2D& cell, double tol);
+bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol);
 
 bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol);
 }

@@ -338,14 +338,15 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
         }
 
         // cerchiamo le intersezioni
-        for (Cell1D& edge : cell2D.edges) {
+        for (unsigned int e = 0; e < cell2D.edges.size(); e++) {
+            Cell1D edge = mesh.cells1D[e];
             double alpha, beta;
             Vector3d intersection;
 
-            int position = findLineSegmentIntersection(intersection, alpha, beta, cut, edge, tol);
+            int position = findLineSegmentIntersection(intersection, mesh, alpha, beta, cut, edge, tol);
 
             // definisco il nuovo vertice
-            Cell0D newVertex = edge.start;
+            unsigned int newVertex = edge.start;
 
             /* se interseco in un lato */
             if(position == 1) {

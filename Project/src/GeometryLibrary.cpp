@@ -34,6 +34,7 @@ bool Fracture::checkFractureEdges(double tol){ //guarda esercitazione sulla mesh
 
 PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     PolygonalMesh mesh;
+    vector<unsigned int> verticesId, edgesId;
 
     // Add vertices
     for (const Vector3d& vertex : fracture.vertices) {
@@ -42,8 +43,9 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
 
         // se l'iteratore è end non l'ha trovato
         if (it == mesh.cells0D.end()) {
-            Cell0D cell0D = Cell0D(mesh.NumberCell0D, vertex);
-            mesh.cells0D.push_back(cell0D);
+            Cell0D cell = Cell0D(mesh.NumberCell0D, vertex);
+            mesh.cells0D.push_back(cell);
+            verticesId.push_back(cell.id);
             mesh.NumberCell0D++;
         }
     }
@@ -52,19 +54,19 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
     for (unsigned int i = 0; i < mesh.NumberCell0D; i++) {
 
         // indices of the start and end vertices in cells0D
-        Cell0D start = mesh.cells0D[i];
-        Cell0D end = mesh.cells0D[(i + 1) %  mesh.NumberCell0D];
+        unsigned int start = i;
+        unsigned int end = (i + 1) %  mesh.NumberCell0D;
 
-        Cell1D cell1D = Cell1D(mesh.NumberCell1D, start, end);
-
-        mesh.cells1D.push_back(cell1D);
+        Cell1D cell = Cell1D(mesh.NumberCell1D, start, end);
+        mesh.cells1D.push_back(cell);
+        edgesId.push_back(cell.id);
         mesh.NumberCell1D++;
     }
 
     Vector3d normal = findNormal(fracture.vertices[0], fracture.vertices[1], fracture.vertices[2]);
 
     // Create Cell2D
-    Cell2D cell2D = Cell2D(mesh.NumberCell2D, normal, mesh.cells0D, mesh.cells1D);
+    Cell2D cell2D = Cell2D(mesh.NumberCell2D, normal, verticesId, edgesId);
 
     // Add Cell2D to the mesh
     mesh.cells2D.push_back(cell2D);
@@ -311,6 +313,7 @@ bool existDirectionSegmentIntersection(Vector3d t1, Vector3d t2, Vector3d s1, Ve
 
 //t1, t2 estremi della traccia; s1, s2 estremi del lato (segmento)
 int findLineSegmentIntersection(Vector3d& intersection,
+                                const PolygonalMesh& mesh,
                                 double& alpha,
                                 double& beta,
                                 const Trace cut,
@@ -319,8 +322,11 @@ int findLineSegmentIntersection(Vector3d& intersection,
                                 ) {
 
 
+    Vector3d start = mesh.cells0D[edge.start].coordinates;
+    Vector3d end = mesh.cells0D[edge.end].coordinates;
+
     Vector3d cutDirection = cut.extremes[1] - cut.extremes[0];
-    Vector3d segmentDirection = edge.start.coordinates - edge.end.coordinates;
+    Vector3d segmentDirection = start - end;
 
     // the lines are parallel
     if (cutDirection.cross(segmentDirection).norm() < tol) {
@@ -328,7 +334,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
     }
 
     // il segmento attraversa il piano
-    Vector3d P =  edge.start.coordinates - cut.extremes[0];
+    Vector3d P =  start - cut.extremes[0];
 
     MatrixXd M(3, 2);
 

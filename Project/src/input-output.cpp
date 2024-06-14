@@ -59,9 +59,7 @@ bool readFractures(const string& fileName, vector<Fracture>& fractures, const do
         // Assegnamo i dati alla frattura (utilizziamo il costruttore della frattura per generarla
         Fracture frac = Fracture(id, vertices, tol);
 
-        // Eseguo un controllo sulle tracce per verificare che non abbiano lati null
-        if (frac.checkFractureEdges(tol))
-            fractures.push_back(frac);
+        fractures.push_back(frac);
     }
     return true;
 }
@@ -79,7 +77,7 @@ void printTraces(vector<Trace> traces) {
             cout << "La frattura è passante" << endl;
         }
         else {
-             cout << "La frattura è NON passante" << endl;
+            cout << "La frattura è NON passante" << endl;
         }
 
         for (unsigned int i=0; i<trace.extremes.size(); i++){
@@ -175,23 +173,23 @@ void printFracturesToFile(const vector<Fracture>& fractures, const string& filen
 }
 
 void printFractureToDebug(const Fracture& fracture, const string& filename) {
-        std::ofstream file(filename, std::ios_base::app);
+    std::ofstream file(filename, std::ios_base::app);
 
-        if (!file.is_open()) {
-            std::cerr << "Unable to open file";
-            return;
-        }
-
-        file << "# FractureId; NumVertices\n";
-        file << fracture.idFrac << "; " << fracture.numVertices << "\n";
-        file << "# Vertices\n";
-
-        for (const auto& vertex : fracture.vertices) {
-            file << std::scientific << vertex.x() << "; " << vertex.y() << "; " << vertex.z() << "\n";
-        }
-
-        file.close();
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file";
+        return;
     }
+
+    file << "# FractureId; NumVertices\n";
+    file << fracture.idFrac << "; " << fracture.numVertices << "\n";
+    file << "# Vertices\n";
+
+    for (const auto& vertex : fracture.vertices) {
+        file << std::scientific << vertex.x() << "; " << vertex.y() << "; " << vertex.z() << "\n";
+    }
+
+    file.close();
+}
 
 
 void printTraceToDebug(const Trace& trace, const string& filename) {
@@ -203,19 +201,19 @@ void printTraceToDebug(const Trace& trace, const string& filename) {
     }
 
 
-        if (trace.extremes.size() >= 2) {
-            const Vector3d& start = trace.extremes[0];
-            const Vector3d& end = trace.extremes[1];
-            outFile << trace.idTrace << "; "
-                    << trace.idGenerator1 << "; "
-                    << trace.idGenerator2 << "; "
-                    << start.x() << "; "
-                    << start.y() << "; "
-                    << start.z() << "; "
-                    << end.x() << "; "
-                    << end.y() << "; "
-                    << end.z() << endl;
-        }
+    if (trace.extremes.size() >= 2) {
+        const Vector3d& start = trace.extremes[0];
+        const Vector3d& end = trace.extremes[1];
+        outFile << trace.idTrace << "; "
+                << trace.idGenerator1 << "; "
+                << trace.idGenerator2 << "; "
+                << start.x() << "; "
+                << start.y() << "; "
+                << start.z() << "; "
+                << end.x() << "; "
+                << end.y() << "; "
+                << end.z() << endl;
+    }
 
 
     outFile.close();
