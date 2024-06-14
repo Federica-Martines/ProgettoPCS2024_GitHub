@@ -91,7 +91,10 @@ struct PolygonalMesh
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
-void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex);
+void splitEdge(vector<unsigned int> splitEdges, PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex);
+
+void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, PolygonalMesh& mesh, unsigned int cell1, unsigned int cell2);
+
 
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol);
 

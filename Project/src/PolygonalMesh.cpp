@@ -13,16 +13,26 @@ namespace fs = filesystem;
 
 namespace PolygonalLibrary {
 
-void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex){
+void splitEdge(vector<unsigned int> splitEdges, PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex){
     unsigned int leftEdgeId = mesh.addCell1D(edge.start, newVertex);
     unsigned int rightEdgeId = mesh.addCell1D(newVertex, edge.end);
 
-    mesh.cells1D[leftEdgeId].neighbours = edge.neighbours;
-    mesh.cells1D[rightEdgeId].neighbours = edge.neighbours;
+    splitEdges.push_back(leftEdgeId);
+    splitEdges.push_back(rightEdgeId);
+
+    // mesh.cells1D[leftEdgeId].neighbours = edge.neighbours;
+    // mesh.cells1D[rightEdgeId].neighbours = edge.neighbours;
 
     // aggiorno i lati della cella vicina
-    auto it = find(edge.neighbours.begin(), edge.neighbours.end(), cell.id);
-    Cell2D& cellToUpdate = mesh.cells2D[*it];
+    unsigned int cellToUpdateId;
+    if(edge.neighbours[0] == cell.id) {
+        cellToUpdateId = edge.neighbours[1];
+    } else {
+        cellToUpdateId = edge.neighbours[0];
+    }
+
+    Cell2D cellToUpdate = mesh.cells2D[cellToUpdateId];
+
 
     for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
         if (cellToUpdate.edges[e] == edge.id) {
@@ -32,6 +42,12 @@ void splitEdge(PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVe
             break;
         }
     }
+
+}
+
+void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, PolygonalMesh& mesh, unsigned int cell1, unsigned int cell2){
+
+
 
 }
 
