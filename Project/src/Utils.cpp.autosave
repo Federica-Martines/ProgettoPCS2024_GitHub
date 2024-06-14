@@ -344,9 +344,10 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
         for (unsigned int e = 0; e < cell2D.edges.size(); e++) {
             Cell1D edge = mesh.cells1D[e];
             double alpha, beta;
+            
             Vector3d intersectionBase;
-            vector<Vector3d> intersectionsBase;
             unsigned int intersectionBaseId = NULL;
+            vector<unsigned int > intersectionsBase;
 
             int position = findLineSegmentIntersection(intersectionBase, mesh, alpha, beta, cut, edge, tol);
 
@@ -354,10 +355,11 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             if (position == -1) continue;
             // se c'è in mezzo al lato lo splitto creando un vertice e due nuovi lati
             if (position == 0) {
-                if (round(beta) == 0) intersectionId = edge.start;
-                if (round(beta) == 1) intersectionId = edge.end;
+                if (round(beta) == 0) intersectionBaseId = edge.start;
+                if (round(beta) == 1) intersectionBaseId = edge.end;
             }
-            if (position == 1) splitEdge(splitEdges, intersectionId, mesh, edge, intersection);
+            if (position == 1) splitEdge(splitEdges, intersectionBaseId, mesh, edge, intersectionBase);
+            intersectionsBase.push_back(intersectionBaseId);
 
 
             Cell2D& neighbour = cell2D;

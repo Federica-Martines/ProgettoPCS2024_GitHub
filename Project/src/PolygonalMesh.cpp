@@ -13,42 +13,40 @@ namespace fs = filesystem;
 
 namespace PolygonalLibrary {
 
-void splitEdge(vector<unsigned int> splitEdges, PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex){
+void splitEdge(vector<unsigned int> splitEdges, unsigned int& newVertex,  PolygonalMesh& mesh, Cell1D edge, Vector3d intersection){
+    newVertex = mesh.addCell0D(intersection);
+
     unsigned int leftEdgeId = mesh.addCell1D(edge.start, newVertex);
     unsigned int rightEdgeId = mesh.addCell1D(newVertex, edge.end);
 
     splitEdges.push_back(leftEdgeId);
     splitEdges.push_back(rightEdgeId);
 
-    // mesh.cells1D[leftEdgeId].neighbours = edge.neighbours;
-    // mesh.cells1D[rightEdgeId].neighbours = edge.neighbours;
+    for (unsigned int n = 0; n < edge.neighbours.size(); n++) {
+        Cell2D cellToUpdate = mesh.cells2D[n];
 
-    // aggiorno i lati della cella vicina
-    unsigned int cellToUpdateId;
-    if(edge.neighbours[0] == cell.id) {
-        cellToUpdateId = edge.neighbours[1];
-    } else {
-        cellToUpdateId = edge.neighbours[0];
-    }
-
-    Cell2D cellToUpdate = mesh.cells2D[cellToUpdateId];
-
-
-    for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
-        if (cellToUpdate.edges[e] == edge.id) {
-            cellToUpdate.edges.erase(cellToUpdate.edges.begin() + e);
-            cellToUpdate.edges.push_back(leftEdgeId);
-            cellToUpdate.edges.push_back(rightEdgeId);
-            break;
+        for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
+            if (cellToUpdate.edges[e] == edge.id) {
+                cellToUpdate.edges[e] = leftEdgeId;
+                cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, rightEdgeId);
+                break;
+            }
         }
     }
 
 }
 
-void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, PolygonalMesh& mesh, unsigned int cell1, unsigned int cell2){
 
+unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId) {
+    Cell1D edge = mesh.cells1D[edgeId];
 
-
+    for (unsigned int& n : edge.neighbours){
+        if (n != cellId){
+            return n;
+        }
+    }
+    cerr << "Nessun vicino trovato per il lato: " << edgeId << endl;
+    return NULL;
 }
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {

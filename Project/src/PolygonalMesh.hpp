@@ -40,7 +40,7 @@ struct Cell2D {
     Vector3d normal;
     vector<unsigned int> vertices;
     vector<unsigned int> edges;
-    vector<unsigned int> neighbours; // id delle celle2D adiacenti a sè stessa (anche solo per un vertice)
+    bool alive = true; // id delle celle2D adiacenti a sè stessa (anche solo per un vertice)
     Cell2D() = default;
     Cell2D(unsigned int id,
            const Vector3d& normal,
@@ -91,10 +91,11 @@ struct PolygonalMesh
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
-void splitEdge(vector<unsigned int> splitEdges, PolygonalMesh& mesh, Cell2D cell, Cell1D edge, unsigned int newVertex);
+void splitEdge(vector<unsigned int> splitEdges, unsigned int& newVertex, PolygonalMesh& mesh, Cell1D edge, Vector3d intersection);
 
 void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, PolygonalMesh& mesh, unsigned int cell1, unsigned int cell2);
 
+unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId);
 
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol);
 
