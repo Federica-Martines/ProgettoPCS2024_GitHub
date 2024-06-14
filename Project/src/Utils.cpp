@@ -338,16 +338,17 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
         }
 
 
-        vector<unsigned int> splitEdges;
+        vector<unsigned int> intersectionsBase;
 
         // cerchiamo le intersezioni
         for (unsigned int e = 0; e < cell2D.edges.size(); e++) {
-            Cell1D edge = mesh.cells1D[e];
+            unsigned int edgeId = cell2D.edges[e];
+            Cell1D edge = mesh.cells1D[edgeId];
             double alpha, beta;
 
             Vector3d intersectionBase;
             unsigned int intersectionBaseId;
-            vector<unsigned int> intersectionsBase;
+
 
             int position = findLineSegmentIntersection(intersectionBase, mesh, alpha, beta, cut, edge, tol);
 
@@ -358,21 +359,28 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                 if (round(beta) == 0) intersectionBaseId = edge.start;
                 if (round(beta) == 1) intersectionBaseId = edge.end;
             }
-            if (position == 1) splitEdge(splitEdges, intersectionBaseId, mesh, edge, intersectionBase);
+            // IMPORTANTE faccio e++ perchè ho appena aggiunto un edge
+            if (position == 1) {
+                splitEdge(intersectionBaseId, mesh, edge, intersectionBase);
+                e++;
+
+                // refresh della reference perchè facendo splitEdge modifico la mesh ma non la cella corrente
+                cell2D = mesh.cells2D[cell2D.id];
+
+            }
             intersectionsBase.push_back(intersectionBaseId);
 
 
             Cell2D& neighbour = cell2D;
             Cell1D edgeNext = edge;
-            vector<unsigned int> splitEdgesNext;
             Vector3d intersection = intersectionBase;
             unsigned int intersectionId = intersectionBaseId;
             Vector3d intersectionNext;
             unsigned int intersectionNextId;
             int positionNext;
 
-            // faccio tagli ulteriori
-            while (abs(alpha) < 1) {
+            // faccio tagli ulteriori se alpha è compresa strettamente tra 0 e 1 e la traccia è non passante
+            while (cut.tips == true && abs(alpha+tol) < 1  && abs(alpha) > tol) {
                 // trovo il vicino
                 unsigned int n = findNeighbour(mesh, neighbour.id, edgeNext.id);
                 neighbour = mesh.cells2D[n];
@@ -380,7 +388,8 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
 
                 // trovo la prossima intersezione
                 for (unsigned int nEdge = 0; nEdge < neighbour.edges.size(); nEdge++) {
-                    edgeNext = mesh.cells1D[nEdge];
+                    unsigned int edgeNextId = neighbour.edges[nEdge];
+                    edgeNext = mesh.cells1D[edgeNextId];
 
                     positionNext = findLineSegmentIntersection(intersectionNext, mesh, alpha, beta, cut, edgeNext, tol);
 
@@ -389,8 +398,9 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
 
 
                     if (positionNext == 1) {
-                        splitEdge(splitEdgesNext, intersectionNextId, mesh, edgeNext, intersectionNext);
-
+                        splitEdge(intersectionNextId, mesh, edgeNext, intersectionNext);
+                        nEdge++;
+                        cell2D = mesh.cells2D[cell2D.id];
                     }
                     if (positionNext == 0) {
                         if (round(beta) == 0) intersectionNextId = edge.start;
@@ -408,10 +418,10 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                 position =  positionNext;
             }
 
-        generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
-
 
         }
+
+        generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
 
 
 

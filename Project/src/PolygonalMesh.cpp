@@ -13,17 +13,15 @@ namespace fs = filesystem;
 
 namespace PolygonalLibrary {
 
-void splitEdge(vector<unsigned int> splitEdges, unsigned int& newVertex,  PolygonalMesh& mesh, Cell1D edge, Vector3d intersection){
+void splitEdge(unsigned int& newVertex, PolygonalMesh& mesh, Cell1D edge, Vector3d intersection){
     newVertex = mesh.addCell0D(intersection);
 
     unsigned int leftEdgeId = mesh.addCell1D(edge.start, newVertex);
     unsigned int rightEdgeId = mesh.addCell1D(newVertex, edge.end);
 
-    splitEdges.push_back(leftEdgeId);
-    splitEdges.push_back(rightEdgeId);
 
     for (unsigned int n = 0; n < edge.neighbours.size(); n++) {
-        Cell2D cellToUpdate = mesh.cells2D[n];
+        Cell2D& cellToUpdate = mesh.cells2D[n];
 
         for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
             if (cellToUpdate.edges[e] == edge.id) {
@@ -49,15 +47,17 @@ unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsig
     return NULL;
 }
 
-void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId ) {
+void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId) {
     bool writeLeft = true;
     vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
+    int intCounter = 0;
 
     for (unsigned int nEdge = 0; nEdge < cell2D.edges.size(); nEdge++) {
-        Cell1D& newEdge = mesh.cells1D[nEdge];
-        unsigned int newEdgeId = newEdge.id;
+        unsigned int newEdgeId = cell2D.edges[nEdge];
+        Cell1D& newEdge = mesh.cells1D[newEdgeId];
+
         unsigned int v = mesh.cells0D[newEdge.start].id;
-        int intCounter = 0;
+
 
         if ((v == intersectionId) || (v == intersectionNextId)) {
             intCounter++;
@@ -65,7 +65,15 @@ void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersect
             // aggiungiamo i vertici
             leftCell2DVertices.push_back(v);
             rightCell2DVertices.push_back(v);
-            // aggiungiamo i lati
+
+            /* aggiungiamo il lato del taglio alle nuove celle 2D */
+            if (intCounter == 2) {
+                unsigned int cutEdgeId = mesh.addCell1D(intersectionId, intersectionNextId);
+                leftCell2DEdges.push_back(cutEdgeId);
+                rightCell2DEdges.push_back(cutEdgeId);
+            }
+
+            /* aggiungiamo i lati */
             if (nEdge == 0){
                 if (writeLeft)
                     leftCell2DEdges.push_back(newEdgeId);
@@ -79,12 +87,6 @@ void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersect
                     leftCell2DEdges.push_back(newEdgeId);
             }
 
-            /* aggiungiamo il lato del taglio alle nuove celle 2D */
-            if (intCounter == 2) {
-                newEdgeId = mesh.addCell1D(intersectionId, intersectionNextId);
-                leftCell2DEdges.push_back(newEdgeId);
-                rightCell2DEdges.push_back(newEdgeId);
-            }
             writeLeft = !writeLeft;
         }
         else {
@@ -99,7 +101,6 @@ void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersect
             }
         }
     }
-
 
     unsigned int newLeftCellId = mesh.addCell2D(cell2D.normal, leftCell2DVertices, leftCell2DEdges);
     unsigned int newRightCellId = mesh.addCell2D(cell2D.normal, rightCell2DVertices, rightCell2DEdges);
@@ -169,7 +170,9 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     ofstream cell2DFile(fileNameCell2D);
     cell2DFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
     for (const auto& cell : mesh.cells2D) {
+
         if(!cell.alive) continue;
+
         cell2DFile << cell.id << ";" << cell.vertices.size() << ";";
         for (const auto& vertex : cell.vertices) {
             cell2DFile << vertex << ";";
@@ -211,9 +214,11 @@ bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& rayOrigin, const C
 
 bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol) {
     for (Cell2D& cell : mesh.cells2D) {
-        if (pointInCell2D(mesh, point, cell, tol))  {
-            foundCell = cell;
-            return true;
+        if(cell.alive) {
+            if (pointInCell2D(mesh, point, cell, tol))  {
+                foundCell = cell;
+                return true;
+            }
         }
     }
     return false;

@@ -67,6 +67,7 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
 
     // Create Cell2D
     Cell2D cell2D = Cell2D(mesh.NumberCell2D, normal, verticesId, edgesId);
+    mesh.NumberCell2D++;
 
     // Add Cell2D to the mesh
     mesh.cells2D.push_back(cell2D);

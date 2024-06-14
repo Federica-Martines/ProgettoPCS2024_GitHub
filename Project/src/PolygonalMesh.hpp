@@ -91,9 +91,7 @@ struct PolygonalMesh
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
-void splitEdge(vector<unsigned int> splitEdges, unsigned int& newVertex, PolygonalMesh& mesh, Cell1D edge, Vector3d intersection);
-
-void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, PolygonalMesh& mesh, unsigned int cell1, unsigned int cell2);
+void splitEdge(unsigned int& newVertex, PolygonalMesh& mesh, Cell1D edge, Vector3d intersection);
 
 unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId);
 
