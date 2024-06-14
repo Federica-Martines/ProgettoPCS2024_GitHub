@@ -49,6 +49,87 @@ unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsig
     return NULL;
 }
 
+void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId ) {
+    bool writeLeft = true;
+    vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
+
+    for (unsigned int nEdge = 0; nEdge < cell2D.edges.size(); nEdge++) {
+        Cell1D& newEdge = mesh.cells1D[nEdge];
+        unsigned int newEdgeId = newEdge.id;
+        unsigned int v = mesh.cells0D[newEdge.start].id;
+        int intCounter = 0;
+
+        if ((v == intersectionId) || (v == intersectionNextId)) {
+            intCounter++;
+
+            // aggiungiamo i vertici
+            leftCell2DVertices.push_back(v);
+            rightCell2DVertices.push_back(v);
+            // aggiungiamo i lati
+            if (nEdge == 0){
+                if (writeLeft)
+                    leftCell2DEdges.push_back(newEdgeId);
+                else
+                    rightCell2DEdges.push_back(newEdgeId);
+            }
+            else {
+                if (writeLeft)
+                    rightCell2DEdges.push_back(newEdgeId);
+                else
+                    leftCell2DEdges.push_back(newEdgeId);
+            }
+
+            /* aggiungiamo il lato del taglio alle nuove celle 2D */
+            if (intCounter == 2) {
+                newEdgeId = mesh.addCell1D(intersectionId, intersectionNextId);
+                leftCell2DEdges.push_back(newEdgeId);
+                rightCell2DEdges.push_back(newEdgeId);
+            }
+            writeLeft = !writeLeft;
+        }
+        else {
+            if (writeLeft) {
+                leftCell2DVertices.push_back(v);
+                leftCell2DEdges.push_back(newEdgeId);
+            }
+            else{
+                rightCell2DVertices.push_back(v);
+                rightCell2DEdges.push_back(newEdgeId);
+
+            }
+        }
+    }
+
+
+    unsigned int newLeftCellId = mesh.addCell2D(cell2D.normal, leftCell2DVertices, leftCell2DEdges);
+    unsigned int newRightCellId = mesh.addCell2D(cell2D.normal, rightCell2DVertices, rightCell2DEdges);
+
+    Cell2D newLeftCell = mesh.cells2D[newLeftCellId];
+    Cell2D newRightCell = mesh.cells2D[newRightCellId];
+
+    // aggiorno i vicini dei lati creati
+    for (unsigned int& newCellEdgeId : newLeftCell.edges) {
+        Cell1D& newCellEdge = mesh.cells1D[newCellEdgeId];
+        if (newCellEdge.neighbours[0] == cell2D.id) {newCellEdge.neighbours[0] = newLeftCell.id; continue;}
+        if (newCellEdge.neighbours[1] == cell2D.id) {newCellEdge.neighbours[0] = newLeftCell.id; continue;}
+        newCellEdge.neighbours.push_back(newLeftCell.id);
+    }
+    for (unsigned int& newCellEdgeId : newRightCell.edges) {
+        Cell1D& newCellEdge = mesh.cells1D[newCellEdgeId];
+        if (newCellEdge.neighbours[0] == cell2D.id) {newCellEdge.neighbours[0] = newRightCell.id; continue;}
+        if (newCellEdge.neighbours[1] == cell2D.id) {newCellEdge.neighbours[0] = newRightCell.id; continue;}
+        newCellEdge.neighbours.push_back(newRightCell.id);
+    }
+
+    // spendo la cella vecchia
+    mesh.cells2D[cell2D.id].alive = false;
+}
+
+
+
+
+
+
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     // Create folder structure
     string folderName = "polygonalMeshes/mesh" + to_string(idFracture);
@@ -88,6 +169,7 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
     ofstream cell2DFile(fileNameCell2D);
     cell2DFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
     for (const auto& cell : mesh.cells2D) {
+        if(!cell.alive) continue;
         cell2DFile << cell.id << ";" << cell.vertices.size() << ";";
         for (const auto& vertex : cell.vertices) {
             cell2DFile << vertex << ";";

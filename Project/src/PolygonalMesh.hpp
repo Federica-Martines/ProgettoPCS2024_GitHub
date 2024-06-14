@@ -97,6 +97,8 @@ void updateNeighbours(unsigned int oldEdge, vector<unsigned int> splitEdges, Pol
 
 unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId);
 
+void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId );
+
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol);
 
 bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol);

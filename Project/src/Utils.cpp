@@ -252,77 +252,77 @@ void sortTraces(vector<Fracture>& fractures) {
 // }
 
 //d deque: duble ended queque (coda a cui posso attingere e mettere sia in capo che in coda)
-void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
-    vector<Fracture> subFractures = {}; //avremmo potuto usato array di 2
-    vector<deque<Trace>> Sub_iCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
-    vector<Vector3d> cutPoints = {}; // sono i punti dove abbiamo tagliato. (i nuovi vertici)
+// void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
+//     vector<Fracture> subFractures = {}; //avremmo potuto usato array di 2
+//     vector<deque<Trace>> Sub_iCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
+//     vector<Vector3d> cutPoints = {}; // sono i punti dove abbiamo tagliato. (i nuovi vertici)
 
-    // passo base
-    // Se ho una foglia
-    if(cuts.size() == 0) {
-        // aggiungo le fratture appena trovate all'elenco generale (delle foglie)
-        resultFractures.push_back(F);
-        printFractureToDebug(F, "./debug.txt"); //serve per python
-        return;
-    }
+//     // passo base
+//     // Se ho una foglia
+//     if(cuts.size() == 0) {
+//         // aggiungo le fratture appena trovate all'elenco generale (delle foglie)
+//         resultFractures.push_back(F);
+//         printFractureToDebug(F, "./debug.txt"); //serve per python
+//         return;
+//     }
 
-    vector<Vector3d> extremes = cuts[0].extremes; // salviamo gli estremi del primo taglio (li rinomino)
+//     vector<Vector3d> extremes = cuts[0].extremes; // salviamo gli estremi del primo taglio (li rinomino)
 
-    printTraceToDebug(cuts[0], "./debug_traces.txt");
-    // taglio la frattura in due sottofratture
-    splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
-    // tolgo il taglio appena fatto
-    cuts.pop_front();
+//     printTraceToDebug(cuts[0], "./debug_traces.txt");
+//     // taglio la frattura in due sottofratture
+//     splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
+//     // tolgo il taglio appena fatto
+//     cuts.pop_front();
 
-    // Mi segno la direzione del taglio e il piano separatore
-    Vector3d cutDirection = extremes[0] - extremes[1];
-    Vector3d separatorPlane = F.normal.cross(cutDirection);
+//     // Mi segno la direzione del taglio e il piano separatore
+//     Vector3d cutDirection = extremes[0] - extremes[1];
+//     Vector3d separatorPlane = F.normal.cross(cutDirection);
 
-    // Assegnazione delle fratture
-    // se il taglio ha diviso la frattura in due
-    if (subFractures.size() == 2) {
-        deque<Trace> Sub_1Cuts, Sub_2Cuts = {};
+//     // Assegnazione delle fratture
+//     // se il taglio ha diviso la frattura in due
+//     if (subFractures.size() == 2) {
+//         deque<Trace> Sub_1Cuts, Sub_2Cuts = {};
 
-        // decido quali tagli passeranno alla ricorsione successiva
-        for (Trace& cut : cuts) {
-            //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
+//         // decido quali tagli passeranno alla ricorsione successiva
+//         for (Trace& cut : cuts) {
+//             //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
 
-            //guardo da che parte si trova il taglio rispetto al taglio passato
-            int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
+//             //guardo da che parte si trova il taglio rispetto al taglio passato
+//             int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
 
-            // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
-            if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0) position *= -1;
+//             // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
+//             if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0) position *= -1;
 
-            switch(position){
-            case 1:
-                Sub_1Cuts.push_back(cut);
-                break;
-            case -1:
-                Sub_2Cuts.push_back(cut);
-                break;
-            case 0:
-                Sub_1Cuts.push_back(cut);
-                Sub_2Cuts.push_back(cut);
-                break;
+//             switch(position){
+//             case 1:
+//                 Sub_1Cuts.push_back(cut);
+//                 break;
+//             case -1:
+//                 Sub_2Cuts.push_back(cut);
+//                 break;
+//             case 0:
+//                 Sub_1Cuts.push_back(cut);
+//                 Sub_2Cuts.push_back(cut);
+//                 break;
 
-            }
+//             }
 
-        }
+//         }
 
-        Sub_iCuts = {Sub_1Cuts, Sub_2Cuts};
-    }
-    else {
-        // se il taglio non ha diviso la frattura, riprovo senza questo taglio (poppato prima)
-        Sub_iCuts = {cuts};
-    }
+//         Sub_iCuts = {Sub_1Cuts, Sub_2Cuts};
+//     }
+//     else {
+//         // se il taglio non ha diviso la frattura, riprovo senza questo taglio (poppato prima)
+//         Sub_iCuts = {cuts};
+//     }
 
-    // Di solito fa 2 chiamate, una per la sottofrattura 1 e una per la 2 ma a volte ne fa una sola
-    // questo succede nel caso una traccia sia passata a una sottofrattura ma non la intersechi
-    for (unsigned int i = 0; i < subFractures.size(); i++) {
-        cuttingFracture(resultFractures, subFractures[i], Sub_iCuts[i], tol);
-    }
+//     // Di solito fa 2 chiamate, una per la sottofrattura 1 e una per la 2 ma a volte ne fa una sola
+//     // questo succede nel caso una traccia sia passata a una sottofrattura ma non la intersechi
+//     for (unsigned int i = 0; i < subFractures.size(); i++) {
+//         cuttingFracture(resultFractures, subFractures[i], Sub_iCuts[i], tol);
+//     }
 
-}
+// }
 
 
 
@@ -344,9 +344,10 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
         for (unsigned int e = 0; e < cell2D.edges.size(); e++) {
             Cell1D edge = mesh.cells1D[e];
             double alpha, beta;
+
             Vector3d intersectionBase;
-            vector<Vector3d> intersectionsBase;
-            unsigned int intersectionBaseId = NULL;
+            unsigned int intersectionBaseId;
+            vector<unsigned int> intersectionsBase;
 
             int position = findLineSegmentIntersection(intersectionBase, mesh, alpha, beta, cut, edge, tol);
 
@@ -354,10 +355,11 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             if (position == -1) continue;
             // se c'è in mezzo al lato lo splitto creando un vertice e due nuovi lati
             if (position == 0) {
-                if (round(beta) == 0) intersectionId = edge.start;
-                if (round(beta) == 1) intersectionId = edge.end;
+                if (round(beta) == 0) intersectionBaseId = edge.start;
+                if (round(beta) == 1) intersectionBaseId = edge.end;
             }
-            if (position == 1) splitEdge(splitEdges, intersectionId, mesh, edge, intersection);
+            if (position == 1) splitEdge(splitEdges, intersectionBaseId, mesh, edge, intersectionBase);
+            intersectionsBase.push_back(intersectionBaseId);
 
 
             Cell2D& neighbour = cell2D;
@@ -366,10 +368,11 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             Vector3d intersection = intersectionBase;
             unsigned int intersectionId = intersectionBaseId;
             Vector3d intersectionNext;
-            unsigned int intersectionNextId = NULL;
+            unsigned int intersectionNextId;
             int positionNext;
 
-            while (alpha < 1) {
+            // faccio tagli ulteriori
+            while (abs(alpha) < 1) {
                 // trovo il vicino
                 unsigned int n = findNeighbour(mesh, neighbour.id, edgeNext.id);
                 neighbour = mesh.cells2D[n];
@@ -397,79 +400,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                 }
 
                 // costruisco la nuova cella2d
-                bool writeLeft = true;
-                vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
-
-                for (unsigned int nEdge = 0; nEdge < neighbour.edges.size(); nEdge++) {
-                    Cell1D& newEdge = mesh.cells1D[nEdge];
-                    unsigned int newEdgeId = newEdge.id;
-                    unsigned int v = mesh.cells0D[newEdge.start].id;
-                    int intCounter = 0;
-
-                    if ((v == intersectionId) || (v == intersectionNextId)) {
-                        intCounter++;
-
-                        // aggiungiamo i vertici
-                        leftCell2DVertices.push_back(v);
-                        rightCell2DVertices.push_back(v);
-                        // aggiungiamo i lati
-                        if (nEdge == 0){
-                            if (writeLeft)
-                                leftCell2DEdges.push_back(newEdgeId);
-                            else
-                                rightCell2DEdges.push_back(newEdgeId);
-                        }
-                        else {
-                            if (writeLeft)
-                                rightCell2DEdges.push_back(newEdgeId);
-                            else
-                                leftCell2DEdges.push_back(newEdgeId);
-                        }
-
-                        /* aggiungiamo il lato del taglio alle nuove celle 2D */
-                        if (intCounter == 2) {
-                            newEdgeId = mesh.addCell1D(intersectionId, intersectionNextId);
-                            leftCell2DEdges.push_back(newEdgeId);
-                            rightCell2DEdges.push_back(newEdgeId);
-                        }
-                        writeLeft = !writeLeft;
-                    }
-                    else {
-                        if (writeLeft) {
-                            leftCell2DVertices.push_back(v);
-                            leftCell2DEdges.push_back(newEdgeId);
-                        }
-                        else{
-                            rightCell2DVertices.push_back(v);
-                            rightCell2DEdges.push_back(newEdgeId);
-
-                        }
-                    }
-                }
-
-
-                unsigned int newLeftCellId = mesh.addCell2D(cell2D.normal, leftCell2DVertices, leftCell2DEdges);
-                unsigned int newRightCellId = mesh.addCell2D(cell2D.normal, rightCell2DVertices, rightCell2DEdges);
-
-                Cell2D newLeftCell = mesh.cells2D[newLeftCellId];
-                Cell2D newRightCell = mesh.cells2D[newRightCellId];
-
-                // aggiorno i vicini dei lati creati
-                for (unsigned int& newCellEdgeId : newLeftCell.edges) {
-                    Cell1D& newCellEdge = mesh.cells1D[newCellEdgeId];
-                    if (newCellEdge.neighbours[0] == cell2D.id) {newCellEdge.neighbours[0] = newLeftCell.id; continue;}
-                    if (newCellEdge.neighbours[1] == cell2D.id) {newCellEdge.neighbours[0] = newLeftCell.id; continue;}
-                    newCellEdge.neighbours.push_back(newLeftCell.id);
-                }
-                for (unsigned int& newCellEdgeId : newRightCell.edges) {
-                    Cell1D& newCellEdge = mesh.cells1D[newCellEdgeId];
-                    if (newCellEdge.neighbours[0] == cell2D.id) {newCellEdge.neighbours[0] = newRightCell.id; continue;}
-                    if (newCellEdge.neighbours[1] == cell2D.id) {newCellEdge.neighbours[0] = newRightCell.id; continue;}
-                    newCellEdge.neighbours.push_back(newRightCell.id);
-                }
-
-                // spendo la cella vecchia
-                mesh.cells2D[cell2D.id].alive = false;
+                generateCell2D(mesh, neighbour, intersectionId, intersectionNextId);
 
                 intersection = intersectionNext;
                 intersectionId = intersectionNextId;
@@ -477,7 +408,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                 position =  positionNext;
             }
 
-
+        generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
 
 
         }
