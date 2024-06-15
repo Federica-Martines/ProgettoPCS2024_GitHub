@@ -201,126 +201,6 @@ void sortTraces(vector<Fracture>& fractures) {
 }
 
 
-// t1 e t2 sono gli estremi del taglio (traccia)
-// void splitFracture(vector<Fracture>& subFractures, vector<Vector3d>& cutPoints, const Fracture& F, const Vector3d& t1, const Vector3d& t2, double tol) {
-//     bool writePol1 = true;
-//     vector<Vector3d> P1Vertices;
-//     vector<Vector3d> P2Vertices;
-
-//     for (unsigned int i = 0; i < F.vertices.size(); i++) {
-//         Vector3d intersection = {};
-//         Vector3d v1 = F.vertices[i];
-//         Vector3d v2 = F.vertices[(i + 1) % F.vertices.size()]; //prendi una coppia di vertici consecutivi
-
-//         // aggiungo il vertice corrente al poligono corrente (si parte da 1 e switch ogni intersezione)
-//         if (writePol1) {
-//             P1Vertices.push_back(v1);
-//         }
-//         else {
-//             P2Vertices.push_back(v1);
-//         }
-
-//         // cerco un'intersezione con il lato
-//         // if (findLineSegmentIntersection(intersection, F.normal,  t1, t2, v1, v2, tol))
-//         // {
-//         //     // se la trovo la aggiungo a entrambi i poligoni e cambio poligono
-//         //     writePol1 = !writePol1;
-//         //     cutPoints.push_back(intersection);
-
-//         //     P1Vertices.push_back(intersection);
-//         //     P2Vertices.push_back(intersection);
-
-//         //     printPointToDebug(intersection,"./debug_points.txt");
-//         // }
-//     }
-
-//     printFractureToDebug(F, "./debug.txt");
-
-//     if (P1Vertices.size() != 0) {
-//         Fracture P1 = Fracture(F.idFrac*10 +1, P1Vertices, F.normal, F.lyingPlane);
-//         subFractures.push_back(P1);
-//     }
-//     if (P2Vertices.size() != 0) {
-//         Fracture P2 = Fracture(F.idFrac*10 +2, P2Vertices, F.normal, F.lyingPlane);
-//         subFractures.push_back(P2); //uno dei due tra P1 e P2 non sarà mai vuoto
-//     }
-
-// }
-
-//d deque: duble ended queque (coda a cui posso attingere e mettere sia in capo che in coda)
-// void cuttingFracture(vector<Fracture>& resultFractures, Fracture& F, deque<Trace>& cuts, double tol) {
-//     vector<Fracture> subFractures = {}; //avremmo potuto usato array di 2
-//     vector<deque<Trace>> Sub_iCuts = {}; // Tagli dell'i-esima sottofrattura. Le fratture figlie sono sempre al massimo 2
-//     vector<Vector3d> cutPoints = {}; // sono i punti dove abbiamo tagliato. (i nuovi vertici)
-
-//     // passo base
-//     // Se ho una foglia
-//     if(cuts.size() == 0) {
-//         // aggiungo le fratture appena trovate all'elenco generale (delle foglie)
-//         resultFractures.push_back(F);
-//         printFractureToDebug(F, "./debug.txt"); //serve per python
-//         return;
-//     }
-
-//     vector<Vector3d> extremes = cuts[0].extremes; // salviamo gli estremi del primo taglio (li rinomino)
-
-//     printTraceToDebug(cuts[0], "./debug_traces.txt");
-//     // taglio la frattura in due sottofratture
-//     splitFracture(subFractures, cutPoints, F, extremes[0], extremes[1], tol);
-//     // tolgo il taglio appena fatto
-//     cuts.pop_front();
-
-//     // Mi segno la direzione del taglio e il piano separatore
-//     Vector3d cutDirection = extremes[0] - extremes[1];
-//     Vector3d separatorPlane = F.normal.cross(cutDirection);
-
-//     // Assegnazione delle fratture
-//     // se il taglio ha diviso la frattura in due
-//     if (subFractures.size() == 2) {
-//         deque<Trace> Sub_1Cuts, Sub_2Cuts = {};
-
-//         // decido quali tagli passeranno alla ricorsione successiva
-//         for (Trace& cut : cuts) {
-//             //se una traccia non è passante sia per il poligono padre che per quello in ricorsione
-
-//             //guardo da che parte si trova il taglio rispetto al taglio passato
-//             int position = classifyTracePosition(cutPoints[0], separatorPlane, cut.extremes[0], cut.extremes[1]);
-
-//             // se la i poligoni vengono separati a partire dal basso allora devo invertire il sopra e sotto
-//             if (separatorPlane.dot(F.vertices[0] - cut.extremes[0]) < 0) position *= -1;
-
-//             switch(position){
-//             case 1:
-//                 Sub_1Cuts.push_back(cut);
-//                 break;
-//             case -1:
-//                 Sub_2Cuts.push_back(cut);
-//                 break;
-//             case 0:
-//                 Sub_1Cuts.push_back(cut);
-//                 Sub_2Cuts.push_back(cut);
-//                 break;
-
-//             }
-
-//         }
-
-//         Sub_iCuts = {Sub_1Cuts, Sub_2Cuts};
-//     }
-//     else {
-//         // se il taglio non ha diviso la frattura, riprovo senza questo taglio (poppato prima)
-//         Sub_iCuts = {cuts};
-//     }
-
-//     // Di solito fa 2 chiamate, una per la sottofrattura 1 e una per la 2 ma a volte ne fa una sola
-//     // questo succede nel caso una traccia sia passata a una sottofrattura ma non la intersechi
-//     for (unsigned int i = 0; i < subFractures.size(); i++) {
-//         cuttingFracture(resultFractures, subFractures[i], Sub_iCuts[i], tol);
-//     }
-
-// }
-
-
 
 void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
 
@@ -414,11 +294,16 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                 position =  positionNext;
             }
 
-
+            if (intersectionsBase.size() == 2) {
+                break;
+            }
         }
 
-        generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
-
+        if (intersectionsBase.size() == 2) {
+            generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
+        } else {
+            cout << "Error: Expected 2 intersections but found " << intersectionsBase.size() << " for cut: " << cut.idTrace << endl;
+        }
 
 
     }
