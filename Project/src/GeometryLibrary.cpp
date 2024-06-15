@@ -58,6 +58,7 @@ PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol) {
         unsigned int end = (i + 1) %  mesh.NumberCell0D;
 
         Cell1D cell = Cell1D(mesh.NumberCell1D, start, end);
+        cell.neighbours = {0};
         mesh.cells1D.push_back(cell);
         edgesId.push_back(cell.id);
         mesh.NumberCell1D++;

@@ -26,7 +26,8 @@ struct Cell1D {
     unsigned int id;
     unsigned int start;
     unsigned int end;
-    vector<unsigned int> neighbours = {0}; // id delle celle2D adiacenti al lato
+    bool alive = true;
+    vector<unsigned int> neighbours = {}; // id delle celle2D adiacenti al lato
     Cell1D() = default;
     Cell1D(unsigned int id, unsigned int start, unsigned int end): id(id), start(start), end(end) {}
 
@@ -72,8 +73,9 @@ struct PolygonalMesh
         return cell.id;
     }
 
-    unsigned int addCell1D(unsigned int start, unsigned int end) {
+    unsigned int addCell1D(unsigned int cell2DId, unsigned int start, unsigned int end) {
         Cell1D cell = Cell1D(NumberCell1D, start, end);
+        cell.neighbours.push_back(cell2DId);
         cells1D.push_back(cell);
         NumberCell1D++;
         return cell.id;
@@ -91,7 +93,7 @@ struct PolygonalMesh
 
 void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture);
 
-void splitEdge(unsigned int& newVertex, PolygonalMesh& mesh, Cell1D edge, Vector3d intersection);
+void splitEdge(unsigned int& newVertex, Cell2D& cell, PolygonalMesh& mesh, Cell1D& edge, Vector3d intersection);
 
 unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId);
 

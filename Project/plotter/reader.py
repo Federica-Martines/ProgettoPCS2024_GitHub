@@ -3,49 +3,49 @@ import numpy as np
 from geometry import Fracture, Trace
 
 
-def read_fractures(file_path):
-    fractures = []
+def readMesh(cellIds):
+    cells2D = {}
 
-    with open(file_path, "r") as file:
-        lines = file.readlines()
+    for cellId in cellIds:
+        mesh_path = f"../Debug/polygonalMeshes/mesh{cellId}/Cell0D.txt"
 
-        # Skip the first line as it contains the number of fractures
-        line_idx = 0
+        meshCell0D = []
 
-        while line_idx < len(lines):
-            if lines[line_idx].startswith("# FractureId; NumVertices"):
-                # Read FractureId and NumVertices
-                fracture_info = lines[line_idx + 1].strip().split(";")
-                fracture_id = int(fracture_info[0].strip())
-                num_vertices = int(fracture_info[1].strip())
+        with open(mesh_path, "r") as file:
+            lines = file.readlines()
 
-                # Read vertices
-                vertices = []
-                line_idx += 3  # Skip to the line with x-coordinates
+            # Skip the first line as it contains the number of fractures
+            line_idx = 0
 
-                for i in range(num_vertices):
-                    vertex = [
-                        float(coords) for coords in lines[line_idx].strip().split(";")
-                    ]
+            while line_idx < len(lines):
+                if not (
+                    lines[line_idx].startswith("Number")
+                    or lines[line_idx].startswith("Id")
+                ):
+                    # Read vertices
+                    coordinates = lines[line_idx].split(";")
+                    meshCell0D.append(
+                        [
+                            float(coordinates[1]),
+                            float(coordinates[2]),
+                            float(coordinates[3]),
+                        ]
+                    )
                     line_idx += 1
-                    vertices.append(vertex)
+                else:
+                    line_idx += 1
 
-                # Create a Fracture object and add to the list
-                fracture = Fracture(fracture_id, num_vertices, vertices)
-                fractures.append(fracture)
+        cells2D[cellId] = meshCell0D
 
-            else:
-                line_idx += 1
-
-    return fractures
+    return cells2D
 
 
-def read_traces(filename: str, fractures: List[Fracture]) -> List[Trace]:
+def read_traces(filename: str, cell2DId) -> List[Trace]:
     traces = []
     with open(filename, "r") as file:
         lines = file.readlines()
 
-        for line in lines:
+        for line in lines[3:]:
             trace_data = line.strip().split("; ")
             trace_id = int(trace_data[0])
             fracture_id1 = int(trace_data[1])
@@ -58,14 +58,8 @@ def read_traces(filename: str, fractures: List[Fracture]) -> List[Trace]:
 
             trace = Trace(trace_id, fracture_id1, fracture_id2, extremes, length, tips)
 
-            for fracture in fractures:
-                if (
-                    fracture.fracture_id == fracture_id1
-                    or fracture.fracture_id == fracture_id2
-                ):
-                    fracture.traces.append(trace)
-
-            traces.append(trace)
+            if fracture_id1 in cell2DId or fracture_id2 in cell2DId:
+                traces.append(trace)
 
     traces = sorted(traces, key=lambda t: t.length, reverse=True)
     # for t in traces:

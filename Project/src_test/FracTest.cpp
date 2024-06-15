@@ -1203,9 +1203,9 @@ TEST(PolygonalMeshTest, PointInsidePolygon) {
     unsigned int cell0D3 = mesh.addCell0D(v3);
 
     // Add Cell1D edges
-    unsigned int cell1D1 = mesh.addCell1D(cell0D1, cell0D2);
-    unsigned int cell1D2 = mesh.addCell1D(cell0D2, cell0D3);
-    unsigned int cell1D3 = mesh.addCell1D(cell0D3, cell0D1);
+    unsigned int cell1D1 = mesh.addCell1D(0, cell0D1, cell0D2);
+    unsigned int cell1D2 = mesh.addCell1D(0, cell0D2, cell0D3);
+    unsigned int cell1D3 = mesh.addCell1D(0, cell0D3, cell0D1);
 
     // Define a plane for the Cell2D
     Vector3d normal = Vector3d(0, 0, 1);
@@ -1244,9 +1244,9 @@ TEST(PolygonalMeshTest, PointInsidePolygon2) {
     unsigned int cell0D3 = mesh.addCell0D(v3);
 
     // Add Cell1D edges
-    unsigned int cell1D1 = mesh.addCell1D(cell0D1, cell0D2);
-    unsigned int cell1D2 = mesh.addCell1D(cell0D2, cell0D3);
-    unsigned int cell1D3 = mesh.addCell1D(cell0D3, cell0D1);
+    unsigned int cell1D1 = mesh.addCell1D(0, cell0D1, cell0D2);
+    unsigned int cell1D2 = mesh.addCell1D(0, cell0D2, cell0D3);
+    unsigned int cell1D3 = mesh.addCell1D(0, cell0D3, cell0D1);
 
     // Define a plane for the Cell2D
     Vector3d normal = Vector3d(0, 0, 1);
@@ -1289,12 +1289,12 @@ TEST(generateCell2D, generateCell2DSimple) {
     unsigned int cell0D6 = mesh.addCell0D(v6);
 
     // Add Cell1D edges
-    unsigned int cell1D1 = mesh.addCell1D(cell0D1, cell0D2);
-    unsigned int cell1D2 = mesh.addCell1D(cell0D2, cell0D3);
-    unsigned int cell1D3 = mesh.addCell1D(cell0D3, cell0D4);
-    unsigned int cell1D4 = mesh.addCell1D(cell0D4, cell0D5);
-    unsigned int cell1D5 = mesh.addCell1D(cell0D5, cell0D6);
-    unsigned int cell1D6 = mesh.addCell1D(cell0D6, cell0D1);
+    unsigned int cell1D1 = mesh.addCell1D(0, cell0D1, cell0D2);
+    unsigned int cell1D2 = mesh.addCell1D(0, cell0D2, cell0D3);
+    unsigned int cell1D3 = mesh.addCell1D(0, cell0D3, cell0D4);
+    unsigned int cell1D4 = mesh.addCell1D(0, cell0D4, cell0D5);
+    unsigned int cell1D5 = mesh.addCell1D(0, cell0D5, cell0D6);
+    unsigned int cell1D6 = mesh.addCell1D(0, cell0D6, cell0D1);
 
     // Define a plane for the Cell2D
     Vector3d normal = Vector3d(0, 0, 1);

@@ -98,7 +98,7 @@ bool checkTraceTips(Fracture F, Trace T, double tol) {
     // ripetiamo per l'altro estremo della traccia
     bool flagE2 = false;
     for (unsigned int v = 0; v < v_size; v++) {
-        if (isPointOn3DSegment(T.extremes[0], F.vertices[v % v_size], F.vertices[(v+1) % v_size], tol))
+        if (isPointOn3DSegment(T.extremes[1], F.vertices[v % v_size], F.vertices[(v+1) % v_size], tol))
         {
             flagE2 = true;
             break;
@@ -116,23 +116,19 @@ void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol) {
 
     if (checkTraceTips(F1, trace, tol) == false) {
         trace.tips = false;
-        F1.passingTraces.reserve(1);
         F1.passingTraces.push_back(trace);
     }
     else {
         trace.tips = true;
-        F1.notPassingTraces.reserve(1);
         F1.notPassingTraces.push_back(trace);
     }
 
     if (checkTraceTips(F2, trace, tol) == false) {
         trace.tips = false;
-        F2.passingTraces.reserve(1);
         F2.passingTraces.push_back(trace);
     }
     else {
         trace.tips = true;
-        F2.notPassingTraces.reserve(1);
         F2.notPassingTraces.push_back(trace);
     }
 
@@ -361,7 +357,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             }
             // IMPORTANTE faccio e++ perchè ho appena aggiunto un edge
             if (position == 1) {
-                splitEdge(intersectionBaseId, mesh, edge, intersectionBase);
+                splitEdge(intersectionBaseId, cell2D, mesh, edge, intersectionBase);
                 e++;
 
                 // refresh della reference perchè facendo splitEdge modifico la mesh ma non la cella corrente
@@ -380,7 +376,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             int positionNext;
 
             // faccio tagli ulteriori se alpha è compresa strettamente tra 0 e 1 e la traccia è non passante
-            while (cut.tips == true && abs(alpha+tol) < 1  && abs(alpha) > tol) {
+            while (cut.tips == true && alpha < 1-tol  && alpha > tol) {
                 // trovo il vicino
                 unsigned int n = findNeighbour(mesh, neighbour.id, edgeNext.id);
                 neighbour = mesh.cells2D[n];
@@ -394,11 +390,11 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                     positionNext = findLineSegmentIntersection(intersectionNext, mesh, alpha, beta, cut, edgeNext, tol);
 
                     // se ho trovato la stessa intersezione di prima, o non l'ho trovata skippo
-                    if (areVectorsEqual(intersection, intersectionNext, tol) || position == -1) continue;
+                    if (areVectorsEqual(intersection, intersectionNext, tol) || positionNext == -1) continue;
 
 
                     if (positionNext == 1) {
-                        splitEdge(intersectionNextId, mesh, edgeNext, intersectionNext);
+                        splitEdge(intersectionNextId, neighbour, mesh, edgeNext, intersectionNext);
                         nEdge++;
                         cell2D = mesh.cells2D[cell2D.id];
                     }

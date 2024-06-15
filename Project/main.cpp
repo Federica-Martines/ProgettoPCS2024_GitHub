@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
     //inizializziamo le fratture
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR3_data.txt";
+    string path = "./DFN/FR10_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
     readFractures(path, fractures, tol);
@@ -57,6 +57,8 @@ int main(int argc, char **argv)
     string outputPathTracesDebug = "./debug_traces.txt";
     std::ofstream fileTracesDebug(outputPathTracesDebug, std::ios_base::trunc);
 
+    printTracesToFile(traces, outputPathTracesDebug);
+
     for (Fracture& F : fractures) {
 
         vector<Trace> cuts = {};
@@ -67,8 +69,11 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
+        if (F.idFrac == 2) {
+            saveMesh(mesh, F.idFrac);
+        }
         cutMeshCell2D(mesh, cuts, tol);
-        saveMesh(mesh, F.idFrac);
+        //saveMesh(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;
     }
