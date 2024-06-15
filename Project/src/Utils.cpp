@@ -396,7 +396,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
                     if (positionNext == 1) {
                         splitEdge(intersectionNextId, neighbour, mesh, edgeNext, intersectionNext);
                         nEdge++;
-                        cell2D = mesh.cells2D[cell2D.id];
+                        neighbour = mesh.cells2D[neighbour.id];
                     }
                     if (positionNext == 0) {
                         if (round(beta) == 0) intersectionNextId = edge.start;

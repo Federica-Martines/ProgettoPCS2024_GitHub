@@ -214,15 +214,17 @@ void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& rayOrigin, const Cell2D& cell, double tol) {
     const auto& vertices = cell.vertices;
 
-    Vector3d rayEnd = rayOrigin + mesh.cells0D[1].coordinates - mesh.cells0D[0].coordinates; // Direction of the ray (can be any non-parallel direction)
+    Vector3d rayEnd = rayOrigin + mesh.cells0D[vertices[1]].coordinates - mesh.cells0D[vertices[0]].coordinates; // Direction of the ray (can be any non-parallel direction)
 
     int intersectionCount = 0;
     size_t numVertices = vertices.size();
 
     // Iterate over polygon edges
     for (unsigned int i = 0; i < numVertices;  i++) {
-        const Vector3d& vi = mesh.cells0D[i].coordinates;
-        const Vector3d& vj = mesh.cells0D[(i+1) % numVertices].coordinates;
+        unsigned int idxI = vertices[i];
+        unsigned int idxJ = vertices[(i+1) % numVertices];
+        const Vector3d& vi = mesh.cells0D[idxI].coordinates;
+        const Vector3d& vj = mesh.cells0D[idxJ].coordinates;
 
 
         if (isPointOn3DSegment(rayOrigin, vi, vj, tol)) {
