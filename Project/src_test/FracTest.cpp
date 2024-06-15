@@ -1326,3 +1326,42 @@ TEST(generateCell2D, generateCell2DSimple) {
 // transformChildrenFracturesToMesh
 
 // saveMesh
+
+
+// Definizione dei casi di test
+TEST(pointInCell2D, ParallelLines) {
+
+    PolygonalMesh mesh;
+    double tol=10*numeric_limits<double>::epsilon();
+
+    Vector3d t1(0.16201266918903162,
+                0.34403894091689424,
+                0.4334174126207856);
+    Vector3d v1(0.23167378221223053,
+                0.3089293706182168,
+                0.9322313439430623);
+    Vector3d v2(0.28390199813548167,
+                0.6044733233624461,
+                0.9322313439430622);
+    Vector3d v3(0.14992041146307888,
+                0.3233767401559571,
+                0.3779190830160366);
+
+    unsigned int cell0D1 = mesh.addCell0D(v1);
+    unsigned int cell0D2 = mesh.addCell0D(v2);
+    unsigned int cell0D3 = mesh.addCell0D(v3);
+
+    unsigned int cell1D1 = mesh.addCell1D(0, cell0D1, cell0D2);
+    unsigned int cell1D2 = mesh.addCell1D(0, cell0D2, cell0D3);
+    unsigned int cell1D3 = mesh.addCell1D(0, cell0D3, cell0D1);
+
+    Vector3d normal = findNormal(v1, v2, v3);
+
+    vector<unsigned int> vertices = {cell0D1, cell0D2, cell0D3};
+    vector<unsigned int> edges = {cell1D1, cell1D2, cell1D3};
+    unsigned int cell2DId = mesh.addCell2D(normal, vertices, edges);
+
+    Cell2D cell2D = mesh.cells2D[cell2DId];
+    EXPECT_TRUE(pointInCell2D(mesh, t1, cell2D, tol));
+}
+
