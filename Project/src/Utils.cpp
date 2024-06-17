@@ -206,123 +206,180 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
 
     for (Trace& cut : cuts) {
 
-        // trovo la cella a cui il taglio appartiene
+        // // trovo la cella a cui il taglio appartiene
+        // Cell2D cell2D;
+        // if (!findCellContainingPoint(cell2D, mesh, cut.extremes[0], tol))
+        // {
+        //     cout << "Cella non tovata per il taglio: " << cut.idTrace << endl;
+        // }
+
+
+        // vector<unsigned int> intersectionsBase;
+
+
+        // unsigned int neighbourId = cell2D.id;
+        // vector<unsigned int> vertices = cell2D.vertices;
+        // vector<unsigned int> edges = cell2D.edges;
+
+        // for (unsigned int e = 0; e < edges.size(); e++) {
+        //     unsigned int edgeId = edges[e];
+        //     Cell1D edge = mesh.cells1D[edgeId];
+        //     double alpha, beta;
+
+        //     Vector3d intersectionBase;
+        //     unsigned int intersectionBaseId;
+
+
+        //     int position = findLineSegmentIntersection(intersectionBase, mesh, alpha, beta, cut, edge, tol);
+
+        //     // se non c'è intersezione skippo lato
+        //     if (position == -1) continue;
+        //     // se c'è in mezzo al lato lo splitto creando un vertice e due nuovi lati
+        //     if (position == 0) {
+        //         if (abs(beta) <= tol) intersectionBaseId = edge.start;
+        //         else intersectionBaseId = edge.end;
+        //     }
+        //     // IMPORTANTE faccio e++ perchè ho appena aggiunto un edge
+        //     if (position == 1) {
+        //         splitEdge(intersectionBaseId, cell2D, mesh, edge, intersectionBase);
+        //     }
+        //     intersectionsBase.push_back(intersectionBaseId);
+
+        // if (position == 0) {
+        //     throw runtime_error("position == 0");
+        //     unsigned int edgeOppositeId = numeric_limits<unsigned int>::max();
+        //     // trovo l'indice dell'opposto con cui si interseca con position 0
+        //     for (unsigned int eS = 0; eS < neighbour.edges.size(); eS++) {
+        //         //faccio eS-1 perchè in senso antiorario sarà quello prima
+        //         if (edgeNext.id == neighbour.edges[eS]){
+        //             edgeOppositeId = neighbour.edges[(eS-1) % neighbour.edges.size()];
+        //             break;
+        //         }
+        //         cout << "Vicino in position == 0 non trovato per taglio: " << cut.idTrace << endl;
+        //     }
+        //     if (edgeOppositeId == numeric_limits<unsigned int>::max()) {
+        //         throw runtime_error("Vicino non trovato");
+        //     }
+        //     Cell1D edgeOpposite = mesh.cells1D[edgeOppositeId];
+        //     unsigned int nOpposite = findNeighbour(mesh, neighbour.id, edgeOppositeId);
+        //     neighbour = mesh.cells2D[nOpposite];
+        // }
+
+
+        // Cell1D edgeNext;
+        // Vector3d intersection = intersectionBase;
+        // unsigned int intersectionId = intersectionBaseId;
+        // Vector3d intersectionNext;
+        // unsigned int intersectionNextId;
+        // int positionNext;
+        bool firstIteration = true;
         Cell2D cell2D;
-        if (!findCellContainingPoint(cell2D, mesh, cut.extremes[0], tol))
-        {
-            cout << "Cella non tovata per il taglio: " << cut.idTrace << endl;
-        }
+        int nEdge = -1;
+        double alpha = numeric_limits<double>::min();
+        vector<unsigned int> intersections = {numeric_limits<unsigned int>::max(), numeric_limits<unsigned int>::max()};
+        vector<unsigned int> old_intersections = {numeric_limits<unsigned int>::max(), numeric_limits<unsigned int>::max()};
+        unsigned int intersectionCount = 0;
+        vector<int> neigh_intersections = {numeric_limits<int>::min(), numeric_limits<int>::min()};
 
 
-        vector<unsigned int> intersectionsBase;
-
-        // cerchiamo le intersezioni
-        for (unsigned int e = 0; e < cell2D.edges.size(); e++) {
-            unsigned int edgeId = cell2D.edges[e];
-            Cell1D edge = mesh.cells1D[edgeId];
-            double alpha, beta;
-
-            Vector3d intersectionBase;
-            unsigned int intersectionBaseId;
-
-
-            int position = findLineSegmentIntersection(intersectionBase, mesh, alpha, beta, cut, edge, tol);
-
-            // se non c'è intersezione skippo lato
-            if (position == -1) continue;
-            // se c'è in mezzo al lato lo splitto creando un vertice e due nuovi lati
-            if (position == 0) {
-                if (round(beta) == 0) intersectionBaseId = edge.start;
-                if (round(beta) == 1) intersectionBaseId = edge.end;
-            }
-            // IMPORTANTE faccio e++ perchè ho appena aggiunto un edge
-            if (position == 1) {
-                splitEdge(intersectionBaseId, cell2D, mesh, edge, intersectionBase);
-                e++;
-
-                // refresh della reference perchè facendo splitEdge modifico la mesh ma non la cella corrente
-                cell2D = mesh.cells2D[cell2D.id];
-
-            }
-            intersectionsBase.push_back(intersectionBaseId);
-
-
-            Cell2D neighbour = cell2D;
-            Cell1D edgeNext = edge;
-            Vector3d intersection = intersectionBase;
-            unsigned int intersectionId = intersectionBaseId;
-            Vector3d intersectionNext;
-            unsigned int intersectionNextId;
-            int positionNext;
-
-            // faccio tagli ulteriori se alpha è compresa strettamente tra 0 e 1 e la traccia è non passante
-            while (cut.tips == true && alpha < 1-tol  && alpha > tol) {
-                // trovo il vicino
-
-                unsigned int n = findNeighbour(mesh, neighbour.id, edgeNext.id);
-                neighbour = mesh.cells2D[n];
-
-                if (position == 0) {
-                    unsigned int edgeOppositeId;
-                    // trovo l'indice dell'opposto con cui si interseca con position 0
-                    for (unsigned int eS = 0; eS < neighbour.edges.size(); eS++) {
-                        //faccio eS-1 perchè in senso antiorario sarà quello prima
-                        if (edgeNext.id == neighbour.edges[eS]){
-                            edgeOppositeId = neighbour.edges[(eS-1) % neighbour.edges.size()];
-                            break;
-                        }
-                        cout << "Vicino in position == 0 non trovato per taglio: " << cut.idTrace << endl;
-                    }
-                    Cell1D edgeOpposite = mesh.cells1D[edgeOppositeId];
-                    unsigned int nOpposite = findNeighbour(mesh, neighbour.id, edgeOppositeId);
-                    neighbour = mesh.cells2D[nOpposite];
+        // faccio tagli ulteriori se alpha è compresa strettamente tra 0 e 1 e la traccia è non passante
+        while (neigh_intersections[0] != -1 && neigh_intersections[1] != -1) {
+            // trovo il vicino
+            unsigned int numIterations = 0;
+            if (firstIteration) {
+                // trovo la cella a cui il taglio appartiene
+                if (!findCellContainingPoint(cell2D, mesh, cut.extremes[0], tol))
+                {
+                    cout << "Cella non tovata per il taglio: " << cut.idTrace << endl;
                 }
-
-
-                // trovo la prossima intersezione
-                for (unsigned int nEdge = 0; nEdge < neighbour.edges.size(); nEdge++) {
-                    unsigned int edgeNextId = neighbour.edges[nEdge];
-                    edgeNext = mesh.cells1D[edgeNextId];
-
-                    positionNext = findLineSegmentIntersection(intersectionNext, mesh, alpha, beta, cut, edgeNext, tol);
-
-                    // se ho trovato la stessa intersezione di prima, o non l'ho trovata skippo
-                    if (areVectorsEqual(intersection, intersectionNext, tol) || positionNext == -1) continue;
-
-
-                    if (positionNext == 1) {
-                        splitEdge(intersectionNextId, neighbour, mesh, edgeNext, intersectionNext);
-                        nEdge++;
-                        neighbour = mesh.cells2D[neighbour.id];
+                firstIteration = false;
+                numIterations = cell2D.edges.size();
+            }
+            else {
+                unsigned int nEdge = 0;
+                unsigned int neighbourId = numeric_limits<unsigned int>::max();
+                for (unsigned int i = 0; i < 2; i++) {
+                    if (neigh_intersections[i] == -1) continue;
+                    else {neighbourId = neigh_intersections[i];
                     }
-                    if (positionNext == 0) {
-                        if (round(beta) == 0) intersectionNextId = edge.start;
-                        if (round(beta) == 1) intersectionNextId = edge.end;
+                }
+                if (neighbourId == numeric_limits<unsigned int>::max())
+                    throw runtime_error("Vicino non trovato");
+
+                cell2D = mesh.cells2D[neighbourId];
+                numIterations = cell2D.edges.size();
+
+                old_intersections = intersections;
+                intersections = {numeric_limits<unsigned int>::max(), numeric_limits<unsigned int>::max()};
+                intersectionCount = 0;
+                neigh_intersections = {numeric_limits<int>::min(), numeric_limits<int>::min()};
+
+            }
+
+
+
+            vector<unsigned int> vertices = cell2D.vertices;
+            vector<unsigned int> edges = cell2D.edges;
+            unsigned int numEdges = cell2D.edges.size();
+
+
+            // trovo la prossima intersezione
+            for (unsigned int nE = 0; nE < numIterations; nE++) {
+
+                nEdge = (nEdge + 1) % numEdges;
+                // edgeNext = mesh.cells1D[nEdge];
+
+                Vector3d intersection;
+                Cell1D edge = mesh.cells1D[edges[nEdge]];
+                double beta;
+                int position = findLineSegmentIntersection(intersection, mesh, alpha, beta, cut, edge, tol);
+
+
+                if (old_intersections[0] != numeric_limits<unsigned int>::max())
+                    if (areVectorsEqual(intersection, mesh.cells0D[old_intersections[0]].coordinates, tol)) {
+                        intersections[intersectionCount] = old_intersections[0];
+                        neigh_intersections[intersectionCount++] = -1;
+                        continue;
                     }
+                if (old_intersections[1] != numeric_limits<unsigned int>::max())
+                    if (areVectorsEqual(intersection, mesh.cells0D[old_intersections[1]].coordinates, tol))
+                    {
+                        intersections[intersectionCount] = old_intersections[1];
+                        neigh_intersections[intersectionCount++] = -1;
+                        continue;
+                    }
+
+                unsigned int id_new_points = numeric_limits<unsigned int>::max();
+
+                if (position == -1)
+                    continue;
+                else if (position == 1)
+                {
+                    splitEdge(id_new_points, cell2D, mesh, edge, intersection);
+                    if(alpha <= tol || alpha >= 1-tol)
+                        neigh_intersections[intersectionCount] = -1;
+                    else
+                        neigh_intersections[intersectionCount] = findNeighbour(mesh, cell2D.id, edge.id);
+                }
+                else if (position == 0) {
+                    if (abs(beta) < tol)
+                        id_new_points = edge.start;
+                    else
+                        id_new_points = edge.end;
+                }
+                else
+                    throw runtime_error("invalid position");
+
+                intersections[intersectionCount++] = id_new_points;
+                if (intersections[0] != numeric_limits<unsigned int>::max() && intersections[1] != numeric_limits<unsigned int>::max())
                     break;
-                }
 
-                // costruisco la nuova cella2d
-                generateCell2D(mesh, neighbour, intersectionId, intersectionNextId);
-
-                intersection = intersectionNext;
-                intersectionId = intersectionNextId;
-                edge = edgeNext;
-                position =  positionNext;
             }
 
-            if (intersectionsBase.size() == 2) {
-                break;
-            }
+            // costruisco la nuova cella2d
+            generateCell2D(mesh, cell2D.id, intersections[0], intersections[1]);
+
         }
-
-        if (intersectionsBase.size() == 2) {
-            generateCell2D(mesh, cell2D, intersectionsBase[0], intersectionsBase[1]);
-        } else {
-            cout << "Error: Expected 2 intersections but found " << intersectionsBase.size() << " for cut: " << cut.idTrace << endl;
-        }
-
-
     }
 
 }

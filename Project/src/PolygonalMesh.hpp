@@ -97,7 +97,7 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell, PolygonalMesh& mesh, Cell1
 
 unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId);
 
-void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId );
+void generateCell2D(PolygonalMesh& mesh, const unsigned int& cell2DId, const unsigned int& intersectionId, const unsigned int& intersectionNextId);
 
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol);
 

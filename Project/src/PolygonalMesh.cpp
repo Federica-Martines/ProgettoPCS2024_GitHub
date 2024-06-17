@@ -59,10 +59,12 @@ unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsig
     return NULL;
 }
 
-void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId) {
+void generateCell2D(PolygonalMesh& mesh, const unsigned int& cell2DId, const unsigned int& intersectionId, const unsigned int& intersectionNextId) {
+
     bool writeLeft = true;
     vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
     int intCounter = 0;
+    const Cell2D cell2D = mesh.cells2D[cell2DId];
 
     for (unsigned int nVertex = 0; nVertex < cell2D.vertices.size(); nVertex++) {
         unsigned int v = cell2D.vertices[nVertex];
@@ -132,7 +134,7 @@ void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersect
     }
 
     // spendo la cella vecchia
-    mesh.cells2D[cell2D.id].alive = false;
+    mesh.cells2D[cell2DId].alive = false;
 }
 
 
