@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
-        if (F.idFrac == 2) {
+        if (F.idFrac == 3) {
             saveMesh(mesh, F.idFrac);
         }
         cutMeshCell2D(mesh, cuts, tol);

@@ -258,8 +258,25 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             // faccio tagli ulteriori se alpha è compresa strettamente tra 0 e 1 e la traccia è non passante
             while (cut.tips == true && alpha < 1-tol  && alpha > tol) {
                 // trovo il vicino
+
                 unsigned int n = findNeighbour(mesh, neighbour.id, edgeNext.id);
                 neighbour = mesh.cells2D[n];
+
+                if (position == 0) {
+                    unsigned int edgeOppositeId;
+                    // trovo l'indice dell'opposto con cui si interseca con position 0
+                    for (unsigned int eS = 0; eS < neighbour.edges.size(); eS++) {
+                        //faccio eS-1 perchè in senso antiorario sarà quello prima
+                        if (edgeNext.id == neighbour.edges[eS]){
+                            edgeOppositeId = neighbour.edges[(eS-1) % neighbour.edges.size()];
+                            break;
+                        }
+                        cout << "Vicino in position == 0 non trovato per taglio: " << cut.idTrace << endl;
+                    }
+                    Cell1D edgeOpposite = mesh.cells1D[edgeOppositeId];
+                    unsigned int nOpposite = findNeighbour(mesh, neighbour.id, edgeOppositeId);
+                    neighbour = mesh.cells2D[nOpposite];
+                }
 
 
                 // trovo la prossima intersezione

@@ -19,17 +19,18 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell2D, PolygonalMesh& mesh, Cel
     unsigned int leftEdgeId = mesh.addCell1D(cell2D.id, edge.start, newVertex);
     unsigned int rightEdgeId = mesh.addCell1D(cell2D.id, newVertex, edge.end);
 
-    mesh.cells1D[edge.id].alive = false;
-
     for (unsigned int n = 0; n < edge.neighbours.size(); n++) {
         unsigned int neighbourId = edge.neighbours[n];
         Cell2D& cellToUpdate = mesh.cells2D[neighbourId];
 
         for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
             if (cellToUpdate.edges[e] == edge.id) {
+
+                cellToUpdate.vertices.insert(cellToUpdate.vertices.begin() + e+1, newVertex);
+
                 if( n==0 ){
-                cellToUpdate.edges[e] = leftEdgeId;
-                cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, rightEdgeId);
+                    cellToUpdate.edges[e] = leftEdgeId;
+                    cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, rightEdgeId);
                 }
                 else {
                     cellToUpdate.edges[e] = rightEdgeId;
@@ -39,6 +40,9 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell2D, PolygonalMesh& mesh, Cel
             }
         }
     }
+
+
+    mesh.cells1D[edge.id].alive = false;
 
 }
 
@@ -58,14 +62,11 @@ unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsig
 void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId) {
     bool writeLeft = true;
     vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
-   int intCounter = 0;
+    int intCounter = 0;
 
-    for (unsigned int nEdge = 0; nEdge < cell2D.edges.size(); nEdge++) {
-        unsigned int newEdgeId = cell2D.edges[nEdge];
-        Cell1D& newEdge = mesh.cells1D[newEdgeId];
-
-        unsigned int v = newEdge.start;
-
+    for (unsigned int nVertex = 0; nVertex < cell2D.vertices.size(); nVertex++) {
+        unsigned int v = cell2D.vertices[nVertex];
+        unsigned int newEdgeId = cell2D.edges[nVertex];
 
         if ((v == intersectionId) || (v == intersectionNextId)) {
             intCounter++;
@@ -82,7 +83,7 @@ void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersect
             }
 
             /* aggiungiamo i lati */
-            if (nEdge == 0){
+            if (nVertex == 0){
                 if (writeLeft)
                     leftCell2DEdges.push_back(newEdgeId);
                 else
