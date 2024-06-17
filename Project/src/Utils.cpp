@@ -247,7 +247,7 @@ void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol) {
             intersectionsBase.push_back(intersectionBaseId);
 
 
-            Cell2D& neighbour = cell2D;
+            Cell2D neighbour = cell2D;
             Cell1D edgeNext = edge;
             Vector3d intersection = intersectionBase;
             unsigned int intersectionId = intersectionBaseId;

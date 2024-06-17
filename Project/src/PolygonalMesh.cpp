@@ -27,8 +27,14 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell2D, PolygonalMesh& mesh, Cel
 
         for (unsigned int e = 0; e < cellToUpdate.edges.size(); e++) {
             if (cellToUpdate.edges[e] == edge.id) {
+                if( n==0 ){
                 cellToUpdate.edges[e] = leftEdgeId;
                 cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, rightEdgeId);
+                }
+                else {
+                    cellToUpdate.edges[e] = rightEdgeId;
+                    cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, leftEdgeId);
+                }
                 break;
             }
         }
@@ -52,7 +58,7 @@ unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsig
 void generateCell2D(PolygonalMesh& mesh, Cell2D& cell2D, unsigned int& intersectionId, unsigned int& intersectionNextId) {
     bool writeLeft = true;
     vector<unsigned int> leftCell2DVertices, rightCell2DVertices, leftCell2DEdges, rightCell2DEdges;
-    int intCounter = 0;
+   int intCounter = 0;
 
     for (unsigned int nEdge = 0; nEdge < cell2D.edges.size(); nEdge++) {
         unsigned int newEdgeId = cell2D.edges[nEdge];
