@@ -42,12 +42,12 @@ int main(int argc, char **argv)
 
     string outputPathFractures = "./fractures.txt";
     std::ofstream fileFractures(outputPathFractures, std::ios_base::trunc);
-    //printFracturesToFile(fractures, outputPathFractures);
+    printFracturesToFile(fractures, outputPathFractures);
 
 
     //PARTE 2
 
-    //le seguenti 4 righe di codice servono per stampare attraverso un codice python
+    //le seguenti 6 righe di codice servono per stampare attraverso un codice python
     string outputPathDebug = "./debug.txt";
     std::ofstream fileDebug(outputPathDebug, std::ios_base::trunc);
 
@@ -57,8 +57,6 @@ int main(int argc, char **argv)
     string outputPathTracesDebug = "./debug_traces.txt";
     std::ofstream fileTracesDebug(outputPathTracesDebug, std::ios_base::trunc);
 
-    printTracesToFile(traces, outputPathTracesDebug);
-
     for (Fracture& F : fractures) {
 
         vector<Trace> cuts = {};
@@ -66,30 +64,22 @@ int main(int argc, char **argv)
         cuts.insert(cuts.end(), F.passingTraces.begin(), F.passingTraces.end());
         cuts.insert(cuts.end(), F.notPassingTraces.begin(), F.notPassingTraces.end());
 
-        // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
-
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
-        saveMesh(mesh, F.idFrac);
-        cutMeshCell2D(mesh, cuts, tol);
 
+        //cutMeshCell2D(mesh, cuts, tol);
+
+        saveMeshToFile(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;
     }
 
-    // Per python
-    // string outputPathDebugFractures = "./log_fractures.txt";
-    // std::ofstream fileDebugFracture(outputPathDebugFractures, std::ios_base::trunc);
-
-    // Stampa sul terminale
-    // for (Fracture& F : cuttedFractures) {
-    //     printFractureToDebug(F, outputPathDebugFractures);
-    // }
-
-    //printFractures(fractures, expectedNumFractures);
-    // print    Traces(traces);
-
-
-
-
     return 0;
 }
+
+
+
+
+
+
+
+

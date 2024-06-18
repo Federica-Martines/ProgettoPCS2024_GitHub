@@ -1,15 +1,10 @@
 #include <vector>
-#include <fstream>
 #include <iostream>
 #include "PolygonalMesh.hpp"
 #include "GeometryLibrary.hpp"
-#include <filesystem>
-
 
 using namespace PolygonalLibrary;
 using namespace GeometryLibrary;
-namespace fs = filesystem;
-
 
 namespace PolygonalLibrary {
 
@@ -152,83 +147,6 @@ void generateCell2D(PolygonalMesh& mesh, const unsigned int& cell2DId, const uns
 
 
 
-void saveMesh(const PolygonalMesh& mesh, unsigned int idFracture) {
-    // Create folder structure
-    string folderName = "polygonalMeshes/mesh" + to_string(idFracture);
-    string fileNameCell0D = folderName + "/Cell0D.txt";
-    string fileNameCell1D = folderName + "/Cell1D.txt";
-    string fileNameCell2D = folderName + "/Cell2D.txt";
-
-    // Create folder
-    try {
-        fs::create_directories(folderName);
-    } catch (const exception& e) {
-        cerr << "Error creating folder: " << e.what() << endl;
-        return;
-    }
-
-    // Save Cell0D data
-    ofstream cell0DFile(fileNameCell0D);
-
-    cell0DFile << "Number of Cells0D: " << mesh.NumberCell0D << endl;
-
-    cell0DFile << "Id;X;Y;Z" << endl;
-    for (const auto& cell : mesh.cells0D) {
-        cell0DFile << cell.id << "; " << setprecision(16) << scientific
-                   << cell.coordinates.x() << "; "
-                   << cell.coordinates.y() << "; "
-                   << cell.coordinates.z()
-                   << endl;
-    }
-    cell0DFile.close();
-
-    // Save Cell1D data
-    ofstream cell1DFile(fileNameCell1D);
-
-    unsigned int counter1 = 0;
-    for (unsigned int i = 0; i< mesh.NumberCell1D; i++) {
-        if (mesh.cells1D[i].alive == true) counter1++;
-    }
-
-    cell1DFile << "Number of Cells1D: " << counter1 << endl;
-
-
-    cell1DFile << "Id;Origin;End" << endl;
-    for (const auto& cell : mesh.cells1D) {
-
-        if(!cell.alive) continue;
-
-        cell1DFile << cell.id << ";" << cell.start << ";" << cell.end << endl;
-    }
-    cell1DFile.close();
-
-    // Save Cell2D data
-    ofstream cell2DFile(fileNameCell2D);
-    unsigned int counter2 = 0;
-    for (unsigned int i = 0; i< mesh.NumberCell2D; i++) {
-        if (mesh.cells2D[i].alive == true) counter2++;
-    }
-    cell2DFile << "Number of Cells2D: " << counter2 << endl;
-
-    cell2DFile << "Id;NumVertices;Vertices;NumEdges;Edges" << endl;
-    for (const auto& cell : mesh.cells2D) {
-
-        if(!cell.alive) continue;
-
-        cell2DFile << cell.id << ";" << cell.vertices.size() << ";";
-        for (const auto& vertex : cell.vertices) {
-            cell2DFile << vertex << ";";
-        }
-        cell2DFile << cell.edges.size() << ";";
-        for (const auto& edge : cell.edges) {
-            cell2DFile << edge << ";";
-        }
-        cell2DFile << endl;
-    }
-    cell2DFile.close();
-
-    cout << "Mesh data saved successfully." << endl;
-}
 
 bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& rayOrigin, const Cell2D& cell, double tol) {
     const auto& vertices = cell.vertices;

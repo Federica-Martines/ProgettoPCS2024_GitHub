@@ -1,11 +1,9 @@
 #include "Utils.hpp"
 #include <iostream>
 #include "GeometryLibrary.hpp"
-#include "input-output.hpp"
 #include <Eigen/Eigen>
 #include <vector>
 #include <algorithm>
-#include <deque>
 
 using namespace std;
 using namespace Eigen;

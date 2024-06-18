@@ -122,6 +122,7 @@ int findLineSegmentIntersection(Vector3d& intersection,
 PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
 
 bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol);
-}
+
 
 bool pointInPolygon(const Vector3d& point, const Cell2D& cell);
+}
