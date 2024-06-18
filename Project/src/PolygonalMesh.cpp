@@ -19,6 +19,7 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell2D, PolygonalMesh& mesh, Cel
     unsigned int leftEdgeId = mesh.addCell1D(cell2D.id, edge.start, newVertex);
     unsigned int rightEdgeId = mesh.addCell1D(cell2D.id, newVertex, edge.end);
 
+
     for (unsigned int n = 0; n < edge.neighbours.size(); n++) {
         unsigned int neighbourId = edge.neighbours[n];
         Cell2D& cellToUpdate = mesh.cells2D[neighbourId];
@@ -28,7 +29,16 @@ void splitEdge(unsigned int& newVertex, Cell2D& cell2D, PolygonalMesh& mesh, Cel
 
                 cellToUpdate.vertices.insert(cellToUpdate.vertices.begin() + e+1, newVertex);
 
-                if( n==0 ){
+                // bool found = false;
+                // for (unsigned int i = 0; i < cellToUpdate.vertices.size(); i++) {
+                //     if (edge.start == cellToUpdate.vertices[i])
+                //     {
+                //         found = true;
+                //         break;
+                //     }
+                // }
+
+                if(n == 0){
                     cellToUpdate.edges[e] = leftEdgeId;
                     cellToUpdate.edges.insert(cellToUpdate.edges.begin() + e+1, rightEdgeId);
                 }

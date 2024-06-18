@@ -40,7 +40,7 @@ def readMesh(cellIds):
     return cells2D
 
 
-def read_traces(filename: str, cell2DId) -> List[Trace]:
+def read_traces(filename: str, cell2DIds) -> List[Trace]:
     traces = []
     with open(filename, "r") as file:
         lines = file.readlines()
@@ -58,7 +58,7 @@ def read_traces(filename: str, cell2DId) -> List[Trace]:
 
             trace = Trace(trace_id, fracture_id1, fracture_id2, extremes, length, tips)
 
-            if fracture_id1 in cell2DId or fracture_id2 in cell2DId:
+            if fracture_id1 in cell2DIds or fracture_id2 in cell2DIds:
                 traces.append(trace)
 
     traces = sorted(traces, key=lambda t: t.length, reverse=True)

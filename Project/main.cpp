@@ -17,7 +17,7 @@ using namespace PolygonalLibrary;
 int main(int argc, char **argv)
 {
 
-    double tol = 10*numeric_limits<double>::epsilon();
+    double tol = numeric_limits<double>::epsilon()*100;
     if(argc >= 2)
     {
         double tolInput=stod(argv[1]);
@@ -69,9 +69,9 @@ int main(int argc, char **argv)
         // cuttingFracture(cuttedFractures, frac, cuts, tol); //cuttedFfractures sono le foglie
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
-
-        cutMeshCell2D(mesh, cuts, tol);
         saveMesh(mesh, F.idFrac);
+        cutMeshCell2D(mesh, cuts, tol);
+
 
         cout << "Saved mesh: " << F.idFrac << endl;
     }

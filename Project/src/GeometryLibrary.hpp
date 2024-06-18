@@ -80,11 +80,7 @@ struct Fracture{
         this->normal = normal;
         this->lyingPlane = lyingPlane;
     }
-
-    bool checkFractureEdges(double tol);
 };
-
-PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
 
 BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices);
 
@@ -121,6 +117,9 @@ int findLineSegmentIntersection(Vector3d& intersection,
                                 const Cell1D edge,
                                 double tol
                                 );
+
+
+PolygonalMesh convertFractureToMesh(const Fracture& fracture, double tol);
 
 bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol);
 }

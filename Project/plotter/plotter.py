@@ -36,7 +36,7 @@ def plot(cells2D, traces):
         ax.add_collection3d(poly)
 
         # Optionally, print the cell's vertices
-        print(f"Cell vertices: {vertices}")
+        # print(f"Cell vertices: {vertices}")
     for trace in traces:
         trace_x = [point[0] for point in trace.extremes]
         trace_y = [point[1] for point in trace.extremes]

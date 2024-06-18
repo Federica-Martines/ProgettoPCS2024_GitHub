@@ -13,6 +13,7 @@ def __main__():
     points = read_points(debug_points_path)
     # points = [[0.21174, 0.86746, 0.381013]]
     # print(cells2D, traces, points, [2])
+    print([trace.idTrace for trace in traces])
 
     plot(cells2D, traces)
 
