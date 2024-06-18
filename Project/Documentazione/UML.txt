@@ -1,14 +1,9 @@
 @startuml
 
-package GeometryLibrary {
+skinparam classFontSize 19
+skinparam defaultFontSize  15
 
-  struct BoundingSphere {
-    + centroid: Vector3d
-    + radius: double
-    ..Non member functions ..
-    + BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices)
-    + bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2);
-  }
+package GeometryLibrary {
 
   struct Trace {
     + idTrace: unsigned int
@@ -20,8 +15,6 @@ package GeometryLibrary {
     + Trace()
     + Trace(unsigned int idTrace, vector <Vector3d> extremes)
     + Trace(unsigned int idTrace, unsigned int idGenerator1, unsigned int idGenerator2, vector <Vector3d> extremes)
-    ..Non member functions ..
-
   }
 
   struct Fracture {
@@ -37,7 +30,15 @@ package GeometryLibrary {
     + Fracture(unsigned int id, vector<Vector3d> vertices, Vector3d normal, unsigned int lyingPlane)
   }
 
-class GeometryLibraryFunctions {
+  struct BoundingSphere {
+    + centroid: Vector3d
+    + radius: double
+    ..Non member functions ..
+    + BoundingSphere computeBoundingSphere(const std::vector<Vector3d>& vertices)
+    + bool spheresIntersect(const BoundingSphere& sphere1, const BoundingSphere& sphere2)
+  }
+
+  class GeometryLibraryFunctions {
     + Vector2d projectOntoXY(const Vector3d& point)
     + Vector2d projectOntoXZ(const Vector3d& point)
     + Vector2d projectOntoYZ(const Vector3d& point)
@@ -45,101 +46,107 @@ class GeometryLibraryFunctions {
     + void projectVertices(vector<Vector2d>& projVertices, Fracture F)
     + bool isPointOn2DSegment(const Vector2d& point, const Vector2d& s1, const Vector2d& s2, double tol)
     + bool isPointOn3DSegment(const Vector3d& point, const Vector3d& s1, const Vector3d& s2, double tol)
-    + bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, double tol);
+    + bool isPointIn2DPolygon(const Vector2d& point, const vector<Vector2d>& polygon, double tol)
     + bool pointInPolygon(const Vector3d& point, const Cell2D& cell)
     + bool existDirectionSegmentIntersection(Vector3d t1, Vector3d t2, Vector3d s1, Vector3d s2, double tol)
     + int findLineSegmentIntersection(Vector3d& intersection, const PolygonalMesh& mesh, double& alpha, double& beta, const Trace cut, const Cell1D edge, double tol)
     + bool areVectorsEqual(Vector3d v1, Vector3d v2, double tol)
-}
-}
+  }
 
-namespace PolygonalLibrary {
-
-class Cell0D {
-    +unsigned int id
-    +Vector3d coordinates
-    +Cell0D()
-    +Cell0D(unsigned int id, Vector3d coordinates)
-    +bool operator==(Cell0D cell)
-}
-
-class Cell1D {
-    +unsigned int id
-    +unsigned int start
-    +unsigned int end
-    +bool alive
-    +vector<unsigned int> neighbours
-    +Cell1D()
-    +Cell1D(unsigned int id, unsigned int start, unsigned int end)
-    +bool operator==(Cell1D cell)
-}
-
-class Cell2D {
-    +unsigned int id
-    +Vector3d normal
-    +vector<unsigned int> vertices
-    +vector<unsigned int> edges
-    +bool alive
-    +Cell2D()
-    +Cell2D(unsigned int id, const Vector3d& normal, const vector<unsigned int>& vertices, const vector<unsigned int>& edges)
-}
-
-class PolygonalMesh {
-    +unsigned int NumberCell0D
-    +vector<Cell0D> cells0D
-    +unsigned int NumberCell1D
-    +vector<Cell1D> cells1D
-    +unsigned int NumberCell2D
-    +vector<Cell2D> cells2D
-    +unsigned int addCell0D(Vector3d coordinates)
-    +unsigned int addCell1D(unsigned int cell2DId, unsigned int start, unsigned int end)
-    +unsigned int addCell2D(Vector3d normal, const vector<unsigned int>& vertices, const vector<unsigned int>& edges)
-}
-
-class PolygonalMeshFunctions {
-    +void splitEdge(unsigned int& newVertex, Cell2D& cell, PolygonalMesh& mesh, Cell1D& edge, Vector3d intersection)
-    +unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId)
-    +void generateCell2D(PolygonalMesh& mesh, const unsigned int& cell2DId, const unsigned int& intersectionId, const unsigned int& intersectionNextId)
-    +bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol)
-    +bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol)
-}
-
-PolygonalMesh "1" *-- "0..*" Cell0D
-PolygonalMesh "1" *-- "0..*" Cell1D
-PolygonalMesh "1" *-- "0..*" Cell2D
+  Trace "2" --o "N" Fracture : has
+  BoundingSphere -[hidden]d-> GeometryLibraryFunctions 
 
 }
 
+package PolygonalLibrary {
 
-namespace InputOutput{
+  struct Cell0D {
+    + unsigned int id
+    + Vector3d coordinates
+    + Cell0D()
+    + Cell0D(unsigned int id, Vector3d coordinates)
+    + bool operator==(Cell0D cell)
+  }
 
-class InputOutputFunctions {
-    +bool readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol)
-    +void printFractures(vector<Fracture> fractures, unsigned int expectedNumFractures)
-    +void printTraces(vector<Trace> traces)
-    +void printTracesToFile(const vector<Trace>& traces, const string& filename)
-    +void printFracturesToFile(const vector<Fracture>& fractures, const string& filename)
-    +void printFractureToDebug(const Fracture& fracture, const string& filename)
-    +void printTraceToDebug(const Trace& trace, const string& filename)
-    +void printPointToDebug(const Vector3d& point, const string& filename)
-    +void saveMeshToFile(const PolygonalMesh& mesh, unsigned int idFracture)
+  struct Cell1D {
+    + unsigned int id
+    + unsigned int start
+    + unsigned int end
+    + bool alive
+    + vector<unsigned int> neighbours
+    + Cell1D()
+    + Cell1D(unsigned int id, unsigned int start, unsigned int end)
+    + bool operator==(Cell1D cell)
+  }
+
+  struct Cell2D {
+    + unsigned int id
+    + Vector3d normal
+    + vector<unsigned int> vertices
+    + vector<unsigned int> edges
+    + bool alive
+    + Cell2D()
+    + Cell2D(unsigned int id, const Vector3d& normal, const vector<unsigned int>& vertices, const vector<unsigned int>& edges)
+  }
+
+  struct PolygonalMesh {
+    + unsigned int NumberCell0D
+    + vector<Cell0D> cells0D
+    + unsigned int NumberCell1D
+    + vector<Cell1D> cells1D
+    + unsigned int NumberCell2D
+    + vector<Cell2D> cells2D
+    + unsigned int addCell0D(Vector3d coordinates)
+    + unsigned int addCell1D(unsigned int cell2DId, unsigned int start, unsigned int end)
+    + unsigned int addCell2D(Vector3d normal, const vector<unsigned int>& vertices, const vector<unsigned int>& edges)
+  }
+
+  class PolygonalMeshFunctions {
+    + void splitEdge(unsigned int& newVertex, Cell2D& cell, PolygonalMesh& mesh, Cell1D& edge, Vector3d intersection)
+    + unsigned int findNeighbour(const PolygonalMesh& mesh, unsigned int cellId, unsigned int edgeId)
+    + void generateCell2D(PolygonalMesh& mesh, const unsigned int& cell2DId, const unsigned int& intersectionId, const unsigned int& intersectionNextId)
+    + bool pointInCell2D(const PolygonalMesh& mesh, const Vector3d& point, const Cell2D& cell, double tol)
+    + bool findCellContainingPoint(Cell2D& foundCell, PolygonalMesh& mesh, Vector3d point, double tol)
+  }
+
+  PolygonalMesh  *--  Cell0D
+  PolygonalMesh  *--  Cell1D
+  PolygonalMesh  *--  Cell2D
 }
 
+
+
+
+package InputOutput {
+
+  class InputOutputFunctions {
+    + bool readFractures(const string& fileName, vector<Fracture>& fractures, const double& tol)
+    + void printFractures(vector<Fracture> fractures, unsigned int expectedNumFractures)
+    + void printTraces(vector<Trace> traces)
+    + void printTracesToFile(const vector<Trace>& traces, const string& filename)
+    + void printFracturesToFile(const vector<Fracture>& fractures, const string& filename)
+    + void printFractureToDebug(const Fracture& fracture, const string& filename)
+    + void printTraceToDebug(const Trace& trace, const string& filename)
+    + void printPointToDebug(const Vector3d& point, const string& filename)
+    + void saveMeshToFile(const PolygonalMesh& mesh, unsigned int idFracture)
+  }
 }
 
-package std {
+package Utility {
 
-class UtilityFunctions {
-       + unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, const double& tol)
-       + bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol)
-       + void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
-       + void sortTraces(vector<Fracture>& fractures)
-       + void cuttingFracture(vector<Fracture>& resultFractures, Fracture& frac, deque<Trace>& cuts, double tol)
-       + bool checkTraceTips(Fracture F, Trace T, double tol)
-       + void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol)   
-       + void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol)
+  class UtilityFunctions {
+    + unsigned int findTraces(vector<Trace>& traces, vector<Fracture>& fractures, const double& tol)
+    + bool checkSegmentPlaneIntersection(vector<Vector3d>& intersections, const Vector3d planeNormal, Vector3d planePoint, Vector3d a, Vector3d b, double tol)
+    + void findIntersections(Trace& trace, Fracture F1, Fracture F2, double tol)
+    + void sortTraces(vector<Fracture>& fractures)
+    + void cuttingFracture(vector<Fracture>& resultFractures, Fracture& frac, deque<Trace>& cuts, double tol)
+    + bool checkTraceTips(Fracture F, Trace T, double tol)
+    + void addTraceToFractures(Fracture& F1, Fracture& F2, Trace& trace, double tol)
+    + void cutMeshCell2D(PolygonalMesh& mesh, vector<Trace> cuts, double tol)
+  }
 }
 
-}
+GeometryLibrary --[hidden]d--> PolygonalLibrary 
 
+InputOutput -[hidden]d-> Utility
 @enduml
