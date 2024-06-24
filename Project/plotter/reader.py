@@ -7,7 +7,7 @@ def readMesh(cellIds):
     cells2D = {}
 
     for cellId in cellIds:
-        mesh_path = f"../Debug/polygonalMeshes/mesh{cellId}/Cell0D.txt"
+        mesh_path = f"C:/Users/matte/Documents/PoliTO/PCS/ProgettoPCS2024/Project/Debug/polygonalMeshes/mesh{cellId}/Cell0D.txt"
 
         meshCell0D = []
 
@@ -64,6 +64,7 @@ def read_traces(filename: str, cell2DIds) -> List[Trace]:
     traces = sorted(traces, key=lambda t: t.length, reverse=True)
     # for t in traces:
     #     print(t.idTrace, t.length)
+    # traces = [trace for trace in traces if trace.idTrace == 0]
     return traces
 
 

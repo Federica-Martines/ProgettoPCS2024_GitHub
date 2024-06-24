@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
     //inizializziamo le fratture
     vector<Fracture> fractures = {};
-    string path = "./DFN/FR10_data.txt";
+    string path = "./DFN/FR3_data.txt";
     // string path = "./DFN/FR362_data.txt";
 
     readFractures(path, fractures, tol);
@@ -65,10 +65,10 @@ int main(int argc, char **argv)
         cuts.insert(cuts.end(), F.notPassingTraces.begin(), F.notPassingTraces.end());
 
         PolygonalMesh mesh = convertFractureToMesh(F, tol);
+saveMeshToFile(mesh, F.idFrac);
+        cutMeshCell2D(mesh, cuts, tol);
 
-        //cutMeshCell2D(mesh, cuts, tol);
 
-        saveMeshToFile(mesh, F.idFrac);
 
         cout << "Saved mesh: " << F.idFrac << endl;
     }

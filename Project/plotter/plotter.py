@@ -17,7 +17,7 @@ def plot(cells2D, traces):
     plotted_vertices = {}
 
     # Define a list of colors to cycle through
-    colors = ["r", "g", "b", "c", "m", "y", "k"]
+    colors = ["r", "g", "k"]
 
     # Iterate through each cell in cell2d, using enumerate to get the index
 
